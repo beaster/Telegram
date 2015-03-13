@@ -1003,8 +1003,8 @@ public class ChatMediaCell extends ChatBaseCell implements MediaController.FileD
             }
         } else if (infoLayout != null && (buttonState == 1 || buttonState == 0 || buttonState == 3 || currentMessageObject.isSecretPhoto())) {
             getInfoPaint().setColor(0xffffffff);
-            setDrawableBounds(mediaBackgroundDrawable, photoImage.getImageX() + dp(4), photoImage.getImageY() + dp(4), infoWidth + dp(8) + infoOffset, dp(16.5f));
-            mediaBackgroundDrawable.draw(canvas);
+            setDrawableBounds(getMediaBackgroundDrawable(), photoImage.getImageX() + dp(4), photoImage.getImageY() + dp(4), infoWidth + dp(8) + infoOffset, dp(16.5f));
+            getMediaBackgroundDrawable().draw(canvas);
 
             if (currentMessageObject.type == 3) {
                 setDrawableBounds(getVideoIconDrawable(), photoImage.getImageX() + dp(8), photoImage.getImageY() + dp(7.5f));

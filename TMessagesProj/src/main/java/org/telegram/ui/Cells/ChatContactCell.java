@@ -67,7 +67,6 @@ public class ChatContactCell extends ChatBaseCell {
     protected Drawable getAddContactDrawableIn() {
         return addContactDrawableIn;
     }
-
     protected Drawable getAddContactDrawableOut() {
         return addContactDrawableOut;
     }

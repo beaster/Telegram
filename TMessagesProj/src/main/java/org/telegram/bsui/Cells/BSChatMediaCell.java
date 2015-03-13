@@ -19,6 +19,10 @@ public class BSChatMediaCell extends ChatMediaCell {
     private static Drawable backgroundDrawableIn;
     private static Drawable backgroundDrawableInSelected;
     private static Drawable backgroundDrawableOut;
+    private static Drawable backgroundMediaDrawableIn;
+    private static Drawable backgroundMediaDrawableInSelected;
+    private static Drawable backgroundMediaDrawableOut;
+    private static Drawable backgroundMediaDrawableOutSelected;
     private static TextPaint namePaint;
     private static Paint docBackPaint;
 
@@ -52,6 +56,11 @@ public class BSChatMediaCell extends ChatMediaCell {
     }
 
     @Override
+    protected void initResources() {
+
+    }
+
+    @Override
     protected void initMedia() {
         if(placeholderDocInDrawable == null) {
             placeholderDocInDrawable = getResources().getDrawable(R.drawable.doc_blue);
@@ -76,6 +85,10 @@ public class BSChatMediaCell extends ChatMediaCell {
             backgroundDrawableOut = getResources().getDrawable(R.drawable.msg_out_bs);
             backgroundDrawableOutSelected = getResources().getDrawable(R.drawable.msg_out_selected_bs);
             backgroundDrawableInSelected = getResources().getDrawable(R.drawable.msg_in_selected_bs);
+            backgroundMediaDrawableIn = getResources().getDrawable(R.drawable.msg_in_photo);
+            backgroundMediaDrawableInSelected = getResources().getDrawable(R.drawable.msg_in_photo_selected);
+            backgroundMediaDrawableOut = getResources().getDrawable(R.drawable.msg_out_photo);
+            backgroundMediaDrawableOutSelected = getResources().getDrawable(R.drawable.msg_out_photo_selected);
             docMenuInDrawable = getResources().getDrawable(android.R.color.white);
             docMenuOutDrawable = getResources().getDrawable(android.R.color.white);
 
@@ -109,14 +122,40 @@ public class BSChatMediaCell extends ChatMediaCell {
 
             deleteProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             deleteProgressPaint.setColor(0xffe4e2e0);
+
+            infoPaint.setTextSize(dp(12));
+
+            namePaint.setTextSize(dp(16));
+
+            timePaintIn.setTextSize(dp(12));
+
+            timePaintOut.setTextSize(dp(12));
         }
-        infoPaint.setTextSize(dp(12));
+    }
 
-        namePaint.setTextSize(dp(16));
+    @Override
+    protected Drawable getMediaBackgroundDrawable() {
+        return  mediaBackgroundDrawable;
+    }
 
-        timePaintIn.setTextSize(dp(12));
+    @Override
+    protected Drawable getBackgroundMediaDrawableIn() {
+        return backgroundMediaDrawableIn;
+    }
 
-        timePaintOut.setTextSize(dp(12));
+    @Override
+    protected Drawable getBackgroundMediaDrawableInSelected() {
+        return backgroundMediaDrawableInSelected;
+    }
+
+    @Override
+    protected Drawable getBackgroundMediaDrawableOut() {
+        return backgroundMediaDrawableOut;
+    }
+
+    @Override
+    protected Drawable getBackgroundMediaDrawableOutSelected() {
+        return backgroundMediaDrawableOutSelected;
     }
 
     @Override

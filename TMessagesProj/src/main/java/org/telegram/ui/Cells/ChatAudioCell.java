@@ -65,12 +65,13 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
         return timePaint;
     }
 
+
     public ChatAudioCell(Context context) {
         super(context);
         TAG = MediaController.getInstance().generateObserverTag();
 
         avatarImage = new ImageReceiver(this);
-        avatarImage.setRoundRadius(dp(25));
+        avatarImage.setRoundRadius(AndroidUtilities.dp(25));
         seekBar = new SeekBar(context);
         seekBar.delegate = this;
         progressView = new ProgressView();
@@ -96,7 +97,7 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
             statesDrawable[7][1] = getResources().getDrawable(R.drawable.audiocancel2_pressed);
 
             timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaint.setTextSize(dp(12));
+            timePaint.setTextSize(AndroidUtilities.dp(12));
         }
     }
 

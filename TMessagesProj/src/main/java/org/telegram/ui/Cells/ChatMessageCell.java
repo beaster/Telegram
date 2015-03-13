@@ -33,6 +33,7 @@ public class ChatMessageCell extends ChatBaseCell {
         drawForwardedName = true;
     }
 
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (currentMessageObject != null && currentMessageObject.textLayoutBlocks != null && !currentMessageObject.textLayoutBlocks.isEmpty() && currentMessageObject.messageText instanceof Spannable && !isPressed) {

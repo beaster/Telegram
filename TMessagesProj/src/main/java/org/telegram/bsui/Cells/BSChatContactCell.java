@@ -6,8 +6,10 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 
 import org.telegram.android.AndroidUtilities;
+import org.telegram.bsui.BSAvatarDrawable;
 import org.telegram.messenger.R;
 import org.telegram.ui.Cells.ChatContactCell;
+import org.telegram.ui.Components.AvatarDrawable;
 
 /**
  * Created by E1ektr0 on 04.01.2015.
@@ -45,6 +47,11 @@ public class BSChatContactCell extends ChatContactCell {
 
     public BSChatContactCell(Context context) {
         super(context);
+    }
+
+    @Override
+    protected void initResources() {
+
     }
 
     @Override

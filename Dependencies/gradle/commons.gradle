@@ -1,0 +1,45 @@
+
+/**
+ * Removes release build type from output file name.
+ * @return Output file name without build type.
+ */
+def removeAllVariantsBuildType() {
+    android.applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.outputFile = new File(output.outputFile.parent, output.outputFile.name.replace("-release", ""))
+        }
+    } 
+}
+
+/**
+ * Gets build version code of project based on commits count of whole repository.
+ * @return Number of commits in current git branch.
+ */
+def getGitRevision() { 
+    def code = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-list', '--count', '--all', 'HEAD'
+        standardOutput = code
+    }
+
+     return Integer.valueOf(code.toString().trim()) 
+}
+
+
+/**
+ * Composes build version name with given version name and code.
+ * @param versionName Version name to compose with.
+ * @param versionCode Version code to compose with.
+ * @return The build version name with given version name and code.
+ */
+def composeVersionName(String versionName, int versionCode) {
+    println sprintf("Building version %s", versionName + "." + versionCode)
+    return versionName + "." + versionCode;
+}
+
+
+ext{
+	cleanBuildType = this.&removeAllVariantsBuildType
+	getYotaVersionName = this.&composeVersionName
+	getYotaVersionCode = this.&getGitRevision
+}

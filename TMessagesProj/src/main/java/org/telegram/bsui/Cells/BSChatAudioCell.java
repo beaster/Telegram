@@ -34,6 +34,10 @@ public class BSChatAudioCell extends ChatAudioCell {
 
     public BSChatAudioCell(Context context) {
         super(context);
+    }
+
+    @Override
+    protected void initResources() {
         if(timePaint == null) {
             backgroundDrawableIn = getResources().getDrawable(R.drawable.msg_in_bs);
             backgroundDrawableOut = getResources().getDrawable(R.drawable.msg_out_bs);
@@ -58,10 +62,11 @@ public class BSChatAudioCell extends ChatAudioCell {
 
             timePaintOut = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             timePaintOut.setColor(0xff70b15c);
+
+            timePaint.setTextSize(dp(12));
+            timePaintIn.setTextSize(dp(12));
+            timePaintOut.setTextSize(dp(12));
         }
-        timePaint.setTextSize(dp(12));
-        timePaintIn.setTextSize(dp(12));
-        timePaintOut.setTextSize(dp(12));
     }
 
     @Override
