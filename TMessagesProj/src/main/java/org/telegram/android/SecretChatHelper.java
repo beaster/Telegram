@@ -1779,4 +1779,149 @@ public class SecretChatHelper {
         });
         progressDialog.show();
     }
+
+    public void startSecretChatBS(final Context context, final TLRPC.User user) {
+        if (user == null) {
+            return;
+        }
+        //todo:add progess bur
+        startingSecretChat = true;
+        TLRPC.TL_messages_getDhConfig req = new TLRPC.TL_messages_getDhConfig();
+        req.random_length = 256;
+        req.version = MessagesStorage.lastSecretVersion;
+        final long reqId = ConnectionsManager.getInstance().performRpc(req, new RPCRequest.RPCRequestDelegate() {
+            @Override
+            public void run(TLObject response, TLRPC.TL_error error) {
+                if (error == null) {
+                    TLRPC.messages_DhConfig res = (TLRPC.messages_DhConfig) response;
+                    if (response instanceof TLRPC.TL_messages_dhConfig) {
+                        if (!Utilities.isGoodPrime(res.p, res.g)) {
+                            AndroidUtilities.runOnUIThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        if (!((Activity) context).isFinishing()) {
+
+                                        }
+                                    } catch (Exception e) {
+                                        FileLog.e("tmessages", e);
+                                    }
+                                }
+                            });
+                            return;
+                        }
+                        MessagesStorage.secretPBytes = res.p;
+                        MessagesStorage.secretG = res.g;
+                        MessagesStorage.lastSecretVersion = res.version;
+                        MessagesStorage.getInstance().saveSecretParams(MessagesStorage.lastSecretVersion, MessagesStorage.secretG, MessagesStorage.secretPBytes);
+                    }
+                    final byte[] salt = new byte[256];
+                    for (int a = 0; a < 256; a++) {
+                        salt[a] = (byte) ((byte) (Utilities.random.nextDouble() * 256) ^ res.random[a]);
+                    }
+
+                    BigInteger i_g_a = BigInteger.valueOf(MessagesStorage.secretG);
+                    i_g_a = i_g_a.modPow(new BigInteger(1, salt), new BigInteger(1, MessagesStorage.secretPBytes));
+                    byte[] g_a = i_g_a.toByteArray();
+                    if (g_a.length > 256) {
+                        byte[] correctedAuth = new byte[256];
+                        System.arraycopy(g_a, 1, correctedAuth, 0, 256);
+                        g_a = correctedAuth;
+                    }
+
+                    TLRPC.TL_messages_requestEncryption req2 = new TLRPC.TL_messages_requestEncryption();
+                    req2.g_a = g_a;
+                    req2.user_id = MessagesController.getInputUser(user);
+                    req2.random_id = Utilities.random.nextInt();
+                    ConnectionsManager.getInstance().performRpc(req2, new RPCRequest.RPCRequestDelegate() {
+                        @Override
+                        public void run(final TLObject response, TLRPC.TL_error error) {
+                            if (error == null) {
+                                AndroidUtilities.runOnUIThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        startingSecretChat = false;
+
+                                        TLRPC.EncryptedChat chat = (TLRPC.EncryptedChat) response;
+                                        chat.user_id = chat.participant_id;
+                                        chat.seq_in = 0;
+                                        chat.seq_out = 1;
+                                        chat.a_or_b = salt;
+                                        MessagesController.getInstance().putEncryptedChat(chat, false);
+                                        TLRPC.TL_dialog dialog = new TLRPC.TL_dialog();
+                                        dialog.id = ((long) chat.id) << 32;
+                                        dialog.unread_count = 0;
+                                        dialog.top_message = 0;
+                                        dialog.last_message_date = ConnectionsManager.getInstance().getCurrentTime();
+                                        MessagesController.getInstance().dialogs_dict.put(dialog.id, dialog);
+                                        MessagesController.getInstance().dialogs.add(dialog);
+                                        Collections.sort(MessagesController.getInstance().dialogs, new Comparator<TLRPC.TL_dialog>() {
+                                            @Override
+                                            public int compare(TLRPC.TL_dialog tl_dialog, TLRPC.TL_dialog tl_dialog2) {
+                                                if (tl_dialog.last_message_date == tl_dialog2.last_message_date) {
+                                                    return 0;
+                                                } else if (tl_dialog.last_message_date < tl_dialog2.last_message_date) {
+                                                    return 1;
+                                                } else {
+                                                    return -1;
+                                                }
+                                            }
+                                        });
+                                        MessagesStorage.getInstance().putEncryptedChat(chat, user, dialog);
+                                        NotificationCenter.getInstance().postNotificationName(NotificationCenter.dialogsNeedReload);
+                                        NotificationCenter.getInstance().postNotificationName(NotificationCenter.encryptedChatCreated, chat);
+                                        Utilities.stageQueue.postRunnable(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (!delayedEncryptedChatUpdates.isEmpty()) {
+                                                    MessagesController.getInstance().processUpdateArray(delayedEncryptedChatUpdates, null, null);
+                                                    delayedEncryptedChatUpdates.clear();
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                delayedEncryptedChatUpdates.clear();
+                                AndroidUtilities.runOnUIThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (!((Activity) context).isFinishing()) {
+                                            startingSecretChat = false;
+                                            try {
+
+                                            } catch (Exception e) {
+                                                FileLog.e("tmessages", e);
+                                            }
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                            builder.setTitle(LocaleController.getString("AppName", R.string.AppName));
+                                            builder.setMessage(LocaleController.getString("CreateEncryptedChatError", R.string.CreateEncryptedChatError));
+                                            builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
+                                            builder.show().setCanceledOnTouchOutside(true);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }, true, RPCRequest.RPCRequestClassGeneric | RPCRequest.RPCRequestClassFailOnServerErrors);
+                } else {
+                    delayedEncryptedChatUpdates.clear();
+                    AndroidUtilities.runOnUIThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            startingSecretChat = false;
+                            if (!((Activity) context).isFinishing()) {
+                                try {
+
+                                } catch (Exception e) {
+                                    FileLog.e("tmessages", e);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }, true, RPCRequest.RPCRequestClassGeneric | RPCRequest.RPCRequestClassFailOnServerErrors);
+
+    }
 }

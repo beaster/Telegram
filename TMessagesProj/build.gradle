@@ -18,6 +18,8 @@ dependencies {
     compile 'net.hockeyapp.android:HockeySDK:3.5.+'
     compile 'com.googlecode.mp4parser:isoparser:1.0.+'
     compile 'com.android.support:recyclerview-v7:+'
+    compile fileTree(dir: 'libs', include: ['*.jar'], excludes: ['com.yotadevices.yotaphone2.sdk.v2.jar'])
+    provided files('libs/com.yotadevices.yotaphone2.sdk.v2.jar')
 }
 
 android {

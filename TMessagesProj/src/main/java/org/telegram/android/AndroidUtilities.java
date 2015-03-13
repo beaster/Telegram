@@ -57,7 +57,9 @@ public class AndroidUtilities {
 
     public static int statusBarHeight = 0;
     public static float density = 1;
+    public static float bsDensity = 1.6f;
     public static Point displaySize = new Point();
+    public static Point bsDisplaySize = new Point();
     public static Integer photoSize = null;
     private static Boolean isTablet = null;
 
@@ -218,6 +220,10 @@ public class AndroidUtilities {
         return (int)Math.ceil(density * value);
     }
 
+    public static int bsDp(float value) {
+        return (int)Math.ceil(bsDensity * value);
+    }
+
     public static float dpf2(float value) {
         return density * value;
     }
@@ -233,6 +239,7 @@ public class AndroidUtilities {
                     } else {
                         display.getSize(displaySize);
                     }
+                    bsDisplaySize.set(500, 800);
                     FileLog.e("tmessages", "display size = " + displaySize.x + " " + displaySize.y);
                 }
             }
@@ -448,6 +455,15 @@ public class AndroidUtilities {
             return dp(48);
         } else {
             return dp(56);
+        }
+    }
+    public static int getBSCurrentActionBarHeight() {
+        if (isTablet()) {
+            return bsDp(64);
+        } else if (ApplicationLoader.applicationContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            return bsDp(48);
+        } else {
+            return bsDp(56);
         }
     }
 

@@ -15,6 +15,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import org.telegram.android.AndroidUtilities;
+
 public class BaseCell extends View {
 
     private final class CheckForTap implements Runnable {
@@ -82,5 +84,22 @@ public class BaseCell extends View {
 
     protected void onLongPress() {
 
+    }
+
+    protected int dp(float value) {
+        return AndroidUtilities.dp(value);
+    }
+
+
+    protected int getDisplayY() {
+        return AndroidUtilities.displaySize.y;
+    }
+
+    protected int getDisplayX() {
+        return AndroidUtilities.displaySize.x;
+    }
+
+    protected float getDensity() {
+        return AndroidUtilities.density;
     }
 }

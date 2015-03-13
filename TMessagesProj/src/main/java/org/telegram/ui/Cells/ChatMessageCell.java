@@ -53,7 +53,7 @@ public class ChatMessageCell extends ChatBaseCell {
                             final float left = block.textLayout.getLineLeft(line);
                             if (left <= x && left + block.textLayout.getLineWidth(line) >= x) {
                                 Spannable buffer = (Spannable)currentMessageObject.messageText;
-                                ClickableSpan[] link = buffer.getSpans(off, off, ClickableSpan.class);
+                                ClickableSpan[] link = getSpans(off, buffer);
 
                                 if (link.length != 0) {
                                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -90,6 +90,10 @@ public class ChatMessageCell extends ChatBaseCell {
             pressedLink = null;
         }
         return super.onTouchEvent(event);
+    }
+
+    protected ClickableSpan[] getSpans(int off, Spannable buffer) {
+        return buffer.getSpans(off, off, ClickableSpan.class);
     }
 
     public void setVisiblePart(int position, int height) {
@@ -139,18 +143,18 @@ public class ChatMessageCell extends ChatBaseCell {
 
             if (AndroidUtilities.isTablet()) {
                 if (isChat && !messageObject.isOut()) {
-                    maxWidth = AndroidUtilities.getMinTabletSide() - AndroidUtilities.dp(122);
+                    maxWidth = AndroidUtilities.getMinTabletSide() - dp(122);
                     drawName = true;
                 } else {
-                    maxWidth = AndroidUtilities.getMinTabletSide() - AndroidUtilities.dp(80);
+                    maxWidth = AndroidUtilities.getMinTabletSide() - dp(80);
                     drawName = false;
                 }
             } else {
                 if (isChat && !messageObject.isOut()) {
-                    maxWidth = Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - AndroidUtilities.dp(122);
+                    maxWidth = Math.min(getDisplayX(), getDisplayY()) - dp(122);
                     drawName = true;
                 } else {
-                    maxWidth = Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - AndroidUtilities.dp(80);
+                    maxWidth = Math.min(getDisplayX(), getDisplayY()) - dp(80);
                     drawName = false;
                 }
             }
@@ -160,25 +164,25 @@ public class ChatMessageCell extends ChatBaseCell {
             super.setMessageObject(messageObject);
 
             backgroundWidth = messageObject.textWidth;
-            totalHeight = messageObject.textHeight + AndroidUtilities.dp(19.5f) + namesOffset;
+            totalHeight = messageObject.textHeight + dp(19.5f) + namesOffset;
 
             int maxChildWidth = Math.max(backgroundWidth, nameWidth);
             maxChildWidth = Math.max(maxChildWidth, forwardedNameWidth);
 
-            int timeMore = timeWidth + AndroidUtilities.dp(6);
+            int timeMore = timeWidth + dp(6);
             if (messageObject.isOut()) {
-                timeMore += AndroidUtilities.dp(20.5f);
+                timeMore += dp(20.5f);
             }
 
             if (maxWidth - messageObject.lastLineWidth < timeMore) {
-                totalHeight += AndroidUtilities.dp(14);
-                backgroundWidth = Math.max(maxChildWidth, messageObject.lastLineWidth) + AndroidUtilities.dp(29);
+                totalHeight += dp(14);
+                backgroundWidth = Math.max(maxChildWidth, messageObject.lastLineWidth) + dp(29);
             } else {
                 int diff = maxChildWidth - messageObject.lastLineWidth;
                 if (diff >= 0 && diff <= timeMore) {
-                    backgroundWidth = maxChildWidth + timeMore - diff + AndroidUtilities.dp(29);
+                    backgroundWidth = maxChildWidth + timeMore - diff + dp(29);
                 } else {
-                    backgroundWidth = Math.max(maxChildWidth, messageObject.lastLineWidth + timeMore) + AndroidUtilities.dp(29);
+                    backgroundWidth = Math.max(maxChildWidth, messageObject.lastLineWidth + timeMore) + dp(29);
                 }
             }
         }
@@ -194,11 +198,11 @@ public class ChatMessageCell extends ChatBaseCell {
         super.onLayout(changed, left, top, right, bottom);
 
         if (currentMessageObject.isOut()) {
-            textX = layoutWidth - backgroundWidth + AndroidUtilities.dp(10);
-            textY = AndroidUtilities.dp(10) + namesOffset;
+            textX = layoutWidth - backgroundWidth + dp(10);
+            textY = dp(10) + namesOffset;
         } else {
-            textX = AndroidUtilities.dp(19) + (isChat ? AndroidUtilities.dp(52) : 0);
-            textY = AndroidUtilities.dp(10) + namesOffset;
+            textX = dp(19) + (isChat ? dp(52) : 0);
+            textY = dp(10) + namesOffset;
         }
     }
 
@@ -210,11 +214,11 @@ public class ChatMessageCell extends ChatBaseCell {
         }
 
         if (currentMessageObject.isOut()) {
-            textX = layoutWidth - backgroundWidth + AndroidUtilities.dp(10);
-            textY = AndroidUtilities.dp(10) + namesOffset;
+            textX = layoutWidth - backgroundWidth + dp(10);
+            textY = dp(10) + namesOffset;
         } else {
-            textX = AndroidUtilities.dp(19) + (isChat ? AndroidUtilities.dp(52) : 0);
-            textY = AndroidUtilities.dp(10) + namesOffset;
+            textX = dp(19) + (isChat ? dp(52) : 0);
+            textY = dp(10) + namesOffset;
         }
 
         for (int a = firstVisibleBlockNum; a <= lastVisibleBlockNum; a++) {

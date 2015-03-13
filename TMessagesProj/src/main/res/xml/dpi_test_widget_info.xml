@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minHeight="10dp"
+    android:minWidth="10dp"
+    android:resizeMode="vertical|horizontal"
+    android:updatePeriodMillis="0"
+    android:widgetCategory=""
+    android:configure="org.telegram.bsui.SettingsActivity">
+</appwidget-provider>

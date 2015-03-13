@@ -61,12 +61,16 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
     public TLRPC.User audioUser;
     private TLRPC.FileLocation currentPhoto;
 
+    protected TextPaint getTimePaint(){
+        return timePaint;
+    }
+
     public ChatAudioCell(Context context) {
         super(context);
         TAG = MediaController.getInstance().generateObserverTag();
 
         avatarImage = new ImageReceiver(this);
-        avatarImage.setRoundRadius(AndroidUtilities.dp(25));
+        avatarImage.setRoundRadius(dp(25));
         seekBar = new SeekBar(context);
         seekBar.delegate = this;
         progressView = new ProgressView();
@@ -92,7 +96,7 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
             statesDrawable[7][1] = getResources().getDrawable(R.drawable.audiocancel2_pressed);
 
             timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaint.setTextSize(AndroidUtilities.dp(12));
+            timePaint.setTextSize(dp(12));
         }
     }
 
@@ -117,7 +121,7 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
             }
             invalidate();
         } else {
-            int side = AndroidUtilities.dp(36);
+            int side = dp(36);
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
                     buttonPressed = true;
@@ -206,8 +210,8 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
         }
         String timeString = String.format("%02d:%02d", duration / 60, duration % 60);
         if (lastTimeString == null || lastTimeString != null && !lastTimeString.equals(timeString)) {
-            int timeWidth = (int)Math.ceil(timePaint.measureText(timeString));
-            timeLayout = new StaticLayout(timeString, timePaint, timeWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            int timeWidth = (int)Math.ceil(getTimePaint().measureText(timeString));
+            timeLayout = new StaticLayout(timeString, getTimePaint(), timeWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         }
         invalidate();
     }
@@ -291,11 +295,11 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        setMeasuredDimension(width, AndroidUtilities.dp(68));
+        setMeasuredDimension(width, dp(68));
         if (isChat) {
-            backgroundWidth = Math.min(width - AndroidUtilities.dp(102), AndroidUtilities.dp(300));
+            backgroundWidth = Math.min(width - dp(102), dp(300));
         } else {
-            backgroundWidth = Math.min(width - AndroidUtilities.dp(50), AndroidUtilities.dp(300));
+            backgroundWidth = Math.min(width - dp(50), dp(300));
         }
     }
 
@@ -306,39 +310,39 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
         int x;
 
         if (currentMessageObject.isOut()) {
-            x = layoutWidth - backgroundWidth + AndroidUtilities.dp(8);
-            seekBarX = layoutWidth - backgroundWidth + AndroidUtilities.dp(97);
-            buttonX = layoutWidth - backgroundWidth + AndroidUtilities.dp(67);
-            timeX = layoutWidth - backgroundWidth + AndroidUtilities.dp(71);
+            x = layoutWidth - backgroundWidth + dp(8);
+            seekBarX = layoutWidth - backgroundWidth + dp(97);
+            buttonX = layoutWidth - backgroundWidth + dp(67);
+            timeX = layoutWidth - backgroundWidth + dp(71);
         } else {
             if (isChat) {
-                x = AndroidUtilities.dp(69);
-                seekBarX = AndroidUtilities.dp(158);
-                buttonX = AndroidUtilities.dp(128);
-                timeX = AndroidUtilities.dp(132);
+                x = dp(69);
+                seekBarX = dp(158);
+                buttonX = dp(128);
+                timeX = dp(132);
             } else {
-                x = AndroidUtilities.dp(16);
-                seekBarX = AndroidUtilities.dp(106);
-                buttonX = AndroidUtilities.dp(76);
-                timeX = AndroidUtilities.dp(80);
+                x = dp(16);
+                seekBarX = dp(106);
+                buttonX = dp(76);
+                timeX = dp(80);
             }
         }
         int diff = 0;
         if (needAvatarImage) {
-            avatarImage.setImageCoords(x, AndroidUtilities.dp(9), AndroidUtilities.dp(50), AndroidUtilities.dp(50));
+            avatarImage.setImageCoords(x, dp(9), dp(50), dp(50));
         } else {
-            diff = AndroidUtilities.dp(56);
+            diff = dp(56);
             seekBarX -= diff;
             buttonX -= diff;
             timeX -= diff;
         }
 
-        seekBar.width = backgroundWidth - AndroidUtilities.dp(112) + diff;
-        seekBar.height = AndroidUtilities.dp(30);
-        progressView.width = backgroundWidth - AndroidUtilities.dp(136) + diff;
-        progressView.height = AndroidUtilities.dp(30);
-        seekBarY = AndroidUtilities.dp(13);
-        buttonY = AndroidUtilities.dp(10);
+        seekBar.width = backgroundWidth - dp(112) + diff;
+        seekBar.height = dp(30);
+        progressView.width = backgroundWidth - dp(136) + diff;
+        progressView.height = dp(30);
+        seekBarY = dp(13);
+        buttonY = dp(10);
 
         updateProgress();
     }
@@ -410,7 +414,7 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
             canvas.translate(seekBarX, seekBarY);
             seekBar.draw(canvas);
         } else {
-            canvas.translate(seekBarX + AndroidUtilities.dp(12), seekBarY);
+            canvas.translate(seekBarX + dp(12), seekBarY);
             progressView.draw(canvas);
         }
         canvas.restore();
@@ -418,19 +422,19 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
         int state = buttonState;
         if (!currentMessageObject.isOut()) {
             state += 4;
-            timePaint.setColor(0xffa1aab3);
+            getTimePaint().setColor(0xffa1aab3);
         } else {
-            timePaint.setColor(0xff70b15c);
+            getTimePaint().setColor(0xff70b15c);
         }
         Drawable buttonDrawable = statesDrawable[state][buttonPressed ? 1 : 0];
-        int side = AndroidUtilities.dp(36);
+        int side = dp(36);
         int x = (side - buttonDrawable.getIntrinsicWidth()) / 2;
         int y = (side - buttonDrawable.getIntrinsicHeight()) / 2;
         setDrawableBounds(buttonDrawable, x + buttonX, y + buttonY);
         buttonDrawable.draw(canvas);
 
         canvas.save();
-        canvas.translate(timeX, AndroidUtilities.dp(45));
+        canvas.translate(timeX, dp(45));
         timeLayout.draw(canvas);
         canvas.restore();
     }

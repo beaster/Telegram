@@ -39,6 +39,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="com.yotadevices.framework.permission.ACCESS_BACKSCREEN" />
 
     <application
         android:name=".ApplicationLoader"
@@ -122,6 +123,7 @@
             android:theme="@style/Theme.TMessages.PopupNotification"
             android:windowSoftInputMode="adjustResize|stateHidden">
         </activity>
+        <activity android:name="org.telegram.bsui.SettingsActivity"></activity>
 
         <receiver android:name="org.telegram.android.SmsListener">
             <intent-filter>
@@ -152,6 +154,32 @@
         <service android:name="org.telegram.android.NotificationDelay" android:exported="false"/>
         <service android:name="org.telegram.android.VideoEncodingService" android:enabled="true"/>
 
+        <service android:name="org.telegram.bsui.BSChatActivity" android:exported="false"/>
+        <service android:name="org.telegram.bsui.BSMessagesActivity" android:exported="false"/>
+        <service android:name="org.telegram.bsui.OtherFlipBSActivity" android:exported="false" />
+        <service android:name="org.telegram.bsui.BSContactsActivity" android:exported="false"/>
+        <service android:name="org.telegram.bsui.BSSecretChatContactsActivity" android:exported="false"/>
+        <service android:name="org.telegram.bsui.BSGroupCreateActivity" android:exported="false"/>
+        <service android:name="org.telegram.bsui.BSGroupCreateFinalActivity" android:exported="false"/>
+
+        <!-- Telegram Widget -->
+        <receiver
+            android:name="org.telegram.bsui.widget.BSTelegramWidgetMedium"
+            android:label="@string/AppName" >
+            <intent-filter>
+                <action android:name="com.yotadevices.yotaphone.action.APPWIDGET_VISIBILITY_CHANGED" />
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_DELETE" />
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/dpi_test_widget_info" />
+            <meta-data
+                android:name="com.yotadevices.yotaphone.bs_provider"
+                android:resource="@xml/bs_widget_info" />
+        </receiver>
+
         <receiver android:name="org.telegram.android.AppStartReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="org.telegram.start" />
@@ -162,6 +190,7 @@
         <receiver android:name="org.telegram.android.WearReplyReceiver" android:enabled="true"/>
 
         <uses-library android:name="com.sec.android.app.multiwindow" android:required="false" />
+        <uses-library android:name="com.yotadevices.yotaphone2.sdk.v2" android:required="false" />
         <meta-data android:name="com.sec.android.support.multiwindow" android:value="true" />
         <meta-data android:name="com.sec.android.multiwindow.DEFAULT_SIZE_W" android:value="632dp" />
         <meta-data android:name="com.sec.android.multiwindow.DEFAULT_SIZE_H" android:value="598dp" />

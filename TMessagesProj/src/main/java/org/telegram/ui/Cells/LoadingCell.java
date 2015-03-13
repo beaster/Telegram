@@ -33,4 +33,8 @@ public class LoadingCell extends FrameLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(54), MeasureSpec.EXACTLY));
     }
+
+    protected int dp(float value){
+        return AndroidUtilities.dp(value);
+    }
 }

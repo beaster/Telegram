@@ -40,6 +40,21 @@ import java.lang.reflect.Field;
 
 public class ActionBarMenuItem extends FrameLayoutFixed {
 
+    public void showSubMenu() {
+        if (hasSubMenu() && (popupWindow == null || popupWindow != null && !popupWindow.isShowing())) {
+            showMenuRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (getParent() != null) {
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                    }
+                    toggleSubMenu();
+                }
+            };
+            AndroidUtilities.runOnUIThread(showMenuRunnable, 200);
+        }
+    }
+
     public static class ActionBarMenuItemSearchListener {
         public void onSearchExpand() { }
         public void onSearchCollapse() { }

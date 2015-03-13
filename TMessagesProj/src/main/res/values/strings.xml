@@ -3,6 +3,40 @@
 
 
 <resources>
+    <!--yota views-->
+    <string name="NoItems">No new messages…</string>
+    <string name="NoItemsInfo">Last Messages</string>
+    <string name="empty_account_description">Set up your account at front screen</string>
+    <string name="StartMessagingWidget">Let\'s start using Yotagram!</string>
+    <integer name="demo_messages_count" translatable="false">2</integer>
+    <string name="demo_message_from">Johnatan Kinsley</string>
+    <string name="demo_message_text">I will show you something!</string>
+
+    <!--speech recognizer error-->
+    <string name="SpeechRecognizerErrorAudio">Audio recording error</string>
+    <string name="SpeechRecognizerErrorClient">Client side error</string>
+    <string name="SpeechRecognizerErrorInsufficientPermissions">Insufficient permissions</string>
+    <string name="SpeechRecognizerErrorNetwork">Network error</string>
+    <string name="SpeechRecognizerErrorNetworkTimeout">Network operation timed out</string>
+    <string name="SpeechRecognizerErrorNoMatch">No recognition result matched</string>
+    <string name="SpeechRecognizerErrorRecognizerBusy">Recognition service busy</string>
+    <string name="SpeechRecognizerErrorServer">Server sends error status</string>
+    <string name="SpeechRecognizerErrorSpeechTimeout">No speech input</string>
+    <string name="SpeechRecognizerError">Didn\'t understand, please try again</string>
+
+    <!--widget strings-->
+    <string name="LastFromYotagram">Last from Yotagram</string>
+    <string name="Yotagram">Yotagram</string>
+    <string name="WidgetToday">Today, %s</string>
+    <string name="WidgetYesterday">Yesterday</string>
+    <string name="WidgetDayAgo">%s day ago</string>
+    <string name="ChatTypePersonal">Personal chat</string>
+    <string name="ChatTypeGroup">Group chat</string>
+    <string name="ChatTypeSecret">Secret chat</string>
+    <string name="SpeakAMessageTo">Speak a message to</string>
+
+    <!--widget format strings-->
+
     <string name="AppName">Telegram</string>
     <string name="LanguageName">English</string>
     <string name="LanguageNameInEnglish">English</string>

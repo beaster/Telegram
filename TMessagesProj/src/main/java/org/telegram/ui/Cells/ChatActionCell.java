@@ -63,8 +63,27 @@ public class ChatActionCell extends BaseCell {
 
     private ChatActionCellDelegate delegate;
 
+    protected Drawable getBackgroundBlack() {
+        return backgroundBlack;
+    }
+
+    protected Drawable getBackgroundBlue() {
+        return backgroundBlue;
+    }
+
+    protected TextPaint getTextPaint() {
+        return textPaint;
+    }
+
     public ChatActionCell(Context context) {
         super(context);
+        initBackground();
+        imageReceiver = new ImageReceiver(this);
+        imageReceiver.setRoundRadius(dp(32));
+        avatarDrawable = new AvatarDrawable();
+    }
+
+    protected void initBackground() {
         if (backgroundBlack == null) {
             backgroundBlack = getResources().getDrawable(R.drawable.system_black);
             backgroundBlue = getResources().getDrawable(R.drawable.system_blue);
@@ -72,11 +91,8 @@ public class ChatActionCell extends BaseCell {
             textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
             textPaint.setColor(0xffffffff);
             textPaint.linkColor = 0xffffffff;
+            textPaint.setTextSize(dp(MessagesController.getInstance().fontSize));
         }
-        imageReceiver = new ImageReceiver(this);
-        imageReceiver.setRoundRadius(AndroidUtilities.dp(32));
-        avatarDrawable = new AvatarDrawable();
-        textPaint.setTextSize(AndroidUtilities.dp(MessagesController.getInstance().fontSize));
     }
 
     public void setDelegate(ChatActionCellDelegate delegate) {
@@ -105,7 +121,7 @@ public class ChatActionCell extends BaseCell {
             if (currentMessageObject.messageOwner.action instanceof TLRPC.TL_messageActionUserUpdatedPhoto) {
                 imageReceiver.setImage(currentMessageObject.messageOwner.action.newUserPhoto.photo_small, "50_50", avatarDrawable, false);
             } else {
-                TLRPC.PhotoSize photo = FileLoader.getClosestPhotoSizeWithSize(currentMessageObject.photoThumbs, AndroidUtilities.dp(64));
+                TLRPC.PhotoSize photo = FileLoader.getClosestPhotoSizeWithSize(currentMessageObject.photoThumbs, dp(64));
                 if (photo != null) {
                     imageReceiver.setImage(photo.location, "50_50", avatarDrawable, false);
                 } else {
@@ -221,14 +237,14 @@ public class ChatActionCell extends BaseCell {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (currentMessageObject == null) {
-            setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), textHeight + AndroidUtilities.dp(14));
+            setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), textHeight + dp(14));
             return;
         }
-        int width = Math.max(AndroidUtilities.dp(30), MeasureSpec.getSize(widthMeasureSpec));
+        int width = Math.max(dp(30), MeasureSpec.getSize(widthMeasureSpec));
         if (width != previousWidth) {
             previousWidth = width;
 
-            textLayout = new StaticLayout(currentMessageObject.messageText, textPaint, width - AndroidUtilities.dp(30), Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
+            textLayout = new StaticLayout(currentMessageObject.messageText, getTextPaint(), width - dp(30), Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
             textHeight = 0;
             textWidth = 0;
             try {
@@ -250,14 +266,14 @@ public class ChatActionCell extends BaseCell {
             }
 
             textX = (width - textWidth) / 2;
-            textY = AndroidUtilities.dp(7);
+            textY = dp(7);
             textXLeft = (width - textLayout.getWidth()) / 2;
 
             if (currentMessageObject.type == 11) {
-                imageReceiver.setImageCoords((width - AndroidUtilities.dp(64)) / 2, textHeight + AndroidUtilities.dp(15), AndroidUtilities.dp(64), AndroidUtilities.dp(64));
+                imageReceiver.setImageCoords((width - dp(64)) / 2, textHeight + dp(15), dp(64), dp(64));
             }
         }
-        setMeasuredDimension(width, textHeight + AndroidUtilities.dp(14 + (currentMessageObject.type == 11 ? 70 : 0)));
+        setMeasuredDimension(width, textHeight + dp(14 + (currentMessageObject.type == 11 ? 70 : 0)));
     }
 
     @Override
@@ -268,11 +284,11 @@ public class ChatActionCell extends BaseCell {
 
         Drawable backgroundDrawable = null;
         if (useBlackBackground) {
-            backgroundDrawable = backgroundBlack;
+            backgroundDrawable = getBackgroundBlack();
         } else {
-            backgroundDrawable = backgroundBlue;
+            backgroundDrawable = getBackgroundBlue();
         }
-        backgroundDrawable.setBounds(textX - AndroidUtilities.dp(5), AndroidUtilities.dp(5), textX + textWidth + AndroidUtilities.dp(5), AndroidUtilities.dp(9) + textHeight);
+        backgroundDrawable.setBounds(textX - dp(5), dp(5), textX + textWidth + dp(5), dp(9) + textHeight);
         backgroundDrawable.draw(canvas);
 
         if (currentMessageObject.type == 11) {

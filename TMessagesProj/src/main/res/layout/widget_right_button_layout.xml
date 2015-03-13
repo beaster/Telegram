@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/right_button"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical|right"
+    android:background="@drawable/counter_circle"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/right_button_paperplan_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:src="@drawable/counter_paperplan"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/right_button_list_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:src="@drawable/counter_list"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/right_button_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="Roboto Medium"
+        android:textColor="#ffffff"
+        android:layout_margin="2dp"
+        android:textSize="14.66sp"
+        android:visibility="gone"/>
+</LinearLayout>

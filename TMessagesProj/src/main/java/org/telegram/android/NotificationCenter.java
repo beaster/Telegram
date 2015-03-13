@@ -83,6 +83,7 @@ public class NotificationCenter {
     public static final int audioDidSent = totalEvents++;
     public static final int audioDidStarted = totalEvents++;
     public static final int audioRouteChanged = totalEvents++;
+    public static final int appDidLogin = totalEvents++;
 
     final private HashMap<Integer, ArrayList<Object>> observers = new HashMap<>();
 

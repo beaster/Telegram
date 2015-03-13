@@ -46,10 +46,10 @@ import java.util.TimerTask;
 
 public class DialogsSearchAdapter extends BaseContactsSearchAdapter {
 
-    private Context mContext;
+    protected Context mContext;
     private Timer searchTimer;
-    private ArrayList<TLObject> searchResult = new ArrayList<>();
-    private ArrayList<CharSequence> searchResultNames = new ArrayList<>();
+    protected ArrayList<TLObject> searchResult = new ArrayList<>();
+    protected ArrayList<CharSequence> searchResultNames = new ArrayList<>();
     private ArrayList<MessageObject> searchResultMessages = new ArrayList<>();
     private String lastSearchText;
     private long reqId = 0;

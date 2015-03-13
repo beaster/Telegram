@@ -58,22 +58,40 @@ public class ChatContactCell extends ChatBaseCell {
 
     private ChatContactCellDelegate contactDelegate = null;
 
+    protected TextPaint getNamePaint() {
+        return namePaint;
+    }
+    protected TextPaint getPhonePaint() {
+        return phonePaint;
+    }
+    protected Drawable getAddContactDrawableIn() {
+        return addContactDrawableIn;
+    }
+
+    protected Drawable getAddContactDrawableOut() {
+        return addContactDrawableOut;
+    }
+
     public ChatContactCell(Context context) {
         super(context);
+        initNamePaint();
+        avatarImage = new ImageReceiver(this);
+        avatarImage.setRoundRadius(dp(21));
+        avatarDrawable = new AvatarDrawable();
+    }
+
+    protected void initNamePaint() {
         if (namePaint == null) {
             namePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            namePaint.setTextSize(AndroidUtilities.dp(15));
+            namePaint.setTextSize(dp(15));
 
             phonePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            phonePaint.setTextSize(AndroidUtilities.dp(15));
+            phonePaint.setTextSize(dp(15));
             phonePaint.setColor(0xff212121);
 
             addContactDrawableIn = getResources().getDrawable(R.drawable.addcontact_blue);
             addContactDrawableOut = getResources().getDrawable(R.drawable.addcontact_green);
         }
-        avatarImage = new ImageReceiver(this);
-        avatarImage.setRoundRadius(AndroidUtilities.dp(21));
-        avatarDrawable = new AvatarDrawable();
     }
 
     public void setContactDelegate(ChatContactCellDelegate delegate) {
@@ -108,12 +126,12 @@ public class ChatContactCell extends ChatBaseCell {
         float y = event.getY();
 
         boolean result = false;
-        int side = AndroidUtilities.dp(36);
+        int side = dp(36);
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (x >= avatarImage.getImageX() && x <= avatarImage.getImageX() + namesWidth + AndroidUtilities.dp(42) && y >= avatarImage.getImageY() && y <= avatarImage.getImageY() + avatarImage.getImageHeight()) {
+            if (x >= avatarImage.getImageX() && x <= avatarImage.getImageX() + namesWidth + dp(42) && y >= avatarImage.getImageY() && y <= avatarImage.getImageY() + avatarImage.getImageHeight()) {
                 avatarPressed = true;
                 result = true;
-            } else if (x >= avatarImage.getImageX() + namesWidth + AndroidUtilities.dp(52) && y >= AndroidUtilities.dp(13) && x <= avatarImage.getImageX() + namesWidth + AndroidUtilities.dp(92) && y <= AndroidUtilities.dp(52)) {
+            } else if (x >= avatarImage.getImageX() + namesWidth + dp(52) && y >= dp(13) && x <= avatarImage.getImageX() + namesWidth + dp(92) && y <= dp(52)) {
                 buttonPressed = true;
                 result = true;
             }
@@ -140,7 +158,7 @@ public class ChatContactCell extends ChatBaseCell {
                 } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
                     avatarPressed = false;
                 } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!(x >= avatarImage.getImageX() && x <= avatarImage.getImageX() + namesWidth + AndroidUtilities.dp(42) && y >= avatarImage.getImageY() && y <= avatarImage.getImageY() + avatarImage.getImageHeight())) {
+                    if (!(x >= avatarImage.getImageX() && x <= avatarImage.getImageX() + namesWidth + dp(42) && y >= avatarImage.getImageY() && y <= avatarImage.getImageY() + avatarImage.getImageHeight())) {
                         avatarPressed = false;
                     }
                 }
@@ -154,7 +172,7 @@ public class ChatContactCell extends ChatBaseCell {
                 } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
                     buttonPressed = false;
                 } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!(x >= avatarImage.getImageX() + namesWidth + AndroidUtilities.dp(52) && y >= AndroidUtilities.dp(13) && x <= avatarImage.getImageX() + namesWidth + AndroidUtilities.dp(92) && y <= AndroidUtilities.dp(52))) {
+                    if (!(x >= avatarImage.getImageX() + namesWidth + dp(52) && y >= dp(13) && x <= avatarImage.getImageX() + namesWidth + dp(92) && y <= dp(52))) {
                         buttonPressed = false;
                     }
                 }
@@ -180,9 +198,9 @@ public class ChatContactCell extends ChatBaseCell {
             if (AndroidUtilities.isTablet()) {
                 maxWidth = (int) (AndroidUtilities.getMinTabletSide() * 0.7f);
             } else {
-                maxWidth = (int) (Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) * 0.7f);
+                maxWidth = (int) (Math.min(getDisplayX(), getDisplayY()) * 0.7f);
             }
-            maxWidth -= AndroidUtilities.dp(58 + (drawAddButton ? 42 : 0));
+            maxWidth -= dp(58 + (drawAddButton ? 42 : 0));
 
             if (contactUser != null) {
                 if (contactUser.photo != null) {
@@ -198,10 +216,10 @@ public class ChatContactCell extends ChatBaseCell {
             avatarImage.setImage(currentPhoto, "50_50", avatarDrawable, false);
 
             String currentNameString = ContactsController.formatName(messageObject.messageOwner.media.first_name, messageObject.messageOwner.media.last_name);
-            int nameWidth = Math.min((int) Math.ceil(namePaint.measureText(currentNameString)), maxWidth);
+            int nameWidth = Math.min((int) Math.ceil(getNamePaint().measureText(currentNameString)), maxWidth);
 
-            CharSequence stringFinal = TextUtils.ellipsize(currentNameString.replace("\n", " "), namePaint, nameWidth, TextUtils.TruncateAt.END);
-            nameLayout = new StaticLayout(stringFinal, namePaint, nameWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            CharSequence stringFinal = TextUtils.ellipsize(currentNameString.replace("\n", " "), getNamePaint(), nameWidth, TextUtils.TruncateAt.END);
+            nameLayout = new StaticLayout(stringFinal, getNamePaint(), nameWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             if (nameLayout.getLineCount() > 0) {
                 nameWidth = (int)Math.ceil(nameLayout.getLineWidth(0));
             } else {
@@ -217,9 +235,9 @@ public class ChatContactCell extends ChatBaseCell {
             } else {
                 phone = LocaleController.getString("NumberUnknown", R.string.NumberUnknown);
             }
-            int phoneWidth = Math.min((int) Math.ceil(phonePaint.measureText(phone)), maxWidth);
-            stringFinal = TextUtils.ellipsize(phone.replace("\n", " "), phonePaint, phoneWidth, TextUtils.TruncateAt.END);
-            phoneLayout = new StaticLayout(stringFinal, phonePaint, phoneWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            int phoneWidth = Math.min((int) Math.ceil(getPhonePaint().measureText(phone)), maxWidth);
+            stringFinal = TextUtils.ellipsize(phone.replace("\n", " "), getPhonePaint(), phoneWidth, TextUtils.TruncateAt.END);
+            phoneLayout = new StaticLayout(stringFinal, getPhonePaint(), phoneWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             if (phoneLayout.getLineCount() > 0) {
                 phoneWidth = (int)Math.ceil(phoneLayout.getLineWidth(0));
             } else {
@@ -227,7 +245,7 @@ public class ChatContactCell extends ChatBaseCell {
             }
 
             namesWidth = Math.max(nameWidth, phoneWidth);
-            backgroundWidth = AndroidUtilities.dp(77 + (drawAddButton ? 42 : 0)) + namesWidth;
+            backgroundWidth = dp(77 + (drawAddButton ? 42 : 0)) + namesWidth;
 
             super.setMessageObject(messageObject);
         }
@@ -235,7 +253,7 @@ public class ChatContactCell extends ChatBaseCell {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), AndroidUtilities.dp(71));
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), dp(71));
     }
 
     @Override
@@ -249,15 +267,15 @@ public class ChatContactCell extends ChatBaseCell {
         int x;
 
         if (currentMessageObject.isOut()) {
-            x = layoutWidth - backgroundWidth + AndroidUtilities.dp(8);
+            x = layoutWidth - backgroundWidth + dp(8);
         } else {
             if (isChat) {
-                x = AndroidUtilities.dp(69);
+                x = dp(69);
             } else {
-                x = AndroidUtilities.dp(16);
+                x = dp(16);
             }
         }
-        avatarImage.setImageCoords(x, AndroidUtilities.dp(9), AndroidUtilities.dp(42), AndroidUtilities.dp(42));
+        avatarImage.setImageCoords(x, dp(9), dp(42), dp(42));
     }
 
     @Override
@@ -272,14 +290,14 @@ public class ChatContactCell extends ChatBaseCell {
 
         if (nameLayout != null) {
             canvas.save();
-            canvas.translate(avatarImage.getImageX() + avatarImage.getImageWidth() + AndroidUtilities.dp(9), AndroidUtilities.dp(10));
-            namePaint.setColor(AvatarDrawable.getColorForId(currentMessageObject.messageOwner.media.user_id));
+            canvas.translate(avatarImage.getImageX() + avatarImage.getImageWidth() + dp(9), dp(10));
+            getNamePaint().setColor(AvatarDrawable.getColorForId(currentMessageObject.messageOwner.media.user_id));
             nameLayout.draw(canvas);
             canvas.restore();
         }
         if (phoneLayout != null) {
             canvas.save();
-            canvas.translate(avatarImage.getImageX() + avatarImage.getImageWidth() + AndroidUtilities.dp(9), AndroidUtilities.dp(31));
+            canvas.translate(avatarImage.getImageX() + avatarImage.getImageWidth() + dp(9), dp(31));
             phoneLayout.draw(canvas);
             canvas.restore();
         }
@@ -287,11 +305,11 @@ public class ChatContactCell extends ChatBaseCell {
         if (drawAddButton) {
             Drawable addContactDrawable;
             if (currentMessageObject.isOut()) {
-                addContactDrawable = addContactDrawableOut;
+                addContactDrawable = getAddContactDrawableOut();
             } else {
-                addContactDrawable = addContactDrawableIn;
+                addContactDrawable = getAddContactDrawableIn();
             }
-            setDrawableBounds(addContactDrawable, avatarImage.getImageX() + namesWidth + AndroidUtilities.dp(78), AndroidUtilities.dp(13));
+            setDrawableBounds(addContactDrawable, avatarImage.getImageX() + namesWidth + dp(78), dp(13));
             addContactDrawable.draw(canvas);
         }
     }

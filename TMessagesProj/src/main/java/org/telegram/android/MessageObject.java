@@ -36,6 +36,7 @@ public class MessageObject {
     public static final int MESSAGE_SEND_STATE_SENDING = 1;
     public static final int MESSAGE_SEND_STATE_SENT = 0;
     public static final int MESSAGE_SEND_STATE_SEND_ERROR = 2;
+    public  AbstractMap<Integer, TLRPC.User> originalUser ;
 
     public TLRPC.Message messageOwner;
     public CharSequence messageText;
@@ -60,19 +61,17 @@ public class MessageObject {
         public int charactersOffset = 0;
     }
 
+    protected TextPaint getTextPaint() {
+        return textPaint;
+    }
+
     private static final int LINES_PER_BLOCK = 10;
 
     public ArrayList<TextLayoutBlock> textLayoutBlocks;
 
     public MessageObject(TLRPC.Message message, AbstractMap<Integer, TLRPC.User> users, boolean generateLayout) {
-        if (textPaint == null) {
-            textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-            textPaint.setColor(0xff000000);
-            textPaint.linkColor = 0xff316f9f;
-        }
-
-        textPaint.setTextSize(AndroidUtilities.dp(MessagesController.getInstance().fontSize));
-
+        originalUser = users;
+        initTextPaint();
         messageOwner = message;
 
         if (message instanceof TLRPC.TL_messageService) {
@@ -288,7 +287,7 @@ public class MessageObject {
         } else {
             messageText = message.message;
         }
-        messageText = Emoji.replaceEmoji(messageText, textPaint.getFontMetricsInt(), AndroidUtilities.dp(20));
+        messageText = Emoji.replaceEmoji(messageText, getTextPaint().getFontMetricsInt(), AndroidUtilities.dp(20));
 
         if (message instanceof TLRPC.TL_message || message instanceof TLRPC.TL_messageForwarded) {
             if (message.media == null || message.media instanceof TLRPC.TL_messageMediaEmpty) {
@@ -356,6 +355,16 @@ public class MessageObject {
             generateLayout();
         }
         generateThumbs(false);
+    }
+
+    protected void initTextPaint() {
+        if (textPaint == null) {
+            textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+            textPaint.setColor(0xff000000);
+            textPaint.linkColor = 0xff316f9f;
+        }
+
+        textPaint.setTextSize(AndroidUtilities.dp(MessagesController.getInstance().fontSize));
     }
 
     public void generateThumbs(boolean update) {
@@ -521,11 +530,12 @@ public class MessageObject {
 
         textLayoutBlocks = new ArrayList<>();
 
-        if (messageText instanceof Spannable && containsUrls(messageText)) {
-            if (messageText.length() < 100) {
-                Linkify.addLinks((Spannable) messageText, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS);
+        if (messageText instanceof Spannable && containsUrls(messageOwner.message)) {
+            if (messageOwner.message.length() < 100) {
+                clickify(messageText, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS);
+
             } else {
-                Linkify.addLinks((Spannable) messageText, Linkify.WEB_URLS);
+                clickify(messageText, Linkify.WEB_URLS);
             }
         }
 
@@ -547,7 +557,7 @@ public class MessageObject {
         StaticLayout textLayout = null;
 
         try {
-            textLayout = new StaticLayout(messageText, textPaint, maxWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            textLayout = new StaticLayout(messageText, getTextPaint(), maxWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         } catch (Exception e) {
             FileLog.e("tmessages", e);
             return;
@@ -578,7 +588,7 @@ public class MessageObject {
                 block.charactersOffset = startCharacter;
                 try {
                     CharSequence str = messageText.subSequence(startCharacter, endCharacter);
-                    block.textLayout = new StaticLayout(str, textPaint, maxWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                    block.textLayout = new StaticLayout(str, getTextPaint(), maxWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
                     block.textYOffset = textLayout.getLineTop(linesOffset);
                     if (a != 0) {
                         blockHeight = Math.min(blockHeight, (int)(block.textYOffset - prevOffset));
@@ -681,6 +691,22 @@ public class MessageObject {
         if (blockHeight == 0) {
             blockHeight = 1;
         }
+    }
+
+    protected void clickify(CharSequence messageText, int i) {
+        Linkify.addLinks((Spannable) messageText, i);
+    }
+
+    protected int dp(float value) {
+        return AndroidUtilities.dp(value);
+    }
+
+    protected int getDisplayY() {
+        return AndroidUtilities.displaySize.y;
+    }
+
+    protected int getDisplayX() {
+        return AndroidUtilities.displaySize.x;
     }
 
     public boolean isOut() {
