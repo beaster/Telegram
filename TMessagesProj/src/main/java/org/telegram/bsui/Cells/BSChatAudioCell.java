@@ -3,6 +3,7 @@ package org.telegram.bsui.Cells;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
+import android.util.Log;
 
 import org.telegram.android.AndroidUtilities;
 import org.telegram.messenger.R;
@@ -31,9 +32,38 @@ public class BSChatAudioCell extends ChatAudioCell {
     private static Drawable broadcastMediaDrawable;
     private static Drawable errorDrawable;
     protected static Drawable mediaBackgroundDrawable;
+    private static Drawable[][] statesDrawable = new Drawable[8][2];
 
     public BSChatAudioCell(Context context) {
         super(context);
+        initAudio();
+    }
+
+    @Override
+    protected void initAudio() {
+        Log.d("AudioCell", "init");
+        if (timePaint == null || statesDrawable[0][0] == null) {
+            statesDrawable[0][0] = getResources().getDrawable(R.drawable.play1);
+            statesDrawable[0][1] = getResources().getDrawable(R.drawable.play1_pressed);
+            statesDrawable[1][0] = getResources().getDrawable(R.drawable.pause1);
+            statesDrawable[1][1] = getResources().getDrawable(R.drawable.pause1_pressed);
+            statesDrawable[2][0] = getResources().getDrawable(R.drawable.audioload1);
+            statesDrawable[2][1] = getResources().getDrawable(R.drawable.audioload1_pressed);
+            statesDrawable[3][0] = getResources().getDrawable(R.drawable.audiocancel1);
+            statesDrawable[3][1] = getResources().getDrawable(R.drawable.audiocancel1_pressed);
+
+            statesDrawable[4][0] = getResources().getDrawable(R.drawable.play2);
+            statesDrawable[4][1] = getResources().getDrawable(R.drawable.play2_pressed);
+            statesDrawable[5][0] = getResources().getDrawable(R.drawable.pause2);
+            statesDrawable[5][1] = getResources().getDrawable(R.drawable.pause2_pressed);
+            statesDrawable[6][0] = getResources().getDrawable(R.drawable.audioload2);
+            statesDrawable[6][1] = getResources().getDrawable(R.drawable.audioload2_pressed);
+            statesDrawable[7][0] = getResources().getDrawable(R.drawable.audiocancel2);
+            statesDrawable[7][1] = getResources().getDrawable(R.drawable.audiocancel2_pressed);
+
+            timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            timePaint.setTextSize(AndroidUtilities.bsDp(12));
+        }
     }
 
     @Override
@@ -67,6 +97,11 @@ public class BSChatAudioCell extends ChatAudioCell {
             timePaintIn.setTextSize(dp(12));
             timePaintOut.setTextSize(dp(12));
         }
+    }
+
+    @Override
+    protected Drawable[][] getStatesDrawable() {
+        return statesDrawable;
     }
 
     @Override

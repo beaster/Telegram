@@ -65,6 +65,9 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
         return timePaint;
     }
 
+    protected Drawable[][] getStatesDrawable() {
+        return statesDrawable;
+    }
 
     public ChatAudioCell(Context context) {
         super(context);
@@ -77,6 +80,10 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
         progressView = new ProgressView();
         avatarDrawable = new AvatarDrawable();
 
+        initAudio();
+    }
+
+    protected void initAudio() {
         if (timePaint == null) {
             statesDrawable[0][0] = getResources().getDrawable(R.drawable.play1);
             statesDrawable[0][1] = getResources().getDrawable(R.drawable.play1_pressed);
@@ -427,7 +434,7 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
         } else {
             getTimePaint().setColor(0xff70b15c);
         }
-        Drawable buttonDrawable = statesDrawable[state][buttonPressed ? 1 : 0];
+        Drawable buttonDrawable = getStatesDrawable()[state][buttonPressed ? 1 : 0];
         int side = dp(36);
         int x = (side - buttonDrawable.getIntrinsicWidth()) / 2;
         int y = (side - buttonDrawable.getIntrinsicHeight()) / 2;
