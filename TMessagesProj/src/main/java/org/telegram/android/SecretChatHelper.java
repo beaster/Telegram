@@ -1072,8 +1072,8 @@ public class SecretChatHelper {
                                 }
                             });
                             MessagesStorage.getInstance().deleteDialog(did, true);
-                            NotificationCenter.getInstance().postNotificationName(NotificationCenter.removeAllMessagesFromDialog, did);
                             NotificationCenter.getInstance().postNotificationName(NotificationCenter.dialogsNeedReload);
+                            NotificationCenter.getInstance().postNotificationName(NotificationCenter.removeAllMessagesFromDialog, did);
                         }
                     });
                     return null;
@@ -1616,7 +1616,7 @@ public class SecretChatHelper {
     }
 
     public void startSecretChat(final Context context, final TLRPC.User user) {
-        if (user == null) {
+        if (user == null || context == null) {
             return;
         }
         startingSecretChat = true;
@@ -1777,7 +1777,11 @@ public class SecretChatHelper {
                 }
             }
         });
-        progressDialog.show();
+        try {
+            progressDialog.show();
+        } catch (Exception e) {
+            //don't promt
+        }
     }
 
     public void startSecretChatBS(final Context context, final TLRPC.User user) {

@@ -9,17 +9,13 @@
 package org.telegram.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.graphics.Canvas;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
@@ -45,7 +41,6 @@ import android.widget.Toast;
 import org.telegram.android.AndroidUtilities;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.android.ContactsController;
-import org.telegram.android.MessageObject;
 import org.telegram.android.MessagesController;
 import org.telegram.android.MessagesStorage;
 import org.telegram.android.SendMessagesHelper;
@@ -68,7 +63,6 @@ import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.Cells.ChatMessageCell;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -97,6 +91,7 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
     private ImageView backgroundTablet;
     private DrawerLayoutContainer drawerLayoutContainer;
     private DrawerLayoutAdapter drawerLayoutAdapter;
+    private PasscodeView passcodeView;
 
     private boolean tabletFullSize;
 
@@ -830,188 +825,8 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
                 rightActionBarLayout.showLastFragment();
             }
         }
-        if(intent != null && intent.getAction() != null) {
-            if (intent.getAction().equals(OtherFlipBSActivity.SETTINGS_FLAG)) {
-                presentFragment(new SettingsActivity());
-                drawerLayoutContainer.closeDrawer(false);
-            } else if (intent.getAction().equals(OtherFlipBSActivity.VIEW_PROFILE)) {
-                Object user_id = OtherFlipBSActivity.Params.get("user_id");
-                Object chat_id = OtherFlipBSActivity.Params.get("chat_id");
-                Object dialog_id = OtherFlipBSActivity.Params.get("dialog_id");
-                TLRPC.ChatParticipants info = (TLRPC.ChatParticipants) OtherFlipBSActivity.Params.get("info");
-                if (user_id != null) {
-                    Bundle args = new Bundle();
-                    args.putInt("user_id", (int) user_id);
-                    if (dialog_id != null) {
-                        args.putLong("dialog_id", (long) dialog_id);
-                    }
-                    presentFragment(new ProfileActivity(args));
-                    OtherFlipBSActivity.Params.clear();
-                } else if (chat_id != null) {
-                    Bundle args = new Bundle();
-                    args.putInt("chat_id", (int) chat_id);
-                    ProfileActivity fragment = new ProfileActivity(args);
-                    fragment.setChatInfo(info);
-                    presentFragment(fragment);
-                    OtherFlipBSActivity.Params.clear();
-                }
-            } else if (intent.getAction().equals(OtherFlipBSActivity.VIEW_VIDEO)) {
-                Object file = OtherFlipBSActivity.Params.get("file");
-                if (file != null) {
-                    Object message = OtherFlipBSActivity.Params.get("message");
-                    if (file != null && message != null) {
-                        MessageObject currMessage = (MessageObject) message;
-                        final long dialog_id = currMessage.getDialogId();
-                        final int message_id = currMessage.messageOwner.id;
-                        Bundle args = new Bundle();
-                        int lower_part = (int) dialog_id;
-                        int high_id = (int) (dialog_id >> 32);
-                        if (lower_part != 0) {
-                            if (high_id == 1) {
-                                args.putInt("chat_id", lower_part);
-                            } else {
-                                if (lower_part > 0) {
-                                    args.putInt("user_id", lower_part);
-                                } else if (lower_part < 0) {
-                                    args.putInt("chat_id", -lower_part);
-                                }
-                            }
-                        } else {
-                            args.putInt("enc_id", high_id);
-                        }
-                        if (message_id != 0) {
-                            args.putInt("message_id", message_id);
-                        }
-                        ChatActivity fragment = new ChatActivity(args);
-                        presentFragment(fragment);
-                        fragment.presentVideoFromBS((File) file);
-                    }
-                }
-            } else if (intent.getAction().equals(OtherFlipBSActivity.ATTACH)) {
-                Bundle args = new Bundle();
-                if (OtherFlipBSActivity.Params.get("chat_id") != null) {
-                    args.putInt("chat_id", (int) OtherFlipBSActivity.Params.get("chat_id"));
-                } else if (OtherFlipBSActivity.Params.get("user_id") != null) {
-                    args.putInt("user_id", (int) OtherFlipBSActivity.Params.get("user_id"));
-                } else if (OtherFlipBSActivity.Params.get("enc_id") != null) {
-                    args.putInt("enc_id", (int) OtherFlipBSActivity.Params.get("enc_id"));
-                }
-                ChatActivity fragment = new ChatActivity(args);
-                presentFragment(fragment);
-                fragment.toggleSubMenu();
-            } else if (intent.getAction().equals(OtherFlipBSActivity.SHARE)) {
-                Object file = OtherFlipBSActivity.Params.get("file");
-                Object message = OtherFlipBSActivity.Params.get("message");
-                if (file != null && message != null) {
-                    MessageObject currMessage = (MessageObject) message;
-                    final long dialog_id = currMessage.getDialogId();
-                    final int message_id = currMessage.messageOwner.id;
-                    Bundle args = new Bundle();
-                    int lower_part = (int) dialog_id;
-                    int high_id = (int) (dialog_id >> 32);
-                    if (lower_part != 0) {
-                        if (high_id == 1) {
-                            args.putInt("chat_id", lower_part);
-                        } else {
-                            if (lower_part > 0) {
-                                args.putInt("user_id", lower_part);
-                            } else if (lower_part < 0) {
-                                args.putInt("chat_id", -lower_part);
-                            }
-                        }
-                    } else {
-                        args.putInt("enc_id", high_id);
-                    }
-                    if (message_id != 0) {
-                        args.putInt("message_id", message_id);
-                    }
-                    ChatActivity fragment = new ChatActivity(args);
-                    presentFragment(fragment);
-                    fragment.shareFromBS((File) file);
-                }
-            } else if (intent.getAction().equals(OtherFlipBSActivity.VIEW_FILE)) {
-                Object message = OtherFlipBSActivity.Params.get("message");
-                if (message != null) {
-                    MessageObject messageObject = (MessageObject) message;
-                    final long dialog_id = messageObject.getDialogId();
-                    final int message_id = messageObject.messageOwner.id;
-                    Bundle args = new Bundle();
-                    int lower_part = (int) dialog_id;
-                    int high_id = (int) (dialog_id >> 32);
-                    if (lower_part != 0) {
-                        if (high_id == 1) {
-                            args.putInt("chat_id", lower_part);
-                        } else {
-                            if (lower_part > 0) {
-                                args.putInt("user_id", lower_part);
-                            } else if (lower_part < 0) {
-                                args.putInt("chat_id", -lower_part);
-                            }
-                        }
-                    } else {
-                        args.putInt("enc_id", high_id);
-                    }
-                    if (message_id != 0) {
-                        args.putInt("message_id", message_id);
-                    }
-                    ChatActivity fragment = new ChatActivity(args);
-                    presentFragment(fragment);
-                    fragment.viewFile(messageObject);
-                }
-            } else if (intent.getAction().equals(OtherFlipBSActivity.GEO)) {
-                Object message = OtherFlipBSActivity.Params.get("message");
-                if(message != null){
-                    MessageObject messageObject = (MessageObject) message;
-                    showLocationActivity(messageObject);
-                }
-            } else if (intent.getAction().equals(OtherFlipBSActivity.USER_PROFILE)){
-                Object Id = OtherFlipBSActivity.Params.get("UId");
-                if(Id != null) {
-                    int uid = (int) Id;
-                    if (uid != UserConfig.getClientUserId()) {
-                        Bundle args = new Bundle();
-                        args.putInt("user_id", uid);
-                        presentFragment(new ProfileActivity(args));
-                    }
-                }
-            }
-        }
 
         intent.setAction(null);
-    }
-
-    private boolean isGoogleMapsInstalled() {
-        try {
-            ApplicationInfo info = ApplicationLoader.applicationContext.getPackageManager().getApplicationInfo("com.google.android.apps.maps", 0);
-            return true;
-        } catch(PackageManager.NameNotFoundException e) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-            builder.setMessage("Install Google Maps?");
-            builder.setCancelable(true);
-            builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.maps"));
-                        getApplicationContext().startActivity(intent);
-                    } catch (Exception e) {
-                        FileLog.e("tmessages", e);
-                    }
-                }
-            });
-            builder.setNegativeButton(R.string.Cancel, null);
-            builder.show();
-            return false;
-        }
-    }
-
-    private void showLocationActivity(MessageObject message) {
-        if (!isGoogleMapsInstalled()) {
-            return;
-        }
-        LocationActivity fragment = new LocationActivity();
-        fragment.setMessageObject(message);
-        presentFragment(fragment);
     }
 
     @Override
