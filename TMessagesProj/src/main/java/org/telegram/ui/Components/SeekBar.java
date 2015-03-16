@@ -73,7 +73,19 @@ public class SeekBar {
         return outerPaint2;
     }
 
+    protected int getThumbWidth() {
+        return thumbWidth;
+    }
+
+    protected int getThumbHeight() {
+        return thumbHeight;
+    }
+
     public SeekBar(Context context) {
+        initThumbs(context);
+    }
+
+    protected void initThumbs(Context context) {
         if (thumbDrawable1 == null) {
             thumbDrawable1 = context.getResources().getDrawable(R.drawable.player1);
             thumbDrawablePressed1 = context.getResources().getDrawable(R.drawable.player1_pressed);
@@ -83,15 +95,15 @@ public class SeekBar {
             outerPaint1.setColor(0xff6ac453);
             innerPaint2.setColor(0xffd9e2eb);
             outerPaint2.setColor(0xff86c5f8);
-            thumbWidth = thumbDrawable1.getIntrinsicWidth();
-            thumbHeight = thumbDrawable1.getIntrinsicHeight();
+            thumbWidth = getThumbDrawable1().getIntrinsicWidth();
+            thumbHeight = getThumbDrawable1().getIntrinsicHeight();
         }
     }
 
     public boolean onTouch(int action, float x, float y) {
         if (action == MotionEvent.ACTION_DOWN) {
-            int additionWidth = (height - thumbWidth) / 2;
-            if (thumbX - additionWidth <= x && x <= thumbX + thumbWidth + additionWidth && y >= 0 && y <= height) {
+            int additionWidth = (height - getThumbWidth()) / 2;
+            if (thumbX - additionWidth <= x && x <= thumbX + getThumbWidth() + additionWidth && y >= 0 && y <= height) {
                 pressed = true;
                 thumbDX = (int)(x - thumbX);
                 return true;
@@ -99,7 +111,7 @@ public class SeekBar {
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             if (pressed) {
                 if (action == MotionEvent.ACTION_UP && delegate != null) {
-                    delegate.onSeekBarDrag((float)thumbX / (float)(width - thumbWidth));
+                    delegate.onSeekBarDrag((float)thumbX / (float)(width - getThumbWidth()));
                 }
                 pressed = false;
                 return true;
@@ -109,8 +121,8 @@ public class SeekBar {
                 thumbX = (int)(x - thumbDX);
                 if (thumbX < 0) {
                     thumbX = 0;
-                } else if (thumbX > width - thumbWidth) {
-                    thumbX = width - thumbWidth;
+                } else if (thumbX > width - getThumbWidth()) {
+                    thumbX = width - getThumbWidth();
                 }
                 return true;
             }
@@ -119,11 +131,11 @@ public class SeekBar {
     }
 
     public void setProgress(float progress) {
-        thumbX = (int)Math.ceil((width - thumbWidth) * progress);
+        thumbX = (int)Math.ceil((width - getThumbWidth()) * progress);
         if (thumbX < 0) {
             thumbX = 0;
-        } else if (thumbX > width - thumbWidth) {
-            thumbX = width - thumbWidth;
+        } else if (thumbX > width - getThumbWidth()) {
+            thumbX = width - getThumbWidth();
         }
     }
 
@@ -137,25 +149,25 @@ public class SeekBar {
         Paint outer = null;
         if (type == 0) {
             if (!pressed) {
-                thumb = thumbDrawable1;
+                thumb = getThumbDrawable1();
             } else {
-                thumb = thumbDrawablePressed1;
+                thumb = getThumbDrawablePressed1();
             }
-            inner = innerPaint1;
-            outer = outerPaint1;
+            inner = getInnerPaint1();
+            outer = getOuterPaint1();
         } else if (type == 1) {
             if (!pressed) {
-                thumb = thumbDrawable2;
+                thumb = getThumbDrawable2();
             } else {
-                thumb = thumbDrawablePressed2;
+                thumb = getThumbDrawablePressed2();
             }
-            inner = innerPaint2;
-            outer = outerPaint2;
+            inner = getInnerPaint2();
+            outer = getOuterPaint2();
         }
-        int y = (height - thumbHeight) / 2;
-        canvas.drawRect(thumbWidth / 2, height / 2 - AndroidUtilities.dp(1), width - thumbWidth / 2, height / 2 + AndroidUtilities.dp(1), inner);
-        canvas.drawRect(thumbWidth / 2, height / 2 - AndroidUtilities.dp(1), thumbWidth / 2 + thumbX, height / 2 + AndroidUtilities.dp(1), outer);
-        thumb.setBounds(thumbX, y, thumbX + thumbWidth, y + thumbHeight);
+        int y = (height - getThumbHeight()) / 2;
+        canvas.drawRect(getThumbWidth() / 2, height / 2 - AndroidUtilities.dp(1), width - getThumbWidth() / 2, height / 2 + AndroidUtilities.dp(1), inner);
+        canvas.drawRect(getThumbWidth() / 2, height / 2 - AndroidUtilities.dp(1), getThumbWidth() / 2 + thumbX, height / 2 + AndroidUtilities.dp(1), outer);
+        thumb.setBounds(thumbX, y, thumbX + getThumbWidth(), y + getThumbHeight());
         thumb.draw(canvas);
     }
 }

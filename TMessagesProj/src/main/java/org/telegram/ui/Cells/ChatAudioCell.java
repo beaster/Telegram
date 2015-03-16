@@ -40,7 +40,7 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
     private ImageReceiver avatarImage;
     private AvatarDrawable avatarDrawable;
     private boolean needAvatarImage = false;
-    private SeekBar seekBar;
+    protected SeekBar seekBar;
     private ProgressView progressView;
     private int seekBarX;
     private int seekBarY;
@@ -75,15 +75,15 @@ public class ChatAudioCell extends ChatBaseCell implements SeekBar.SeekBarDelega
 
         avatarImage = new ImageReceiver(this);
         avatarImage.setRoundRadius(AndroidUtilities.dp(25));
-        seekBar = new SeekBar(context);
-        seekBar.delegate = this;
         progressView = new ProgressView();
         avatarDrawable = new AvatarDrawable();
-
-        initAudio();
+        initAudio(context);
     }
 
-    protected void initAudio() {
+    protected void initAudio(Context context) {
+        seekBar = new SeekBar(context);
+        seekBar.delegate = this;
+
         if (timePaint == null) {
             statesDrawable[0][0] = getResources().getDrawable(R.drawable.play1);
             statesDrawable[0][1] = getResources().getDrawable(R.drawable.play1_pressed);

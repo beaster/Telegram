@@ -6,6 +6,7 @@ import android.text.TextPaint;
 import android.util.Log;
 
 import org.telegram.android.AndroidUtilities;
+import org.telegram.bsui.Components.BSSeekBar;
 import org.telegram.messenger.R;
 import org.telegram.ui.Cells.ChatAudioCell;
 
@@ -36,12 +37,14 @@ public class BSChatAudioCell extends ChatAudioCell {
 
     public BSChatAudioCell(Context context) {
         super(context);
-        initAudio();
+        initAudio(context);
     }
 
     @Override
-    protected void initAudio() {
-        Log.d("AudioCell", "init");
+    protected void initAudio(Context context) {
+        seekBar = new BSSeekBar(context);
+        seekBar.delegate = this;
+
         if (timePaint == null || statesDrawable[0][0] == null) {
             statesDrawable[0][0] = getResources().getDrawable(R.drawable.play1);
             statesDrawable[0][1] = getResources().getDrawable(R.drawable.play1_pressed);
