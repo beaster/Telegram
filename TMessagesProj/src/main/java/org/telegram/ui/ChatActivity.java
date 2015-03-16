@@ -27,7 +27,6 @@ import android.provider.MediaStore;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -3736,93 +3735,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         }
     }
 
-
-    public void presentVideoFromBS(File file) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(file), "video/mp4");
-        getParentActivity().startActivity(intent);
-    }
-
-    public void shareFromBS(File f) {
-        try {
-            if (f.exists()) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                if (f.toString().endsWith("mp4")) {
-                    intent.setType("video/mp4");
-                } else {
-                    intent.setType("image/jpeg");
-                }
-                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
-                getParentActivity().startActivity(intent);
-            } else {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-                builder.setTitle(LocaleController.getString("AppName", R.string.AppName));
-                builder.setPositiveButton(R.string.OK, null);
-                builder.setMessage(LocaleController.getString("PleaseDownload", R.string.PleaseDownload));
-                builder.show().setCanceledOnTouchOutside(true);
-            }
-        }catch (Exception e){
-            Log.d("tmessages", e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    public void toggleSubMenu() {
-        if(menuItem != null){
-            menuItem.showSubMenu();
-        }
-    }
-
-    public void viewFile(MessageObject message){
-        File f = null;
-        String fileName = message.getFileName();
-        if (message.messageOwner.attachPath != null && message.messageOwner.attachPath.length() != 0) {
-            f = new File(message.messageOwner.attachPath);
-        }
-        if (f == null || f != null && !f.exists()) {
-            f = FileLoader.getPathToMessage(message.messageOwner);
-        }
-        if (f != null && f.exists()) {
-            String realMimeType = null;
-            try {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                if (message.type == 8 || message.type == 9) {
-                    MimeTypeMap myMime = MimeTypeMap.getSingleton();
-                    int idx = fileName.lastIndexOf(".");
-                    if (idx != -1) {
-                        String ext = fileName.substring(idx + 1);
-                        realMimeType = myMime.getMimeTypeFromExtension(ext.toLowerCase());
-                        if (realMimeType == null) {
-                            realMimeType = message.messageOwner.media.document.mime_type;
-                            if (realMimeType == null || realMimeType.length() == 0) {
-                                realMimeType = null;
-                            }
-                        }
-                        if (realMimeType != null) {
-                            intent.setDataAndType(Uri.fromFile(f), realMimeType);
-                        } else {
-                            intent.setDataAndType(Uri.fromFile(f), "text/plain");
-                        }
-                    } else {
-                        intent.setDataAndType(Uri.fromFile(f), "text/plain");
-                    }
-                }
-                if (realMimeType != null) {
-                    try {
-                        getParentActivity().startActivity(intent);
-                    } catch (Exception e) {
-                        intent.setDataAndType(Uri.fromFile(f), "text/plain");
-                        getParentActivity().startActivity(intent);
-                    }
-                } else {
-                    getParentActivity().startActivity(intent);
-                }
-            } catch (Exception e) {
-                alertUserOpenError(message);
-            }
-        }
-    }
-
     private void alertUserOpenError(MessageObject message) {
         if (getParentActivity() == null) {
             return;
@@ -3911,6 +3823,92 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
     @Override
     public int getSelectedCount() { return 0; }
+
+    public void presentVideoFromBS(File file) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(file), "video/mp4");
+        getParentActivity().startActivity(intent);
+    }
+
+    public void shareFromBS(File f) {
+        try {
+            if (f.exists()) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                if (f.toString().endsWith("mp4")) {
+                    intent.setType("video/mp4");
+                } else {
+                    intent.setType("image/jpeg");
+                }
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
+                getParentActivity().startActivity(intent);
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+                builder.setTitle(LocaleController.getString("AppName", R.string.AppName));
+                builder.setPositiveButton(R.string.OK, null);
+                builder.setMessage(LocaleController.getString("PleaseDownload", R.string.PleaseDownload));
+                builder.show().setCanceledOnTouchOutside(true);
+            }
+        }catch (Exception e){
+            FileLog.d("tmessages", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void toggleSubMenu() {
+        if(menuItem != null){
+            menuItem.showSubMenu();
+        }
+    }
+
+    public void viewFile(MessageObject message) {
+        File f = null;
+        String fileName = message.getFileName();
+        if (message.messageOwner.attachPath != null && message.messageOwner.attachPath.length() != 0) {
+            f = new File(message.messageOwner.attachPath);
+        }
+        if (f == null || f != null && !f.exists()) {
+            f = FileLoader.getPathToMessage(message.messageOwner);
+        }
+        if (f != null && f.exists()) {
+            String realMimeType = null;
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                if (message.type == 8 || message.type == 9) {
+                    MimeTypeMap myMime = MimeTypeMap.getSingleton();
+                    int idx = fileName.lastIndexOf(".");
+                    if (idx != -1) {
+                        String ext = fileName.substring(idx + 1);
+                        realMimeType = myMime.getMimeTypeFromExtension(ext.toLowerCase());
+                        if (realMimeType == null) {
+                            realMimeType = message.messageOwner.media.document.mime_type;
+                            if (realMimeType == null || realMimeType.length() == 0) {
+                                realMimeType = null;
+                            }
+                        }
+                        if (realMimeType != null) {
+                            intent.setDataAndType(Uri.fromFile(f), realMimeType);
+                        } else {
+                            intent.setDataAndType(Uri.fromFile(f), "text/plain");
+                        }
+                    } else {
+                        intent.setDataAndType(Uri.fromFile(f), "text/plain");
+                    }
+                }
+                if (realMimeType != null) {
+                    try {
+                        getParentActivity().startActivity(intent);
+                    } catch (Exception e) {
+                        intent.setDataAndType(Uri.fromFile(f), "text/plain");
+                        getParentActivity().startActivity(intent);
+                    }
+                } else {
+                    getParentActivity().startActivity(intent);
+                }
+            } catch (Exception e) {
+                alertUserOpenError(message);
+            }
+        }
+    }
 
     private class ChatAdapter extends BaseFragmentAdapter {
 

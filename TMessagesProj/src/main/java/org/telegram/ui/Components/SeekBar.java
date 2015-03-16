@@ -41,6 +41,38 @@ public class SeekBar {
     public int height;
     public SeekBarDelegate delegate;
 
+    protected Drawable getThumbDrawable1() {
+        return thumbDrawable1;
+    }
+
+    protected Drawable getThumbDrawablePressed1() {
+        return thumbDrawablePressed1;
+    }
+
+    protected Drawable getThumbDrawable2() {
+        return thumbDrawable2;
+    }
+
+    protected Drawable getThumbDrawablePressed2() {
+        return thumbDrawablePressed2;
+    }
+
+    protected Paint getInnerPaint1() {
+        return innerPaint1;
+    }
+
+    protected Paint getOuterPaint1() {
+        return outerPaint1;
+    }
+
+    protected Paint getInnerPaint2() {
+        return innerPaint2;
+    }
+
+    protected Paint getOuterPaint2() {
+        return outerPaint2;
+    }
+
     public SeekBar(Context context) {
         if (thumbDrawable1 == null) {
             thumbDrawable1 = context.getResources().getDrawable(R.drawable.player1);

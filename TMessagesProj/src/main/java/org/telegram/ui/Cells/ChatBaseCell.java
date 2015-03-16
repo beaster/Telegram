@@ -17,7 +17,6 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 
@@ -675,8 +674,6 @@ public class ChatBaseCell extends BaseCell {
                             if (drawCheck1) {
                                 final int x = layoutWidth - dp(22.5f) - getCheckDrawable().getIntrinsicWidth();
                                 final int y = layoutHeight - dp(8.5f) - getCheckDrawable().getIntrinsicHeight();
-                                Log.d("TAG", "layoutWidth"+layoutWidth);
-                                Log.d("TAG", "getCheckDrawable().getIntrinsicWidth()"+getCheckDrawable().getIntrinsicWidth());
                                 setDrawableBounds(getCheckDrawable(), x, y);
                             } else {
                                 setDrawableBounds(getCheckDrawable(), layoutWidth - dp(18.5f) - getCheckDrawable().getIntrinsicWidth(), layoutHeight - dp(8.5f) - getCheckDrawable().getIntrinsicHeight());

@@ -20,10 +20,29 @@ public class BSChatContactCell extends ChatContactCell {
     private static TextPaint phonePaint;
     private static Drawable addContactDrawableIn;
     private static Drawable addContactDrawableOut;
+
     private static Drawable backgroundDrawableIn;
     private static Drawable backgroundDrawableOut;
     private static Drawable backgroundDrawableInSelected;
     private static Drawable backgroundDrawableOutSelected;
+    private static TextPaint timePaint;
+    private static TextPaint timePaintIn;
+    private static TextPaint timePaintOut;
+
+    private static Drawable checkDrawable;
+    private static Drawable halfCheckDrawable;
+    private static Drawable clockDrawable;
+    private static Drawable broadcastDrawable;
+    private static Drawable checkMediaDrawable;
+    private static Drawable halfCheckMediaDrawable;
+    private static Drawable clockMediaDrawable;
+    private static Drawable broadcastMediaDrawable;
+    private static Drawable errorDrawable;
+
+    public BSChatContactCell(Context context) {
+        super(context);
+        initNamePaint();
+    }
 
     @Override
     protected TextPaint getNamePaint() {
@@ -45,14 +64,82 @@ public class BSChatContactCell extends ChatContactCell {
         return addContactDrawableOut;
     }
 
-    public BSChatContactCell(Context context) {
-        super(context);
+    @Override
+    protected TextPaint getTimePaintIn() {
+        return timePaintIn;
     }
 
     @Override
-    protected void initResources() {
-
+    protected TextPaint getTimePaintOut() {
+        return timePaintOut;
     }
+
+    @Override
+    protected Drawable getCheckDrawable() {
+        return checkDrawable;
+    }
+
+    @Override
+    protected Drawable getHalfCheckDrawable() {
+        return halfCheckDrawable;
+    }
+
+    @Override
+    protected Drawable getClockDrawable() {
+        return clockDrawable;
+    }
+
+    @Override
+    protected Drawable getBroadcastDrawable() {
+        return broadcastDrawable;
+    }
+
+    @Override
+    protected Drawable getErrorDrawable() {
+        return errorDrawable;
+    }
+
+    @Override
+    protected Drawable getBroadcastMediaDrawable() {
+        return broadcastMediaDrawable;
+    }
+
+    @Override
+    protected Drawable getClockMediaDrawable() {
+        return clockMediaDrawable;
+    }
+
+    @Override
+    protected Drawable getCheckMediaDrawable() {
+        return checkMediaDrawable;
+    }
+
+    @Override
+    protected Drawable getHalfCheckMediaDrawable() {
+        return halfCheckMediaDrawable;
+    }
+
+    @Override
+    protected Drawable getBackgroundDrawableOutSelected() {
+        return backgroundDrawableOutSelected;
+    }
+
+    @Override
+    protected Drawable getBackgroundDrawableOut() {
+        return backgroundDrawableOut;
+    }
+
+    @Override
+    protected Drawable getBackgroundDrawableInSelected() {
+        return backgroundDrawableInSelected;
+    }
+
+    @Override
+    protected Drawable getBackgroundDrawableIn() {
+        return backgroundDrawableIn;
+    }
+
+
 
     @Override
     protected void initNamePaint() {
@@ -62,12 +149,7 @@ public class BSChatContactCell extends ChatContactCell {
 
             phonePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             phonePaint.setTextSize(dp(15));
-            phonePaint.setColor(0xff000000);
-
-            backgroundDrawableIn = getResources().getDrawable(R.drawable.msg_in_bs);
-            backgroundDrawableOut = getResources().getDrawable(R.drawable.msg_out_bs);
-            backgroundDrawableInSelected = getResources().getDrawable(R.drawable.msg_in_selected_bs);
-            backgroundDrawableOutSelected = getResources().getDrawable(R.drawable.msg_out_selected_bs);
+            phonePaint.setColor(0xff212121);
 
             addContactDrawableIn = getResources().getDrawable(R.drawable.addcontact_black);
             addContactDrawableOut = getResources().getDrawable(R.drawable.addcontact_black);
@@ -75,21 +157,41 @@ public class BSChatContactCell extends ChatContactCell {
     }
 
     @Override
+    protected void initResources() {
+        if(timePaint == null) {
+            backgroundDrawableIn = getResources().getDrawable(R.drawable.msg_in_bs);
+            backgroundDrawableOut = getResources().getDrawable(R.drawable.msg_out_bs);
+            backgroundDrawableOutSelected = getResources().getDrawable(R.drawable.msg_out_selected_bs);
+            backgroundDrawableInSelected = getResources().getDrawable(R.drawable.msg_in_selected_bs);
+
+            checkDrawable = getResources().getDrawable(R.drawable.msg_check);
+            halfCheckDrawable = getResources().getDrawable(R.drawable.msg_halfcheck);
+            clockDrawable = getResources().getDrawable(R.drawable.msg_clock);
+            checkMediaDrawable = getResources().getDrawable(R.drawable.msg_check_w);
+            halfCheckMediaDrawable = getResources().getDrawable(R.drawable.msg_halfcheck_w);
+            clockMediaDrawable = getResources().getDrawable(R.drawable.msg_clock_photo);
+            errorDrawable = getResources().getDrawable(R.drawable.msg_warning);
+            mediaBackgroundDrawable = getResources().getDrawable(R.drawable.phototime);
+            broadcastDrawable = getResources().getDrawable(R.drawable.broadcast3);
+            broadcastMediaDrawable = getResources().getDrawable(R.drawable.broadcast4);
+
+            timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+
+            timePaintIn = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            timePaintIn.setColor(0xffa1aab3);
+
+            timePaintOut = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            timePaintOut.setColor(0xff70b15c);
+
+            timePaint.setTextSize(dp(12));
+            timePaintIn.setTextSize(dp(12));
+            timePaintOut.setTextSize(dp(12));
+        }
+    }
+
+    @Override
     protected int dp(float value) {
         return AndroidUtilities.bsDp(value);
-    }
-    @Override
-    protected int getDisplayY() {
-        return getDisplaySize().y;
-    }
-
-    @Override
-    protected int getDisplayX() {
-        return getDisplaySize().x;
-    }
-
-    private Point getDisplaySize() {
-        return AndroidUtilities.bsDisplaySize;
     }
 
     @Override
@@ -98,22 +200,12 @@ public class BSChatContactCell extends ChatContactCell {
     }
 
     @Override
-    protected Drawable getBackgroundDrawableIn() {
-        return backgroundDrawableIn;
+    protected int getDisplayY() {
+        return AndroidUtilities.bsDisplaySize.y;
     }
 
     @Override
-    protected Drawable getBackgroundDrawableOut() {
-        return backgroundDrawableOut;
-    }
-
-    @Override
-    protected Drawable getBackgroundDrawableOutSelected() {
-        return backgroundDrawableOutSelected;
-    }
-
-    @Override
-    protected Drawable getBackgroundDrawableInSelected() {
-        return backgroundDrawableInSelected;
+    protected int getDisplayX() {
+        return AndroidUtilities.bsDisplaySize.x;
     }
 }

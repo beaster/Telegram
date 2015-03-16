@@ -718,7 +718,7 @@ public class BSPhotoViewer implements NotificationCenter.NotificationCenterDeleg
         radialProgressViews[2].setBackgroundState(0, false);
 
         shareButton = new ImageView(containerView.getContext());
-        shareButton.setImageResource(R.drawable.ic_ab_share_white);
+        shareButton.setImageResource(R.drawable.share);
         shareButton.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         shareButton.setBackgroundResource(R.drawable.bar_selector_white);
         bottomLayout.addView(shareButton);
@@ -1152,7 +1152,7 @@ public class BSPhotoViewer implements NotificationCenter.NotificationCenterDeleg
         int count = placeProvider.getSelectedCount();
         if (count == 0) {
             doneButtonTextView.setTextColor(0xffffffff);
-            doneButtonTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.selectphoto_small, 0, 0, 0);
+            doneButtonTextView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
             doneButtonBadgeTextView.setVisibility(View.GONE);
         } else {
             doneButtonTextView.setTextColor(0xffffffff);

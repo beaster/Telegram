@@ -132,7 +132,7 @@ public class BSChatActivityEnterView implements NotificationCenter.NotificationC
             }
         }
         if (sizeNotifierRelativeLayout != null) {
-            sizeNotifierRelativeLayout.delegate = null;
+            sizeNotifierRelativeLayout.setDelegate(null);
         }
         removeEmojiWindow();
     }
@@ -142,7 +142,7 @@ public class BSChatActivityEnterView implements NotificationCenter.NotificationC
         this.containerView = containerView;
         sizeNotifierRelativeLayout = (SizeNotifierRelativeLayout) containerView.findViewById(R.id.chat_layout_bs);
         sizeNotifierRelativeLayout.setBackgroundColor(Color.parseColor("#000000"));
-        sizeNotifierRelativeLayout.delegate = this;
+        sizeNotifierRelativeLayout.setDelegate(this);
         emoji_container =  containerView.findViewById(R.id.emoji_container);
 
         messsageEditText = (EditText) containerView.findViewById(R.id.chat_text_edit);

@@ -99,7 +99,7 @@ public class BSAlertDialog extends FrameLayout {
             listView.setBackgroundColor(0xffffff);
             listView.setPadding(5, 5, 5, 5);
             listView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(mContext, android.R.layout.simple_list_item_1, items);
+            ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(mContext, R.layout.bs_dialog_item, items);
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(listener);
             mContent.addView(listView);
