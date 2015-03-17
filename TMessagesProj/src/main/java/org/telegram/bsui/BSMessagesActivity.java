@@ -3,6 +3,8 @@ package org.telegram.bsui;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -31,6 +33,7 @@ import org.telegram.android.NotificationCenter;
 import org.telegram.bsui.ActionBar.BSActionBar;
 import org.telegram.bsui.ActionBar.BSActionBarMenu;
 import org.telegram.bsui.ActionBar.BSActionBarMenuItem;
+import org.telegram.bsui.ActionBar.BSMenuDrawable;
 import org.telegram.bsui.Adapters.BSDialogsAdapter;
 import org.telegram.bsui.Adapters.BSDialogsSearchAdapter;
 import org.telegram.bsui.Components.BSAlertDialog;
@@ -133,7 +136,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
         layoutParams.addRule((LocaleController.isRTL ? RelativeLayout.ALIGN_PARENT_LEFT : RelativeLayout.ALIGN_PARENT_RIGHT) | RelativeLayout.ALIGN_BOTTOM);
         floatingButton.setLayoutParams(layoutParams);
         BSActionBarMenu menu = actionBar.createMenu();
-        menu.addItem(0, R.drawable.ic_ab_search)
+        menu.addItem(0, R.drawable.zoom)
                 .setIsSearchField(true)
                 .setActionBarMenuItemSearchListener(new BSActionBarMenuItem.ActionBarMenuItemSearchListener() {
                     @Override
@@ -199,7 +202,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
             actionBar.setBackButtonImage(R.drawable.ic_ab_back);
             actionBar.setTitle(LocaleController.getString("SelectChat", R.string.SelectChat));
         } else {
-            actionBar.setBackButtonDrawable(new MenuDrawable());
+            actionBar.setBackButtonDrawable(new BSMenuDrawable());
             actionBar.setTitle(LocaleController.getString("AppName", R.string.AppName));
         }
 //        actionBar.setAllowOverlayTitle(true);

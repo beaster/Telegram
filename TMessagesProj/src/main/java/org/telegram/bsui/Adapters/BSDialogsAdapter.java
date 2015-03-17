@@ -79,15 +79,16 @@ public class BSDialogsAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         int type = getItemViewType(i);
+
         if (type == 1) {
-            if (view == null) {
-                view = new LoadingCell(mContext);
-            }
-        } else if (type == 0) {
+            view = new View(mContext);
+        }
+
+        if (type == 0) {
             if (view == null) {
                 view = new BSDialogCell(mContext);
             }
-            ((BSDialogCell) view).useSeparator = (i != getCount() - 1);
+            ((BSDialogCell) view).useSeparator = (i != 0);
             TLRPC.TL_dialog dialog = null;
             if (serverOnly) {
                 dialog = MessagesController.getInstance().dialogsServerOnly.get(i);
@@ -97,7 +98,6 @@ public class BSDialogsAdapter extends BaseAdapter {
             MessageObject message = MessagesController.getInstance().dialogMessage.get(dialog.top_message);
             ((BSDialogCell) view).setDialog(dialog.id, message, true, dialog.last_message_date, dialog.unread_count);
         }
-
         return view;
     }
 

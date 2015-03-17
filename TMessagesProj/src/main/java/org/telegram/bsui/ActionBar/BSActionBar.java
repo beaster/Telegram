@@ -44,10 +44,6 @@ public class BSActionBar extends FrameLayout {
     private FrameLayout titleFrameLayout;
     private ImageView backButtonImageView;
 
-    public TextView getTitleTextView() {
-        return titleTextView;
-    }
-
     private TextView titleTextView;
     private TextView subTitleTextView;
     private View actionModeTop;
@@ -89,7 +85,7 @@ public class BSActionBar extends FrameLayout {
         layoutParams.height = LayoutParams.FILL_PARENT;
         layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
         titleFrameLayout.setLayoutParams(layoutParams);
-        titleFrameLayout.setPadding(0, 0, AndroidUtilities.bsDp(4), 0);
+        titleFrameLayout.setPadding(0, AndroidUtilities.bsDp(4), 0, 0);
         titleFrameLayout.setEnabled(false);
     }
 
@@ -99,6 +95,9 @@ public class BSActionBar extends FrameLayout {
             layoutParams.width = AndroidUtilities.bsDp(54);
             layoutParams.height = height;
             layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
+            layoutParams.setMargins(AndroidUtilities.bsDp(15), 0,
+                    AndroidUtilities.bsDp(20), AndroidUtilities.bsDp(16));
+
             backButtonImageView.setLayoutParams(layoutParams);
         }
     }
@@ -111,7 +110,7 @@ public class BSActionBar extends FrameLayout {
         LayoutParams layoutParams = null;
 
         if (titleTextView != null && titleTextView.getVisibility() == VISIBLE) {
-            titleTextView.setTextSize(AndroidUtilities.bsDp(10));
+            titleTextView.setTextSize(AndroidUtilities.bsDp(16));
             layoutParams = (LayoutParams) titleTextView.getLayoutParams();
             layoutParams.width = LayoutParams.WRAP_CONTENT;
             layoutParams.height = LayoutParams.WRAP_CONTENT;
@@ -122,9 +121,9 @@ public class BSActionBar extends FrameLayout {
         }
         if (subTitleTextView != null && subTitleTextView.getVisibility() == VISIBLE) {
             if (!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                subTitleTextView.setTextSize(14);
-            } else {
                 subTitleTextView.setTextSize(16);
+            } else {
+                subTitleTextView.setTextSize(18);
             }
 
             layoutParams = (LayoutParams) subTitleTextView.getLayoutParams();
@@ -241,6 +240,7 @@ public class BSActionBar extends FrameLayout {
         }
         subTitleTextView = new TextView(getContext());
         titleFrameLayout.addView(subTitleTextView);
+        titleTextView.setPadding(AndroidUtilities.bsDp(10), 0, 0, 0);
         subTitleTextView.setGravity(Gravity.LEFT);
         subTitleTextView.setTextColor(0xffd7e8f7);
         subTitleTextView.setSingleLine(true);
@@ -281,6 +281,7 @@ public class BSActionBar extends FrameLayout {
         }
         titleTextView = new TextView(getContext());
         titleTextView.setGravity(Gravity.LEFT);
+        titleTextView.setPadding(AndroidUtilities.bsDp(10), 0, 0, 0);
         titleTextView.setSingleLine(true);
         titleTextView.setLines(1);
         titleTextView.setMaxLines(1);
@@ -437,8 +438,8 @@ public class BSActionBar extends FrameLayout {
             subTitleTextView.setVisibility(visible ? GONE : VISIBLE);
         }
         Drawable drawable = backButtonImageView.getDrawable();
-        if (drawable != null && drawable instanceof MenuDrawable) {
-            ((MenuDrawable)drawable).setRotation(visible ? 1 : 0, true);
+        if (drawable != null && drawable instanceof BSMenuDrawable) {
+            ((BSMenuDrawable)drawable).setRotation(visible ? 1 : 0);
         }
     }
 
