@@ -10,7 +10,7 @@ import org.telegram.ui.Cells.BaseCell;
 /**
  * Created by E1ektr0 on 09.01.2015.
  */
-public class BSDividerCell extends BaseCell {
+public class BSDividerCell extends BSBaseCell {
 
     private static Paint paint;
 

@@ -9,7 +9,6 @@ import org.telegram.android.MessageObject;
 import org.telegram.android.MessagesController;
 import org.telegram.bsui.Cells.BSDialogCell;
 import org.telegram.messenger.TLRPC;
-import org.telegram.ui.Cells.LoadingCell;
 
 /**
  * Created by Ji on 29.12.2014.

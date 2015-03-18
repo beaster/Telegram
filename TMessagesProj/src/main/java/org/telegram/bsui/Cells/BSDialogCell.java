@@ -4,14 +4,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
+import android.view.View;
+import android.view.ViewGroup;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.android.AndroidUtilities;
@@ -31,7 +31,7 @@ import org.telegram.ui.Cells.BaseCell;
 /**
  * Created by Ji on 29.12.2014.
  */
-public class BSDialogCell extends BaseCell {
+public class BSDialogCell extends BSBaseCell {
 
     private static TextPaint namePaint;
     private static TextPaint nameEncryptedPaint;
@@ -144,8 +144,8 @@ public class BSDialogCell extends BaseCell {
             countPaint.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
 
             lockDrawable = getResources().getDrawable(R.drawable.secret_chat_bs);
-            checkDrawable = getResources().getDrawable(R.drawable.dialogs_check_bs);
-            halfCheckDrawable = getResources().getDrawable(R.drawable.halfchecked_bs);
+            checkDrawable = getResources().getDrawable(R.drawable.msg_check_bs);
+            halfCheckDrawable = getResources().getDrawable(R.drawable.msg_halfchecked_bs);
             clockDrawable = getResources().getDrawable(R.drawable.msg_clock_bs);
             errorDrawable = getResources().getDrawable(R.drawable.alert_bs);
             countDrawable = getResources().getDrawable(R.drawable.msg_counter_bs);
@@ -154,12 +154,15 @@ public class BSDialogCell extends BaseCell {
         }
     }
 
+    Context context;
+
     public BSDialogCell(Context context) {
         super(context);
         init();
         avatarImage = new ImageReceiver(this);
         avatarImage.setRoundRadius(AndroidUtilities.bsDp(26));
         avatarDrawable = new BSAvatarDrawable();
+        this.context = context;
     }
 
     public void setDialog(long dialog_id, MessageObject messageObject, boolean usePrintStrings, int date, int unread) {
@@ -727,5 +730,13 @@ public class BSDialogCell extends BaseCell {
         }
 
         avatarImage.draw(canvas);
+    }
+
+    protected void setDrawableBounds(Drawable drawable, int x, int y) {
+        setDrawableBounds(drawable, x, y, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+    }
+
+    protected void setDrawableBounds(Drawable drawable, int x, int y, int w, int h) {
+        drawable.setBounds(x, y, x + w, y + h);
     }
 }

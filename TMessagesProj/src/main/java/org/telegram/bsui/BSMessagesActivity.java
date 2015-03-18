@@ -36,6 +36,8 @@ import org.telegram.bsui.ActionBar.BSActionBarMenuItem;
 import org.telegram.bsui.ActionBar.BSMenuDrawable;
 import org.telegram.bsui.Adapters.BSDialogsAdapter;
 import org.telegram.bsui.Adapters.BSDialogsSearchAdapter;
+import org.telegram.bsui.Cells.BSDialogCell;
+import org.telegram.bsui.Cells.BSUserCell;
 import org.telegram.bsui.Components.BSAlertDialog;
 import org.telegram.bsui.widget.BSBaseActivity;
 import org.telegram.messenger.FileLog;
@@ -44,7 +46,6 @@ import org.telegram.messenger.TLRPC;
 import org.telegram.ui.ActionBar.MenuDrawable;
 import org.telegram.ui.AnimationCompat.ObjectAnimatorProxy;
 import org.telegram.ui.AnimationCompat.ViewProxy;
-import org.telegram.ui.Cells.DialogCell;
 import org.telegram.ui.Cells.UserCell;
 
 import java.util.ArrayList;
@@ -136,6 +137,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
         layoutParams.addRule((LocaleController.isRTL ? RelativeLayout.ALIGN_PARENT_LEFT : RelativeLayout.ALIGN_PARENT_RIGHT) | RelativeLayout.ALIGN_BOTTOM);
         floatingButton.setLayoutParams(layoutParams);
         BSActionBarMenu menu = actionBar.createMenu();
+        menu.setPadding(0, AndroidUtilities.bsDp(5), AndroidUtilities.bsDp(5), 0);
         menu.addItem(0, R.drawable.zoom)
                 .setIsSearchField(true)
                 .setActionBarMenuItemSearchListener(new BSActionBarMenuItem.ActionBarMenuItemSearchListener() {
@@ -563,13 +565,13 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
         int count = messagesListView.getChildCount();
         for (int a = 0; a < count; a++) {
             View child = messagesListView.getChildAt(a);
-            if (child instanceof DialogCell) {
-                DialogCell cell = (DialogCell) child;
+            if (child instanceof BSDialogCell) {
+                BSDialogCell cell = (BSDialogCell) child;
                 if ((mask & MessagesController.UPDATE_MASK_SELECT_DIALOG) != 0) {
                     cell.update(mask);
                 }
-            } else if (child instanceof UserCell) {
-                ((UserCell) child).update(mask);
+            } else if (child instanceof BSUserCell) {
+                ((BSUserCell) child).update(mask);
             }
         }
     }

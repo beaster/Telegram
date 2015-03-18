@@ -95,7 +95,7 @@ public class BSActionBar extends FrameLayout {
             layoutParams.width = AndroidUtilities.bsDp(54);
             layoutParams.height = height;
             layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
-            layoutParams.setMargins(AndroidUtilities.bsDp(15), 0,
+            layoutParams.setMargins(AndroidUtilities.bsDp(10), 0,
                     AndroidUtilities.bsDp(20), AndroidUtilities.bsDp(16));
 
             backButtonImageView.setLayoutParams(layoutParams);
@@ -240,7 +240,6 @@ public class BSActionBar extends FrameLayout {
         }
         subTitleTextView = new TextView(getContext());
         titleFrameLayout.addView(subTitleTextView);
-        titleTextView.setPadding(AndroidUtilities.bsDp(10), 0, 0, 0);
         subTitleTextView.setGravity(Gravity.LEFT);
         subTitleTextView.setTextColor(0xffd7e8f7);
         subTitleTextView.setSingleLine(true);
@@ -281,7 +280,6 @@ public class BSActionBar extends FrameLayout {
         }
         titleTextView = new TextView(getContext());
         titleTextView.setGravity(Gravity.LEFT);
-        titleTextView.setPadding(AndroidUtilities.bsDp(10), 0, 0, 0);
         titleTextView.setSingleLine(true);
         titleTextView.setLines(1);
         titleTextView.setMaxLines(1);
@@ -348,6 +346,7 @@ public class BSActionBar extends FrameLayout {
         layoutParams.height = LayoutParams.FILL_PARENT;
         layoutParams.width = LayoutParams.WRAP_CONTENT;
         layoutParams.gravity = Gravity.RIGHT;
+//        layoutParams.setMargins(0, AndroidUtilities.bsDp(5), AndroidUtilities.bsDp(10), 0);
         menu.setLayoutParams(layoutParams);
         return menu;
     }

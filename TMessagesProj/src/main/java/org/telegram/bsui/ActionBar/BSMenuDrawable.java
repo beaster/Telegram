@@ -31,6 +31,7 @@ public class BSMenuDrawable extends Drawable {
         super();
         paint.setColor(0xffffffff);
         paint.setStrokeWidth(AndroidUtilities.bsDp(2));
+        paint.setStrokeJoin(Paint.Join.ROUND);
     }
 
     public void setRotation(float rotation) {

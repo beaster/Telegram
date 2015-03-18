@@ -288,7 +288,7 @@ public class MessageObject {
         } else {
             messageText = message.message;
         }
-        messageText = Emoji.replaceEmoji(messageText, getTextPaint().getFontMetricsInt(), AndroidUtilities.dp(20));
+        messageText = Emoji.replaceEmoji(messageText, getTextPaint().getFontMetricsInt(), dp(20));
 
         if (message instanceof TLRPC.TL_message || message instanceof TLRPC.TL_messageForwarded) {
             if (message.media == null || message.media instanceof TLRPC.TL_messageMediaEmpty) {
@@ -546,15 +546,15 @@ public class MessageObject {
         int maxWidth;
         if (AndroidUtilities.isTablet()) {
             if (messageOwner.to_id.chat_id != 0) {
-                maxWidth = AndroidUtilities.getMinTabletSide() - AndroidUtilities.dp(122);
+                maxWidth = AndroidUtilities.getMinTabletSide() - dp(122);
             } else {
-                maxWidth = AndroidUtilities.getMinTabletSide() - AndroidUtilities.dp(80);
+                maxWidth = AndroidUtilities.getMinTabletSide() - dp(80);
             }
         } else {
             if (messageOwner.to_id.chat_id != 0) {
-                maxWidth = Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - AndroidUtilities.dp(122);
+                maxWidth = Math.min(getDisplayX(), getDisplayY()) - dp(122);
             } else {
-                maxWidth = Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - AndroidUtilities.dp(80);
+                maxWidth = Math.min(getDisplayX(), getDisplayY()) - dp(80);
             }
         }
 

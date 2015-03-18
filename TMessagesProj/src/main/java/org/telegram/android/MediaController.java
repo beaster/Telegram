@@ -48,6 +48,7 @@ import org.telegram.android.video.InputSurface;
 import org.telegram.android.video.MP4Builder;
 import org.telegram.android.video.Mp4Movie;
 import org.telegram.android.video.OutputSurface;
+import org.telegram.bsui.Cells.BSChatMediaCell;
 import org.telegram.messenger.ConnectionsManager;
 import org.telegram.messenger.DispatchQueue;
 import org.telegram.messenger.FileLoader;
@@ -1729,6 +1730,53 @@ public class MediaController implements NotificationCenter.NotificationCenterDel
         }
     }
 
+    public GifDrawable getGifDrawable(BSChatMediaCell cell, boolean create) {
+        if (cell == null) {
+            return null;
+        }
+
+        MessageObject messageObject = cell.getMessageObject();
+        if (messageObject == null) {
+            return null;
+        }
+
+        if (currentGifDrawable != null && currentGifMessageObject != null && messageObject.messageOwner.id == currentGifMessageObject.messageOwner.id) {
+            currentGifDrawable.parentView = new WeakReference<View>(cell);
+            return currentGifDrawable;
+        }
+
+        if (create) {
+            if (cell != null) {
+                if (currentGifDrawable != null) {
+                    currentGifDrawable.stop();
+                    currentGifDrawable.recycle();
+                }
+                cell.clearGifImage();
+            }
+            currentGifMessageObject = cell.getMessageObject();
+
+            File cacheFile = null;
+            if (currentGifMessageObject.messageOwner.attachPath != null && currentGifMessageObject.messageOwner.attachPath.length() != 0) {
+                File f = new File(currentGifMessageObject.messageOwner.attachPath);
+                if (f.length() > 0) {
+                    cacheFile = f;
+                }
+            }
+            if (cacheFile == null) {
+                cacheFile = FileLoader.getPathToMessage(messageObject.messageOwner);
+            }
+            try {
+                currentGifDrawable = new GifDrawable(cacheFile);
+                currentGifDrawable.parentView = new WeakReference<View>(cell);
+                return currentGifDrawable;
+            } catch (Exception e) {
+                FileLog.e("tmessages", e);
+            }
+        }
+
+        return null;
+    }
+
     public GifDrawable getGifDrawable(ChatMediaCell cell, boolean create) {
         if (cell == null) {
             return null;
@@ -1776,6 +1824,27 @@ public class MediaController implements NotificationCenter.NotificationCenterDel
         }
 
         return null;
+    }
+
+    public void clearGifDrawable(BSChatMediaCell cell){
+        if (cell == null) {
+            return;
+        }
+
+        MessageObject messageObject = cell.getMessageObject();
+        if (messageObject == null) {
+            return;
+        }
+
+        if (currentGifMessageObject != null && messageObject.messageOwner.id == currentGifMessageObject.messageOwner.id) {
+            if (currentGifDrawable != null) {
+                currentGifDrawable.stop();
+                currentGifDrawable.recycle();
+                currentGifDrawable = null;
+            }
+            currentMediaCell = null;
+            currentGifMessageObject = null;
+        }
     }
 
     public void clearGifDrawable(ChatMediaCell cell) {
