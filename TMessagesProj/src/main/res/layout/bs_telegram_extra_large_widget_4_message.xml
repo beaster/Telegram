@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/widget_root"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <LinearLayout
+        android:id="@+id/sms_missed_container_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="21dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/sms_missed_4"
+            style="@style/WidgetMessages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="32sp"
+            android:maxLines="1"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    style="@style/widget_clock"/>
+
+                <TextView
+                    android:id="@+id/time_4"
+                    style="@style/FooterText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"/>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/button_speak_4"
+                style="@style/ButtonSpeak"
+                android:layout_gravity="right"
+                android:visibility="gone"/>
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/sms_missed_container_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sms_missed_container_4"
+        android:layout_marginBottom="21dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/sms_missed_3"
+            style="@style/WidgetMessages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="32sp"
+            android:maxLines="1"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    style="@style/widget_clock"/>
+
+                <TextView
+                    android:id="@+id/time_3"
+                    style="@style/FooterText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"/>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/button_speak_3"
+                style="@style/ButtonSpeak"
+                android:layout_gravity="right"
+                android:visibility="gone"/>
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/sms_missed_container_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sms_missed_container_3"
+        android:layout_marginBottom="21dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/sms_missed_2"
+            style="@style/WidgetMessages"
+            android:textSize="32sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    style="@style/widget_clock"/>
+
+                <TextView
+                    android:id="@+id/time_2"
+                    style="@style/FooterText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"/>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/button_speak_2"
+                style="@style/ButtonSpeak"
+                android:layout_gravity="right"
+                android:visibility="gone"/>
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/sms_missed_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sms_missed_container_2"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/sms_missed"
+            style="@style/WidgetMessages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="32sp"
+            android:maxLines="1"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    style="@style/widget_clock"/>
+
+                <TextView
+                    android:id="@+id/time"
+                    style="@style/FooterText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/button_speak"
+                style="@style/ButtonSpeak"
+                android:layout_gravity="right"
+                android:visibility="gone"/>
+        </FrameLayout>
+
+
+    </LinearLayout>
+
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+        <!--10.66dp-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:fontFamily="Roboto Medium"
+            android:paddingBottom="5dp"
+            android:text="@string/LastFromYotagram"
+            android:textColor="#999999"
+            android:textSize="16sp"/>
+
+        <include layout="@layout/bs_telegram_widget_right_button"/>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/recognizer_error"
+        style="@style/RecognizerError"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+</RelativeLayout>

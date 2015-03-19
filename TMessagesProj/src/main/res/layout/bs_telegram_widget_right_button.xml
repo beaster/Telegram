@@ -9,18 +9,22 @@
     android:gravity="center">
 
     <ImageView
-        android:id="@+id/right_button_paperplan_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="2dp"
-        android:src="@drawable/counter_paperplan"
-        android:visibility="gone"/>
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginBottom="2dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="2dp"
+        android:layout_marginTop="2dp"
+        android:src="@drawable/widget_counter_icon"/>
 
     <ImageView
         android:id="@+id/right_button_list_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
+        android:layout_marginBottom="2dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="1dp"
+        android:layout_marginTop="2dp"
         android:src="@drawable/counter_list"
         android:visibility="gone"/>
 
@@ -28,9 +32,12 @@
         android:id="@+id/right_button_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="1dp"
+        android:layout_marginTop="2dp"
         android:fontFamily="Roboto Medium"
         android:textColor="#ffffff"
-        android:layout_margin="2dp"
         android:textSize="14.66sp"
         android:visibility="gone"/>
 </LinearLayout>

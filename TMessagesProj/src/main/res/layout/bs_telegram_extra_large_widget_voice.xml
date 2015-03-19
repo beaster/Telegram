@@ -10,11 +10,10 @@
         android:layout_alignParentStart="true"/>
 
     <FrameLayout
-        android:layout_width="133.33dp"
-        android:layout_height="133.33dp"
-        android:layout_alignParentBottom="true"
+        android:layout_width="178dp"
+        android:layout_height="178dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="64dp">
+        android:layout_centerVertical="true">
 
         <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
                      android:layout_width="match_parent"
@@ -24,29 +23,30 @@
                      android:autoStart="true"
                      android:flipInterval="550"
                      android:measureAllChildren="true">
-
+            <!--86.66dp-->
             <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="116dp"
+                android:layout_height="116dp"
+                android:layout_gravity="center"
+                android:src="@drawable/voice_background"/>
+            <!--110dp-->
+            <ImageView
+                android:layout_width="147dp"
+                android:layout_height="147dp"
                 android:layout_gravity="center"
                 android:src="@drawable/voice_background"/>
 
+            <!--133.33dp-->
             <ImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center"
-                android:src="@drawable/voice_background"/>
-
-            <ImageView
-                android:layout_width="120dp"
-                android:layout_height="120dp"
+                android:layout_width="178dp"
+                android:layout_height="178dp"
                 android:layout_gravity="center"
                 android:src="@drawable/voice_background"/>
         </ViewFlipper>
 
         <ImageView
-            android:layout_width="27dp"
-            android:layout_height="27dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_mic_voice"/>
 
