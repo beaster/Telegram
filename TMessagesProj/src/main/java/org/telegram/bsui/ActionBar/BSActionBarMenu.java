@@ -17,7 +17,7 @@ import org.telegram.ui.ActionBar.ActionBarMenuItem;
  */
 public class BSActionBarMenu extends LinearLayout {
 
-    protected BSActionBar parentActionBar;
+    public BSActionBar parentActionBar;
 
     public BSActionBarMenu(Context context, BSActionBar layer) {
         super(context);
@@ -74,11 +74,11 @@ public class BSActionBarMenu extends LinearLayout {
     public BSActionBarMenuItem addItem(int id, int icon, int backgroundResource, Drawable drawable, int width) {
         BSActionBarMenuItem menuItem = new BSActionBarMenuItem(getContext(), this, backgroundResource);
         menuItem.setTag(id);
-        menuItem.setScaleType(ImageView.ScaleType.CENTER);
+//        menuItem.setScaleType(ImageView.ScaleType.CENTER);
         if (drawable != null) {
-            menuItem.setImageDrawable(drawable);
+            menuItem.iconView.setImageDrawable(drawable);
         } else {
-            menuItem.setImageResource(icon);
+            menuItem.iconView.setImageResource(icon);
         }
         addView(menuItem);
         LayoutParams layoutParams = (LayoutParams)menuItem.getLayoutParams();

@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.Gravity;
@@ -24,25 +25,47 @@ import android.widget.TextView;
 import org.telegram.android.AndroidUtilities;
 import org.telegram.android.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
+import org.telegram.ui.AnimationCompat.ViewProxy;
+import org.telegram.ui.Components.FrameLayoutFixed;
 
 import java.lang.reflect.Field;
 
 /**
  * Created by E1ektr0 on 10.01.2015.
  */
-public class BSActionBarMenuItem extends ImageView {
+public class BSActionBarMenuItem extends FrameLayoutFixed {
 
-    public static interface ActionBarMenuItemSearchListener {
-        public abstract void onSearchExpand();
-        public abstract void onSearchCollapse();
-        public abstract void onTextChanged(EditText editText);
+    public void showSubMenu() {
+        if (hasSubMenu() && (popupWindow == null || popupWindow != null && !popupWindow.isShowing())) {
+            showMenuRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (getParent() != null) {
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                    }
+                    toggleSubMenu();
+                }
+            };
+            AndroidUtilities.runOnUIThread(showMenuRunnable, 200);
+        }
+    }
+
+    public static class ActionBarMenuItemSearchListener {
+        public void onSearchExpand() { }
+        public void onSearchCollapse() { }
+        public void onTextChanged(EditText editText) { }
+        public void onSearchPressed(EditText editText) { }
     }
 
     private ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout;
     private BSActionBarMenu parentMenu;
     private ActionBarPopupWindow popupWindow;
     private EditText searchField;
+    private ImageView clearButton;
+    protected ImageView iconView;
+    private FrameLayout searchContainer;
     private boolean isSearchField = false;
     private ActionBarMenuItemSearchListener listener;
     private Rect rect;
@@ -52,11 +75,20 @@ public class BSActionBarMenuItem extends ImageView {
     private boolean showFromBottom;
     private int menuHeight = AndroidUtilities.bsDp(16);
     private boolean needOffset = Build.VERSION.SDK_INT >= 21;
+    private int subMenuOpenSide = 0;
 
     public BSActionBarMenuItem(Context context, BSActionBarMenu menu, int background) {
         super(context);
         setBackgroundResource(background);
         parentMenu = menu;
+
+        iconView = new ImageView(context);
+        iconView.setScaleType(ImageView.ScaleType.CENTER);
+        addView(iconView);
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) iconView.getLayoutParams();
+        layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT;
+        layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT;
+        iconView.setLayoutParams(layoutParams);
     }
 
     @Override
@@ -134,6 +166,10 @@ public class BSActionBarMenuItem extends ImageView {
 
     public void setNeedOffset(boolean value) {
         needOffset = Build.VERSION.SDK_INT >= 21 && value;
+    }
+
+    public void setSubMenuOpenSide(int side) {
+        subMenuOpenSide = side;
     }
 
     public TextView addSubItem(int id, String text, int icon) {
@@ -247,18 +283,27 @@ public class BSActionBarMenuItem extends ImageView {
         }
         popupWindow.setFocusable(true);
         if (popupLayout.getMeasuredWidth() == 0) {
-            if (showFromBottom) {
-                popupWindow.showAsDropDown(this, -popupLayout.getMeasuredWidth() + getMeasuredWidth() + AndroidUtilities.bsDp(14), getOffsetY());
-                popupWindow.update(this, -popupLayout.getMeasuredWidth() + getMeasuredWidth() + AndroidUtilities.bsDp(14), getOffsetY(), -1, -1);
+            if (subMenuOpenSide == 0) {
+                if (showFromBottom) {
+                    popupWindow.showAsDropDown(this, -popupLayout.getMeasuredWidth() + getMeasuredWidth(), getOffsetY());
+                    popupWindow.update(this, -popupLayout.getMeasuredWidth() + getMeasuredWidth(), getOffsetY(), -1, -1);
+                } else {
+                    popupWindow.showAsDropDown(this, parentMenu.parentActionBar.getMeasuredWidth() - popupLayout.getMeasuredWidth() - getLeft() - parentMenu.getLeft(), getOffsetY());
+                    popupWindow.update(this, parentMenu.parentActionBar.getMeasuredWidth() - popupLayout.getMeasuredWidth() - getLeft() - parentMenu.getLeft(), getOffsetY(), -1, -1);
+                }
             } else {
-                popupWindow.showAsDropDown(this, parentMenu.parentActionBar.getMeasuredWidth() - popupLayout.getMeasuredWidth() - getLeft() - parentMenu.getLeft(), getOffsetY());
-                popupWindow.update(this, parentMenu.parentActionBar.getMeasuredWidth() - popupLayout.getMeasuredWidth() - getLeft() - parentMenu.getLeft(), getOffsetY(), -1, -1);
+                popupWindow.showAsDropDown(this, -AndroidUtilities.bsDp(8), getOffsetY());
+                popupWindow.update(this, -AndroidUtilities.bsDp(8), getOffsetY(), -1, -1);
             }
         } else {
-            if (showFromBottom) {
-                popupWindow.showAsDropDown(this, -popupLayout.getMeasuredWidth() + getMeasuredWidth() + AndroidUtilities.bsDp(14), getOffsetY());
+            if (subMenuOpenSide == 0) {
+                if (showFromBottom) {
+                    popupWindow.showAsDropDown(this, -popupLayout.getMeasuredWidth() + getMeasuredWidth(), getOffsetY());
+                } else {
+                    popupWindow.showAsDropDown(this, parentMenu.parentActionBar.getMeasuredWidth() - popupLayout.getMeasuredWidth() - getLeft() - parentMenu.getLeft(), getOffsetY());
+                }
             } else {
-                popupWindow.showAsDropDown(this, parentMenu.parentActionBar.getMeasuredWidth() - popupLayout.getMeasuredWidth() - getLeft() - parentMenu.getLeft(), getOffsetY());
+                popupWindow.showAsDropDown(this, -AndroidUtilities.bsDp(8), getOffsetY());
             }
         }
     }
@@ -267,7 +312,7 @@ public class BSActionBarMenuItem extends ImageView {
         if (showFromBottom) {
             getLocationOnScreen(location);
             int diff = location[1] - AndroidUtilities.statusBarHeight + getMeasuredHeight() - menuHeight;
-            int y = AndroidUtilities.bsDp(8) - menuHeight;
+            int y = -menuHeight;
             if (diff < 0) {
                 y -= diff;
             }
@@ -277,12 +322,19 @@ public class BSActionBarMenuItem extends ImageView {
         }
     }
 
+    public void openSearch() {
+        if (searchContainer == null || searchContainer.getVisibility() == VISIBLE) {
+            return;
+        }
+        parentMenu.parentActionBar.onSearchFieldVisibilityChanged(toggleSearch());
+    }
+
     public boolean toggleSearch() {
-        if (searchField == null) {
+        if (searchContainer == null) {
             return false;
         }
-        if (searchField.getVisibility() == VISIBLE) {
-            searchField.setVisibility(GONE);
+        if (searchContainer.getVisibility() == VISIBLE) {
+            searchContainer.setVisibility(GONE);
             setVisibility(VISIBLE);
             AndroidUtilities.hideKeyboard(searchField);
             if (listener != null) {
@@ -290,7 +342,7 @@ public class BSActionBarMenuItem extends ImageView {
             }
             return false;
         } else {
-            searchField.setVisibility(VISIBLE);
+            searchContainer.setVisibility(VISIBLE);
             setVisibility(GONE);
             searchField.setText("");
             searchField.requestFocus();
@@ -308,20 +360,35 @@ public class BSActionBarMenuItem extends ImageView {
         }
     }
 
+    public void setIcon(int resId) {
+        iconView.setImageResource(resId);
+    }
+
     public EditText getSearchField() {
         return searchField;
     }
 
     public BSActionBarMenuItem setIsSearchField(boolean value) {
-        if (value && searchField == null) {
+        if (value && searchContainer == null) {
+            searchContainer = new FrameLayout(getContext());
+            parentMenu.addView(searchContainer, 0);
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams)searchContainer.getLayoutParams();
+            layoutParams.weight = 1;
+            layoutParams.width = 0;
+            layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
+            layoutParams.leftMargin = AndroidUtilities.bsDp(6);
+            searchContainer.setLayoutParams(layoutParams);
+            searchContainer.setVisibility(GONE);
+
             searchField = new EditText(getContext());
-            searchField.setTextSize(18);
+            searchField.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+            searchField.setHintTextColor(0x88ffffff);
             searchField.setTextColor(0xffffffff);
             searchField.setSingleLine(true);
-            searchField.setBackgroundResource(R.drawable.search_light_states);
+            searchField.setBackgroundResource(0);
             searchField.setPadding(0, 0, 0, 0);
             searchField.setInputType(EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-            if (Build.VERSION.SDK_INT < 11) {
+            if (android.os.Build.VERSION.SDK_INT < 11) {
                 searchField.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
                     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
                         menu.clear();
@@ -348,8 +415,11 @@ public class BSActionBarMenuItem extends ImageView {
             searchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                 @Override
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (actionId == EditorInfo.IME_ACTION_SEARCH || event != null && event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_SEARCH) {
+                    if (actionId == EditorInfo.IME_ACTION_SEARCH || event != null && (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_SEARCH || event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                         AndroidUtilities.hideKeyboard(searchField);
+                        if (listener != null) {
+                            listener.onSearchPressed(searchField);
+                        }
                     }
                     return false;
                 }
@@ -365,6 +435,7 @@ public class BSActionBarMenuItem extends ImageView {
                     if (listener != null) {
                         listener.onTextChanged(searchField);
                     }
+                    ViewProxy.setAlpha(clearButton, s == null || s.length() == 0 ? 0.6f : 1.0f);
                 }
 
                 @Override
@@ -373,12 +444,6 @@ public class BSActionBarMenuItem extends ImageView {
                 }
             });
 
-            /*
-            ImageView img = (ImageView) searchView.findViewById(R.id.search_close_btn);
-        if (img != null) {
-            img.setImageResource(R.drawable.ic_msg_btn_cross_custom);
-        }
-             */
             try {
                 Field mCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
                 mCursorDrawableRes.setAccessible(true);
@@ -392,16 +457,30 @@ public class BSActionBarMenuItem extends ImageView {
             } else {
                 searchField.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
             }
-            parentMenu.addView(searchField, 0);
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams)searchField.getLayoutParams();
-            layoutParams.weight = 1;
-            layoutParams.width = 0;
-            layoutParams.gravity = Gravity.CENTER_VERTICAL;
-            layoutParams.height = AndroidUtilities.bsDp(36);
-            layoutParams.rightMargin = AndroidUtilities.bsDp(22);
-            layoutParams.leftMargin = AndroidUtilities.bsDp(6);
-            searchField.setLayoutParams(layoutParams);
-            searchField.setVisibility(GONE);
+            searchContainer.addView(searchField);
+            FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) searchField.getLayoutParams();
+            layoutParams2.width = FrameLayout.LayoutParams.MATCH_PARENT;
+            layoutParams2.gravity = Gravity.CENTER_VERTICAL;
+            layoutParams2.height = AndroidUtilities.bsDp(36);
+            layoutParams2.rightMargin = AndroidUtilities.bsDp(48);
+            searchField.setLayoutParams(layoutParams2);
+
+            clearButton = new ImageView(getContext());
+            clearButton.setImageResource(R.drawable.ic_close_white);
+            clearButton.setScaleType(ImageView.ScaleType.CENTER);
+            clearButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    searchField.setText("");
+                    AndroidUtilities.showKeyboard(searchField);
+                }
+            });
+            searchContainer.addView(clearButton);
+            layoutParams2 = (FrameLayout.LayoutParams) clearButton.getLayoutParams();
+            layoutParams2.width = AndroidUtilities.bsDp(48);
+            layoutParams2.gravity = Gravity.CENTER_VERTICAL | Gravity.RIGHT;
+            layoutParams2.height = FrameLayout.LayoutParams.MATCH_PARENT;
+            clearButton.setLayoutParams(layoutParams2);
         }
         isSearchField = value;
         return this;
@@ -411,18 +490,23 @@ public class BSActionBarMenuItem extends ImageView {
         return isSearchField;
     }
 
-    public void setActionBarMenuItemSearchListener(ActionBarMenuItemSearchListener listener) {
+    public BSActionBarMenuItem setActionBarMenuItemSearchListener(ActionBarMenuItemSearchListener listener) {
         this.listener = listener;
+        return this;
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (popupWindow != null && popupWindow.isShowing()) {
-            if (showFromBottom) {
-                popupWindow.update(this, -popupLayout.getMeasuredWidth() + getMeasuredWidth() + AndroidUtilities.bsDp(14), getOffsetY(), -1, -1);
+            if (subMenuOpenSide == 0) {
+                if (showFromBottom) {
+                    popupWindow.update(this, -popupLayout.getMeasuredWidth() + getMeasuredWidth(), getOffsetY(), -1, -1);
+                } else {
+                    popupWindow.update(this, parentMenu.parentActionBar.getMeasuredWidth() - popupLayout.getMeasuredWidth() - getLeft() - parentMenu.getLeft(), getOffsetY(), -1, -1);
+                }
             } else {
-                popupWindow.update(this, parentMenu.parentActionBar.getMeasuredWidth() - popupLayout.getMeasuredWidth() - getLeft() - parentMenu.getLeft(), getOffsetY(), -1, -1);
+                popupWindow.update(this, -AndroidUtilities.bsDp(8), getOffsetY(), -1, -1);
             }
         }
     }

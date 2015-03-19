@@ -5,11 +5,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.yotadevices.sdk.BSActivity;
 import com.yotadevices.sdk.Constants;
 
+import org.telegram.android.AndroidUtilities;
 import org.telegram.bsui.ActionBar.BSActionBar;
 import org.telegram.messenger.R;
 
@@ -65,11 +69,14 @@ public class BSBaseActivity extends BSActivity{
         LayoutInflater bsLayoutInflater = getBSDrawer().getBSLayoutInflater();
         rootView = bsLayoutInflater.inflate(R.layout.bs_actoin_bar, null);
         actionBar = (BSActionBar)rootView.findViewById(R.id.action_bar);
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) actionBar.getLayoutParams();
+        params.setMargins(0, AndroidUtilities.bsDp(-40), 0, 0);
+        actionBar.setLayoutParams(params);
     }
 
     protected View createActionBar(View childView)
     {
-        ((RelativeLayout)rootView.findViewById(R.id.view_container)).addView(childView);
+        ((FrameLayout)rootView.findViewById(R.id.view_container)).addView(childView);
         return rootView;
     }
 

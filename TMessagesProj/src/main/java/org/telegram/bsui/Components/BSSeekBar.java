@@ -116,7 +116,7 @@ public class BSSeekBar {
         int y = (height - thumbHeight) / 2;
         canvas.drawRect(thumbWidth / 2, height / 2 - AndroidUtilities.dp(1), width - thumbWidth / 2, height / 2 + AndroidUtilities.dp(1), inner);
         canvas.drawRect(thumbWidth / 2, height / 2 - AndroidUtilities.dp(1), thumbWidth / 2 + thumbX, height / 2 + AndroidUtilities.dp(1), outer);
-        thumb.setBounds(thumbX, y, thumbX + thumbWidth, y + thumbHeight);
+        thumb.setBounds(thumbX + AndroidUtilities.bsDp(2), y, thumbX + thumbWidth, y + thumbHeight);
         thumb.draw(canvas);
     }
 }

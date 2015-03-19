@@ -920,11 +920,12 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             }
             avatarContainer = new FrameLayoutFixed(getParentActivity());
             avatarContainer.setBackgroundResource(R.drawable.bar_selector);
-            avatarContainer.setPadding(AndroidUtilities.bsDp(8), 0, AndroidUtilities.bsDp(8), 0);
+            avatarContainer.setPadding(AndroidUtilities.bsDp(8), AndroidUtilities.bsDp(5), AndroidUtilities.bsDp(8), 0);
             actionBar.addView(avatarContainer);
             FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) avatarContainer.getLayoutParams();
             layoutParams2.height = FrameLayout.LayoutParams.WRAP_CONTENT;
             layoutParams2.width = FrameLayout.LayoutParams.WRAP_CONTENT;
+            layoutParams2.topMargin = AndroidUtilities.bsDp(40);
             layoutParams2.rightMargin = AndroidUtilities.bsDp(40);
             layoutParams2.leftMargin = AndroidUtilities.bsDp(56);
             layoutParams2.gravity = Gravity.TOP | Gravity.LEFT;

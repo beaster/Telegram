@@ -1,3 +1,11 @@
+/*
+ * This is the source code of Telegram for Android v. 1.4.x.
+ * It is licensed under GNU GPL v. 2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright Nikolai Kudashov, 2013-2014.
+ */
+
 package org.telegram.bsui.ActionBar;
 
 import android.content.Context;
@@ -6,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -14,22 +23,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.yotadevices.sdk.Drawer;
-import com.yotadevices.sdk.utils.EinkUtils;
-
 import org.telegram.android.AndroidUtilities;
 import org.telegram.messenger.R;
-import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.MenuDrawable;
 
-/**
- * Created by E1ektr0 on 10.01.2015.
- */
 public class BSActionBar extends FrameLayout {
-
-    public void setActionBarMenuOnItemClick(ActionBarMenuOnItemClick listener) {
-        actionBarMenuOnItemClick = listener;
-    }
 
     public static class ActionBarMenuOnItemClick {
         public void onItemClick(int id) {
@@ -43,7 +40,6 @@ public class BSActionBar extends FrameLayout {
 
     private FrameLayout titleFrameLayout;
     private ImageView backButtonImageView;
-
     private TextView titleTextView;
     private TextView subTitleTextView;
     private View actionModeTop;
@@ -51,15 +47,21 @@ public class BSActionBar extends FrameLayout {
     private BSActionBarMenu actionMode;
     private boolean occupyStatusBar = Build.VERSION.SDK_INT >= 21;
 
-    private boolean allowOverlayTitle = false;
+    private boolean allowOverlayTitle;
     private CharSequence lastTitle;
     private boolean showingOverlayTitle;
+    private boolean castShadows = true;
 
     protected boolean isSearchFieldVisible;
     protected int itemsBackgroundResourceId;
     private boolean isBackOverlayVisible;
     public ActionBarMenuOnItemClick actionBarMenuOnItemClick;
     private int extraHeight;
+
+    public BSActionBar(Context context) {
+        super(context);
+        Ini(context);
+    }
 
     public BSActionBar(Context context, AttributeSet attrs)
     {
@@ -69,23 +71,18 @@ public class BSActionBar extends FrameLayout {
 
     public BSActionBar(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs,defStyle);
-       Ini(context);
-    }
-
-    public BSActionBar(Context context) {
-        super(context);
         Ini(context);
     }
 
     private void Ini(Context context) {
         titleFrameLayout = new FrameLayout(context);
         addView(titleFrameLayout);
-        LayoutParams layoutParams = (LayoutParams)titleFrameLayout.getLayoutParams();
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)titleFrameLayout.getLayoutParams();
         layoutParams.width = LayoutParams.WRAP_CONTENT;
         layoutParams.height = LayoutParams.FILL_PARENT;
         layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
         titleFrameLayout.setLayoutParams(layoutParams);
-        titleFrameLayout.setPadding(0, AndroidUtilities.bsDp(4), 0, 0);
+        titleFrameLayout.setPadding(0, 0, AndroidUtilities.bsDp(4), 0);
         titleFrameLayout.setEnabled(false);
     }
 
@@ -95,22 +92,26 @@ public class BSActionBar extends FrameLayout {
             layoutParams.width = AndroidUtilities.bsDp(54);
             layoutParams.height = height;
             layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
-            layoutParams.setMargins(AndroidUtilities.bsDp(10), 0,
-                    AndroidUtilities.bsDp(20), AndroidUtilities.bsDp(16));
-
             backButtonImageView.setLayoutParams(layoutParams);
         }
     }
 
     private void positionTitle(int width, int height) {
         int offset = AndroidUtilities.bsDp(2);
-
+        if (!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            offset = AndroidUtilities.bsDp(1);
+        }
         int maxTextWidth = 0;
 
         LayoutParams layoutParams = null;
 
         if (titleTextView != null && titleTextView.getVisibility() == VISIBLE) {
-            titleTextView.setTextSize(AndroidUtilities.bsDp(16));
+            if (!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+            } else {
+                titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+            }
+
             layoutParams = (LayoutParams) titleTextView.getLayoutParams();
             layoutParams.width = LayoutParams.WRAP_CONTENT;
             layoutParams.height = LayoutParams.WRAP_CONTENT;
@@ -121,9 +122,9 @@ public class BSActionBar extends FrameLayout {
         }
         if (subTitleTextView != null && subTitleTextView.getVisibility() == VISIBLE) {
             if (!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                subTitleTextView.setTextSize(16);
+                subTitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
             } else {
-                subTitleTextView.setTextSize(18);
+                subTitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
             }
 
             layoutParams = (LayoutParams) subTitleTextView.getLayoutParams();
@@ -151,7 +152,7 @@ public class BSActionBar extends FrameLayout {
         }
 
         if (menu != null) {
-            maxTextWidth = Math.min(maxTextWidth, width - menu.getMeasuredWidth() - AndroidUtilities.bsDp(16));
+            maxTextWidth = Math.min(maxTextWidth, width - menu.getMeasuredWidth() - AndroidUtilities.bsDp(16) - x);
         }
 
         if (titleTextView != null && titleTextView.getVisibility() == VISIBLE) {
@@ -177,23 +178,19 @@ public class BSActionBar extends FrameLayout {
 
         MarginLayoutParams layoutParams1 = (MarginLayoutParams) titleFrameLayout.getLayoutParams();
         layoutParams1.width = x + maxTextWidth + (isSearchFieldVisible ? 0 : AndroidUtilities.bsDp(6));
-        layoutParams1.topMargin = occupyStatusBar ? getStatusBarHeight() : 0;
+        layoutParams1.topMargin = occupyStatusBar ? AndroidUtilities.statusBarHeight : 0;
         titleFrameLayout.setLayoutParams(layoutParams1);
-    }
-
-    private int getStatusBarHeight() {
-        return 88;//AndroidUtilities.statusBarHeight;
     }
 
     public void positionMenu(int width, int height) {
         if (menu == null) {
             return;
         }
-        LayoutParams layoutParams = (LayoutParams)menu.getLayoutParams();
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)menu.getLayoutParams();
         layoutParams.width = isSearchFieldVisible ? LayoutParams.MATCH_PARENT : LayoutParams.WRAP_CONTENT;
         layoutParams.height = height;
-        layoutParams.leftMargin = isSearchFieldVisible ? AndroidUtilities.bsDp(54) : 0;
-        layoutParams.topMargin = occupyStatusBar ? getStatusBarHeight() : 0;
+        layoutParams.leftMargin = isSearchFieldVisible ? AndroidUtilities.bsDp(AndroidUtilities.isTablet() ? 74 : 66) : 0;
+        layoutParams.topMargin = occupyStatusBar ? AndroidUtilities.statusBarHeight : 0;
         menu.setLayoutParams(layoutParams);
         menu.measure(width, height);
     }
@@ -289,21 +286,6 @@ public class BSActionBar extends FrameLayout {
         titleTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
     }
 
-    public void setTitleToCenter(CharSequence value){
-        if(value != null && titleTextView == null){
-            createTitleTextView();
-        }
-        if(titleTextView != null){
-            lastTitle = value;
-            titleTextView.setVisibility(value != null && !isSearchFieldVisible ? VISIBLE : GONE);
-            titleTextView.setText(value);
-            positionTitle(getMeasuredWidth(), getMeasuredHeight());
-            LayoutParams layoutParams = (LayoutParams) titleTextView.getLayoutParams();
-            layoutParams.gravity = Gravity.TOP | Gravity.CENTER;
-            titleTextView.setLayoutParams(layoutParams);
-        }
-    }
-
     public void setTitle(CharSequence value) {
         if (value != null && titleTextView == null) {
             createTitleTextView();
@@ -342,23 +324,26 @@ public class BSActionBar extends FrameLayout {
         }
         menu = new BSActionBarMenu(getContext(), this);
         addView(menu);
-        LayoutParams layoutParams = (LayoutParams)menu.getLayoutParams();
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)menu.getLayoutParams();
         layoutParams.height = LayoutParams.FILL_PARENT;
         layoutParams.width = LayoutParams.WRAP_CONTENT;
         layoutParams.gravity = Gravity.RIGHT;
-//        layoutParams.setMargins(0, AndroidUtilities.bsDp(5), AndroidUtilities.bsDp(10), 0);
         menu.setLayoutParams(layoutParams);
         return menu;
+    }
+
+    public void setActionBarMenuOnItemClick(ActionBarMenuOnItemClick listener) {
+        actionBarMenuOnItemClick = listener;
     }
 
     public void setCustomView(int resourceId) {
         LayoutInflater li = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = li.inflate(resourceId, null);
         addView(view);
-        LayoutParams layoutParams = (LayoutParams)view.getLayoutParams();
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)view.getLayoutParams();
         layoutParams.width = LayoutParams.FILL_PARENT;
         layoutParams.height = LayoutParams.FILL_PARENT;
-        layoutParams.topMargin = occupyStatusBar ? getStatusBarHeight() : 0;
+        layoutParams.topMargin = occupyStatusBar ? AndroidUtilities.statusBarHeight : 0;
         view.setLayoutParams(layoutParams);
     }
 
@@ -369,8 +354,8 @@ public class BSActionBar extends FrameLayout {
         actionMode = new BSActionBarMenu(getContext(), this);
         actionMode.setBackgroundResource(R.drawable.editheader);
         addView(actionMode);
-        actionMode.setPadding(0, occupyStatusBar ? getStatusBarHeight() : 0, 0, 0);
-        LayoutParams layoutParams = (LayoutParams)actionMode.getLayoutParams();
+        actionMode.setPadding(0, occupyStatusBar ? AndroidUtilities.statusBarHeight : 0, 0, 0);
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)actionMode.getLayoutParams();
         layoutParams.height = LayoutParams.FILL_PARENT;
         layoutParams.width = LayoutParams.FILL_PARENT;
         layoutParams.gravity = Gravity.RIGHT;
@@ -381,8 +366,8 @@ public class BSActionBar extends FrameLayout {
             actionModeTop = new View(getContext());
             actionModeTop.setBackgroundColor(0x99000000);
             addView(actionModeTop);
-            layoutParams = (LayoutParams)actionModeTop.getLayoutParams();
-            layoutParams.height = getStatusBarHeight();
+            layoutParams = (FrameLayout.LayoutParams)actionModeTop.getLayoutParams();
+            layoutParams.height = AndroidUtilities.statusBarHeight;
             layoutParams.width = LayoutParams.FILL_PARENT;
             layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
             actionModeTop.setLayoutParams(layoutParams);
@@ -397,7 +382,7 @@ public class BSActionBar extends FrameLayout {
             return;
         }
         actionMode.setVisibility(VISIBLE);
-        if (actionModeTop != null) {
+        if (occupyStatusBar && actionModeTop != null) {
             actionModeTop.setVisibility(VISIBLE);
         }
         if (titleFrameLayout != null) {
@@ -413,7 +398,7 @@ public class BSActionBar extends FrameLayout {
             return;
         }
         actionMode.setVisibility(GONE);
-        if (actionModeTop != null) {
+        if (occupyStatusBar && actionModeTop != null) {
             actionModeTop.setVisibility(GONE);
         }
         if (titleFrameLayout != null) {
@@ -447,7 +432,6 @@ public class BSActionBar extends FrameLayout {
             return;
         }
         menu.closeSearchField();
-        EinkUtils.performSingleUpdate(this, Drawer.Waveform.WAVEFORM_GC_PARTIAL);
     }
 
     @Override
@@ -456,7 +440,7 @@ public class BSActionBar extends FrameLayout {
         positionBackImage(actionBarHeight);
         positionMenu(MeasureSpec.getSize(widthMeasureSpec), actionBarHeight);
         positionTitle(MeasureSpec.getSize(widthMeasureSpec), actionBarHeight);
-        actionBarHeight += occupyStatusBar ? getStatusBarHeight() : 0;
+        actionBarHeight += occupyStatusBar ? AndroidUtilities.statusBarHeight : 0;
         super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(actionBarHeight + extraHeight, MeasureSpec.EXACTLY));
     }
 
@@ -477,7 +461,7 @@ public class BSActionBar extends FrameLayout {
     }
 
     public void setTitleOverlayText(String text) {
-        if (!allowOverlayTitle) {
+        if (showingOverlayTitle == (text != null) || !allowOverlayTitle) {
             return;
         }
         showingOverlayTitle = text != null;
@@ -490,7 +474,6 @@ public class BSActionBar extends FrameLayout {
             titleTextView.setText(textToSet);
             positionTitle(getMeasuredWidth(), getMeasuredHeight());
         }
-        EinkUtils.performSingleUpdate(this, Drawer.Waveform.WAVEFORM_GC_PARTIAL);
     }
 
     public void setExtraHeight(int value, boolean layout) {
@@ -506,6 +489,9 @@ public class BSActionBar extends FrameLayout {
 
     public void setOccupyStatusBar(boolean value) {
         occupyStatusBar = value;
+        if (actionMode != null) {
+            actionMode.setPadding(0, occupyStatusBar ? AndroidUtilities.statusBarHeight : 0, 0, 0);
+        }
     }
 
     public boolean getOccupyStatusBar() {
@@ -517,6 +503,14 @@ public class BSActionBar extends FrameLayout {
         if (backButtonImageView != null) {
             backButtonImageView.setBackgroundResource(itemsBackgroundResourceId);
         }
+    }
+
+    public void setCastShadows(boolean value) {
+        castShadows = value;
+    }
+
+    public boolean getCastShadows() {
+        return castShadows;
     }
 
     @Override

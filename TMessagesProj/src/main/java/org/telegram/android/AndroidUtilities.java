@@ -483,13 +483,7 @@ public class AndroidUtilities {
     }
 
     public static int getBSCurrentActionBarHeight() {
-        if (isTablet()) {
-            return bsDp(64);
-        } else if (ApplicationLoader.applicationContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            return bsDp(68);
-        } else {
-            return bsDp(64);
-        }
+        return bsDp(60);
     }
 
     public static Point getRealScreenSize() {

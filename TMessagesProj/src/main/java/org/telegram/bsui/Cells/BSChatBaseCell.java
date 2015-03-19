@@ -165,8 +165,8 @@ public class BSChatBaseCell extends BSBaseCell {
             forwardNamePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             forwardNamePaint.setTextSize(dp(14));
 
-            checkDrawable = getResources().getDrawable(R.drawable.msg_check);
-            halfCheckDrawable = getResources().getDrawable(R.drawable.msg_halfcheck);
+            checkDrawable = getResources().getDrawable(R.drawable.msg_check_bs);
+            halfCheckDrawable = getResources().getDrawable(R.drawable.msg_check_bs);
         }
     }
 
