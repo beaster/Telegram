@@ -1,15 +1,25 @@
 package org.telegram.bsui.widget;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.util.Log;
 
+import java.util.Vector;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.util.Log;
+
+import org.telegram.android.ImageReceiver;
 import org.telegram.android.LocaleController;
 import org.telegram.android.MessageObject;
 import org.telegram.android.MessagesController;
+import org.telegram.bsui.BSAvatarDrawable;
+import org.telegram.messenger.R;
 import org.telegram.messenger.TLRPC;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Vector;
 
 /**
@@ -18,17 +28,21 @@ import java.util.Vector;
 public class BSTelegramWidgetMessages {
     private static final String LOG_TAG = "BSTGWidgetMessages";
 
+    public static final int PERSONAL_CHAT = 1;
+    public static final int GROUP_CHAT = 2;
+    public static final int SECRET_CHAT = 3;
+
     private static BSTelegramWidgetMessages mInstance;
     private Context mContext;
 
     private MessageObject[] mCurrentMessages;
-    private int[] mMessagesCount;
-    private String[] mMessagesText;
-    private String[] mMessagesUser;
-    private long[] mMessagesTime;
+    private int[] mCount;
+    private String[] mUserName;
+    private TLRPC.User[] mUser;
 
-    private Vector<MessageObject> mAllMessages;
-    private HashMap<Long, Integer> mUnreadMessagesCount;
+    private Vector<MessageObject> mAllUnreadMessages;
+    private Vector<Integer> mUnreadMessagesCount;
+    private Vector<TLRPC.TL_dialog> mDialog;
 
     private boolean mIsDialogsLoaded;
 
@@ -43,29 +57,30 @@ public class BSTelegramWidgetMessages {
     private BSTelegramWidgetMessages(Context context) {
         Log.d(LOG_TAG, ".ctor");
         this.mContext = context;
-        this.mAllMessages = new Vector<>();
-        this.mUnreadMessagesCount = new HashMap<>();
+        this.mAllUnreadMessages = new Vector<>();
+        this.mUnreadMessagesCount = new Vector<>();
+        this.mDialog = new Vector<>();
         this.mIsDialogsLoaded = false;
     }
 
-    public long getMessageTime(int messageIndex) {
-        return this.mMessagesTime[messageIndex];
+    public long getTime(int messageIndex) {
+        return (long) this.mCurrentMessages[messageIndex].messageOwner.date;
+    }
+
+    public String getText(int messageIndex) {
+        return LocaleController.formatStringSimple("<b>%s:</b> %s", this.mUserName[messageIndex], this.getMessageText(messageIndex));
     }
 
     public String getMessageText(int messageIndex) {
-        return this.mMessagesText[messageIndex];
+        return this.mCurrentMessages[messageIndex].messageText.toString();
     }
 
-    public int getMessageCount(int messageIndex) {
-        return this.mMessagesCount[messageIndex];
+    public int getCount(int messageIndex) {
+        return this.mCount[messageIndex];
     }
 
-    public MessageObject getCurrentMessage(int messageIndex) {
-        return this.mCurrentMessages[messageIndex];
-    }
-
-    public String getMessagesUser(int messageIndex) {
-        return this.mMessagesUser[messageIndex];
+    public String getUserName(int messageIndex) {
+        return this.mUserName[messageIndex];
     }
 
     public boolean isDialogsLoaded() {
@@ -76,83 +91,195 @@ public class BSTelegramWidgetMessages {
         this.mIsDialogsLoaded = isDialogsLoaded;
     }
 
-    public Integer getUnreadMessagesCount(Long dialogId) {
-        return this.mUnreadMessagesCount.get(dialogId);
+    public int getChatType(int messageIndex) {
+        return this.getChatType(this.mDialog.get(messageIndex).id);
+    }
+
+    public Long getDialogId(int messageIndex) {
+        return this.mDialog.get(messageIndex).id;
+    }
+
+    public Bitmap getAvatar(int messageIndex) {
+        TLRPC.User user = this.mUser[messageIndex];
+        TLRPC.TL_dialog dialog = this.mDialog.get(messageIndex);
+        BSAvatarDrawable bsAvatarDrawable = new BSAvatarDrawable();
+
+        TLRPC.FileLocation photo;
+        if (this.getChatType(messageIndex) == BSTelegramWidgetMessages.GROUP_CHAT) {
+            MessagesController messagesController = MessagesController.getInstance();
+
+            int chatId = 0;
+            int lower_part = (int) dialog.id;
+            int high_id = (int) (dialog.id >> 32);
+            if (lower_part != 0) {
+                if (high_id == 1) {
+                    chatId = lower_part;
+                } else {
+                    if (lower_part < 0) {
+                        chatId = -lower_part;
+                    }
+                }
+            }
+            TLRPC.Chat chat = messagesController.getChat(chatId);
+
+            photo = chat.photo.photo_big;
+
+            if (photo == null)
+                bsAvatarDrawable.setInfo(chat);
+        } else {
+            photo = user.photo.photo_big;
+            if (photo == null)
+                bsAvatarDrawable.setInfo(user);
+        }
+
+        ImageReceiver imageReceiver = new ImageReceiver();
+        imageReceiver.setForcePreview(photo == null);
+        imageReceiver.setImageCoords(0, 0, 100, 100);
+        imageReceiver.setRoundRadius(50);
+        imageReceiver.setImage(photo, "50_50", bsAvatarDrawable, false);
+        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(bitmap);
+        imageReceiver.draw(canvas);
+
+        return bitmap;
+    }
+
+    public Bitmap getDemoAvatar(String firstName, String lastName) {
+        BSAvatarDrawable bsAvatarDrawable = new BSAvatarDrawable();
+        bsAvatarDrawable.setInfo(11, firstName, lastName, false);
+        ImageReceiver imageReceiver = new ImageReceiver();
+        imageReceiver.setForcePreview(true);
+        imageReceiver.setImageCoords(0, 0, 100, 100);
+        imageReceiver.setRoundRadius(50);
+        imageReceiver.setImage(null, "50_50", bsAvatarDrawable, false);
+        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(bitmap);
+        imageReceiver.draw(canvas);
+
+        return bitmap;
     }
 
     public void clear() {
         this.mUnreadMessagesCount.clear();
-        this.mAllMessages.clear();
-    }
-
-    public Vector<MessageObject> getAllMessages() {
-        return mAllMessages;
+        this.mAllUnreadMessages.clear();
+        this.mDialog.clear();
     }
 
     public int updateMessages(int maxCount) {
-        int count = Math.min(this.mAllMessages.size(), maxCount);
+        int count = Math.min(this.mAllUnreadMessages.size(), maxCount);
 
-        this.mCurrentMessages = new MessageObject[count];
-        this.mMessagesCount = new int[count];
-        this.mMessagesText = new String[count];
-        this.mMessagesTime = new long[count];
-        this.mMessagesUser = new String[count];
+        MessageObject[] tempCurrentMessages = new MessageObject[count];
+        int[] tempCount = new int[count];
+        String[] tempUserName = new String[count];
+        TLRPC.User[] tempUser = new TLRPC.User[count];
+
         String temp;
-        String userName;
         MessagesController messagesController = MessagesController.getInstance();
-        TLRPC.User user;
 
         for (int i = 0; i < count; i++) {
-            this.mCurrentMessages[i] = this.mAllMessages.get(this.mAllMessages.size() - 1 - i);
-            this.mMessagesCount[i] = count == 1 ?
-                    this.sumUnreadMessagesCount() :
-                    this.mUnreadMessagesCount.get(this.mCurrentMessages[i].getDialogId());
-            user = messagesController.getUser(this.mCurrentMessages[i].messageOwner.from_id);
+            tempCurrentMessages[i] = this.mAllUnreadMessages.get(i);
 
-            userName = "";
-            if (user.first_name != null) {
-                userName += user.first_name + " " + user.last_name;
+            tempCount[i] = count == 1 ?
+                    this.sumUnreadMessagesCount() :
+                    this.mUnreadMessagesCount.get(i);
+
+            tempUser[i] = messagesController.getUser(tempCurrentMessages[i].messageOwner.from_id);
+
+            temp = "";
+            if (tempUser[i].first_name != null) {
+                temp += tempUser[i].first_name + " " + tempUser[i].last_name;
             } else {
-                userName += user.phone;
+                temp += tempUser[i].phone;
             }
-            this.mMessagesUser[i] = userName;
-            temp = LocaleController.formatStringSimple("<b>%s:</b> %s", userName, this.mCurrentMessages[i].messageText);
-            this.mMessagesText[i] = temp;
-            this.mMessagesTime[i] = (long) this.mCurrentMessages[i].messageOwner.date * 1000;
+            tempUserName[i] = temp;
         }
 
-        Log.d(LOG_TAG, "all " + this.mAllMessages.size());
-        Log.d(LOG_TAG, "current " + this.mCurrentMessages.length);
+        this.mCurrentMessages = tempCurrentMessages;
+        this.mCount = tempCount;
+        this.mUserName = tempUserName;
+        this.mUser = tempUser;
 
         return count;
     }
 
     public int sumUnreadMessagesCount() {
         int sum = 0;
-        for (int value : this.mUnreadMessagesCount.values()) {
+        for (int value : this.mUnreadMessagesCount) {
             sum += value;
         }
         return sum;
     }
 
     public void reloadDialogs() {
-        this.mAllMessages = new Vector<>();
-        this.mUnreadMessagesCount = new HashMap<>();
-        //mCount = 0;
-        for (TLRPC.TL_dialog dialog : MessagesController.getInstance().dialogs) {
-            if (dialog.unread_count == 0) {
-                continue;
+        Log.d(LOG_TAG, "reloadDialogs");
+        Vector<MessageObject> allUnreadMessages = new Vector<>();
+        Vector<Integer> unreadMessagesCount = new Vector<>();
+        Vector<TLRPC.TL_dialog> dialogs = new Vector<>();
+
+        MessagesController messagesController = MessagesController.getInstance();
+
+        for (TLRPC.TL_dialog dialog : messagesController.dialogs) {
+            if (dialog.unread_count != 0) {
+                MessageObject message = messagesController.dialogMessage.get(dialog.top_message);
+                if (!message.isFromMe()) {
+                    allUnreadMessages.add(message);
+                    unreadMessagesCount.add(dialog.unread_count);
+                    dialogs.add(dialog);
+//                    Collections.reverse(allUnreadMessages);
+                }
             }
-            MessageObject message = MessagesController.getInstance().dialogMessage.get(dialog.top_message);
-            if (!message.isFromMe()) {
-                this.mAllMessages.add(message);
-                this.mUnreadMessagesCount.put(dialog.id, dialog.unread_count);
-                Collections.reverse(this.mAllMessages);
+        }
+
+        this.mAllUnreadMessages = allUnreadMessages;
+        this.mUnreadMessagesCount = unreadMessagesCount;
+        this.mDialog = dialogs;
+    }
+
+    private int getChatType(long dialogId) {
+        int chatType = BSTelegramWidgetMessages.PERSONAL_CHAT;
+
+        int chatId = 0;
+        int encId = 0;
+
+        int lower_part = (int) dialogId;
+        int high_id = (int) (dialogId >> 32);
+        if (lower_part != 0) {
+            if (high_id == 1) {
+                chatId = lower_part;
+            } else {
+                if (lower_part < 0) {
+                    chatId = -lower_part;
+                }
             }
+        } else {
+            encId = high_id;
+        }
+        if (chatId != 0) {
+            if (chatId > 0) {
+                chatType = BSTelegramWidgetMessages.GROUP_CHAT;
+            }
+        } else if (encId != 0) {
+            chatType = BSTelegramWidgetMessages.SECRET_CHAT;
+        }
+        return chatType;
+    }
+
+    public String getChatTypeName(int chatType) {
+
+        switch (chatType) {
+            case BSTelegramWidgetMessages.PERSONAL_CHAT:
+                return this.mContext.getString(R.string.ChatTypePersonal);
+            case BSTelegramWidgetMessages.GROUP_CHAT:
+                return this.mContext.getString(R.string.ChatTypeGroup);
+            case BSTelegramWidgetMessages.SECRET_CHAT:
+                return this.mContext.getString(R.string.ChatTypeSecret);
+            default:
+                return null;
         }
     }
 
     public void loadDialogs() {
+        Log.d(LOG_TAG, "loadDialogs");
         if (!this.mIsDialogsLoaded) {
             MessagesController.getInstance().loadDialogs(0, 0, 100, true);
             this.mIsDialogsLoaded = true;

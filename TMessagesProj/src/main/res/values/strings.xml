@@ -4,12 +4,13 @@
 
 <resources>
     <!--yota views-->
-    <string name="NoItems">No new messages…</string>
+    <string name="NoItems">No new messages</string>
     <string name="NoItemsInfo">Last Messages</string>
     <string name="empty_account_description">Set up your account at front screen</string>
-    <string name="StartMessagingWidget">Let\'s start using Yotagram!</string>
+    <string name="StartMessagingWidget">Start messaging…</string>
     <integer name="demo_messages_count" translatable="false">2</integer>
-    <string name="demo_message_from">Johnatan Kinsley</string>
+    <string name="demo_message_from_first_name">Johnatan</string>
+    <string name="demo_message_from_last_name">Kinsley</string>
     <string name="demo_message_text">I will show you something!</string>
 
     <!--speech recognizer error-->
@@ -27,13 +28,14 @@
     <!--widget strings-->
     <string name="LastFromYotagram">Last from Yotagram</string>
     <string name="Yotagram">Yotagram</string>
-    <string name="WidgetToday">Today, %s</string>
     <string name="WidgetYesterday">Yesterday</string>
     <string name="WidgetDayAgo">%s day ago</string>
     <string name="ChatTypePersonal">Personal chat</string>
     <string name="ChatTypeGroup">Group chat</string>
     <string name="ChatTypeSecret">Secret chat</string>
     <string name="SpeakAMessageTo">Speak a message to</string>
+    <string name="Authorize">Authorize in Yotagram</string>
+    <string name="WidgetLastYear">Last year</string>
 
     <!--widget format strings-->
 

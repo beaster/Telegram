@@ -22,9 +22,7 @@ import android.widget.RemoteViews;
 
 import com.yotadevices.sdk.BackscreenLauncherConstants;
 import com.yotadevices.sdk.Constants;
-import com.yotadevices.sdk.template.ModernWidgetFooterTemplate;
 
-import org.telegram.android.AndroidUtilities;
 import org.telegram.android.LocaleController;
 import org.telegram.android.NotificationCenter;
 import org.telegram.bsui.BSChatActivity;
@@ -73,11 +71,9 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
     }
 
     private PendingIntent getChatActivity(Context context, int messageIndex) {
-        //        long dialog_id = MessagesController.getInstance().dialogs.get(0).id;
-
         BSTelegramWidgetMessages messages = BSTelegramWidgetMessages.getInstance(context);
 
-        long dialogId = messages.getCurrentMessage(messageIndex).getDialogId();
+        long dialogId = messages.getDialogId(messageIndex);// messages.getCurrentMessage(messageIndex).getDialogId();
         Bundle args = this.getChatActivityArgs(dialogId);
 
         SpeechRecognizerManager speechRecognizerManager = SpeechRecognizerManager.getInstance(context);
@@ -89,7 +85,7 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
 
         Intent intent = new Intent(context, BSChatActivity.class);
         intent.putExtras(args);
-        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(context, messageIndex, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private PendingIntent getStartActivity(Context context) {
@@ -109,37 +105,37 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
         return PendingIntent.getBroadcast(context, 0, intent, 0);
     }
 
-    private PendingIntent getPendingSelfIntent(Context context, String action, int data) {
+    private PendingIntent getPendingSelfIntent(Context context, String action, int messageIndex) {
+        Log.d(LOG_TAG, "getPendingSelfIntent messageIndex = " + messageIndex);
         Intent intent = new Intent(context, BSTelegramWidgetMedium.class);
         intent.setAction(action);
-        intent.putExtra("data", data);
-        return PendingIntent.getBroadcast(context, 0, intent, 0);
-    }
 
+        intent.putExtra("messageIndex", messageIndex);
+        return PendingIntent.getBroadcast(context, messageIndex, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
 
     private void acquireWakeLock(Context context) {
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
-        wakeLock.acquire();
+        this.wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
+        this.wakeLock.acquire();
     }
 
     private void releaseWakeLock() {
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-            wakeLock.acquire(1000);
+        if (this.wakeLock != null && this.wakeLock.isHeld()) {
+            this.wakeLock.release();
+            this.wakeLock.acquire(1000);
         }
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(LOG_TAG, "onReceive: " + intent.getAction());
-
+        Log.d(LOG_TAG, "onReceive: " + intent.getAction() + " (" + intent.getIntExtra("messageIndex", -1) + ")");
         SpeechRecognizerManager speechRecognizerManager = SpeechRecognizerManager.getInstance(context);
         switch (intent.getAction()) {
             case SpeechRecognizerManager.ACTION_SPEAK: {
                 if (!speechRecognizerManager.isListening()) {
                     SpeechRecognizer speechRecognizer = speechRecognizerManager.getSpeechRecognizer();
-                    speechRecognizerManager.setMessageIndex(intent.getIntExtra("data", 0));
+                    speechRecognizerManager.setMessageIndex(intent.getIntExtra("messageIndex", 0));
                     Intent recognizerIntent = speechRecognizerManager.getIntent();
                     speechRecognizer.setRecognitionListener(new SpeechRecognizerListener(context));
                     speechRecognizer.startListening(recognizerIntent);
@@ -151,6 +147,7 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
                 if (speechRecognizerManager.isListening()) {
                     speechRecognizerManager.getSpeechRecognizer().stopListening();
                 }
+                break;
             }
             case SpeechRecognizerManager.ACTION_CLOSE_RECOGNIZER_ERROR: {
                 speechRecognizerManager.setErrorVisibility(View.GONE);
@@ -162,7 +159,7 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
             }
         }
         super.onReceive(context, intent);
-        drawWidgets(context);
+        this.drawWidgets(context);
     }
 
     @Override
@@ -173,13 +170,13 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
 
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         Log.d(LOG_TAG, "onUpdate");
-        drawWidgets(context);
+        this.drawWidgets(context);
     }
 
     @Override
     public void onDisabled(Context context) {
         Log.d(LOG_TAG, "onDisabled");
-        onFinish();
+        this.onFinish();
         super.onDisabled(context);
     }
 
@@ -192,25 +189,36 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
         for (int widgetId : allWidgetIds) {
             this.drawWidget(context, widgetId);
         }
-        releaseWakeLock();
+        this.releaseWakeLock();
     }
 
     private void drawWidget(Context context, int widgetId) {
-        Log.d(LOG_TAG, "drawWidget");
+        Log.d(LOG_TAG, "drawWidget, id: " + widgetId);
         Bundle appWidgetOptions = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId);
         int size = appWidgetOptions.getInt(BackscreenLauncherConstants.OPTION_WIDGET_SIZE, -1);
         boolean demo = appWidgetOptions.getBoolean(BackscreenLauncherConstants.OPTION_WIDGET_DEMO_MODE, false);
 
-        RemoteViews remoteViews = new WidgetView(context, size, demo).invoke();
+        if (size != -1) {
+            RemoteViews remoteViews = new WidgetView(context, size, demo).invoke();
 
-        AppWidgetManager.getInstance(context).updateAppWidget(widgetId, remoteViews);
+            AppWidgetManager.getInstance(context).updateAppWidget(widgetId, remoteViews);
+        }
     }
 
-    private int getCountContentLine(String text) {
-        TextPaint tp = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-        tp.setTextSize(AndroidUtilities.dp(20));
-        StaticLayout sl = new StaticLayout(text, tp, 448, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-        return sl.getLineCount();
+    private int getCountContentLine(float textSize, String... text) {
+        int widgetWidth = (int) (476f / 1.5f);//AndroidUtilities.dp(476f);/
+
+        TextPaint textPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+
+        textPaint.setTextSize(textSize);
+        StaticLayout staticLayout;
+        int count = 0;
+        for (String t : text) {
+            staticLayout = new StaticLayout(t, textPaint, widgetWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            count += staticLayout.getLineCount();
+        }
+
+        return count;
     }
 
     private void onInit(Context context) {
@@ -222,28 +230,27 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
             NotificationCenter.getInstance().addObserver(this, NotificationCenter.messageSendError);
             NotificationCenter.getInstance().addObserver(this, NotificationCenter.appDidLogout);
             NotificationCenter.getInstance().addObserver(this, NotificationCenter.appDidLogin);
-            mContext = context;
+            this.mContext = context;
             initialize = true;
         }
     }
 
-
     @Override
     public void didReceivedNotification(int id, Object... args) {
         if (id == NotificationCenter.appDidLogout) {
-            onFinish();
+            this.onFinish();
         } else if (id == NotificationCenter.dialogsNeedReload || id == NotificationCenter.updateInterfaces) {
             BSTelegramWidgetMessages messages = BSTelegramWidgetMessages.getInstance(this.mContext);
             messages.reloadDialogs();
         }
-        drawWidgets(mContext);
+        this.drawWidgets(mContext);
     }
 
     private void onFinish() {
-        if (finished) {
+        if (this.finished) {
             return;
         }
-        finished = true;
+        this.finished = true;
         NotificationCenter.getInstance().removeObserver(this, NotificationCenter.dialogsNeedReload);
         NotificationCenter.getInstance().removeObserver(this, NotificationCenter.emojiDidLoaded);
         NotificationCenter.getInstance().removeObserver(this, NotificationCenter.updateInterfaces);
@@ -257,334 +264,375 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
     }
 
     private class WidgetView {
-        private final int FLAG_MEDIUM_WIDGET = 0;
-        private final int FLAG_LARGE_WIDGET_SINGLE = 1;
-        private final int FLAG_LARGE_WIDGET = 2;
+        private final int MEDIUM_WIDGET_MESSAGE_LIMIT = 1;//1
+        private final int LARGE_WIDGET_MESSAGE_LIMIT = 3;//3
+        private final int EXTRA_LARGE_WIDGET_MESSAGE_LIMIT = 4;//4
+        private final int MESSAGE_UPDATE_LIMIT = 4;
+
+        private final int EXTRA_LARGE_WIDGET_2_MESSAGE_LINE_LIMIT = 8;
+        private final int EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT = 6;
 
         private Context mContext;
         private RemoteViews mRemoteViews;
         private int mWidgetSize;
         private boolean mIsDemo;
-
+        private boolean mIsOnline;
+        private boolean mShowAvatar;
         private int mDisplayMessagesCount;
         private BSTelegramWidgetMessages mMessages;
         private SpeechRecognizerManager mSpeechRecognizerManager;
 
         public WidgetView(Context context, int widgetSize, boolean demo) {
-            Log.d(LOG_TAG, "WidgetView.ctor: size = " + widgetSize);
+            Log.d(LOG_TAG, "WidgetView.ctor: size = " + widgetSize + " isDemo: " + demo);
 
             this.mContext = context;
             this.mWidgetSize = widgetSize;
             this.mIsDemo = demo;
-
+            this.mShowAvatar = false;
+            this.mIsOnline = UserConfig.isClientActivated();
             this.mDisplayMessagesCount = 0;
             this.mMessages = BSTelegramWidgetMessages.getInstance(this.mContext);
             this.mSpeechRecognizerManager = SpeechRecognizerManager.getInstance(mContext);
 
+            int messageCount = this.mMessages.updateMessages(MESSAGE_UPDATE_LIMIT);
+
             switch (this.mWidgetSize) {
+                case BackscreenLauncherConstants.WIDGET_SIZE_EXTRA_LARGE: {
+                    this.mDisplayMessagesCount = Math.min(messageCount, EXTRA_LARGE_WIDGET_MESSAGE_LIMIT);
+                    this.buildExtraLargeWidget();
+                    break;
+                }
                 case BackscreenLauncherConstants.WIDGET_SIZE_LARGE: {
-                    this.mDisplayMessagesCount = this.mMessages.updateMessages(2);
-
-                    if (this.mSpeechRecognizerManager.isListening()) {
-                        this.mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.bs_telegram_large_widget_voice);
-                    } else {
-                        if (this.mDisplayMessagesCount <= 1) {
-                            this.mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.bs_telegram_image_large_widget);
-                        } else {
-                            this.mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.bs_telegram_large_widget);
-                        }
-                    }
-
-
+                    this.mDisplayMessagesCount = Math.min(messageCount, LARGE_WIDGET_MESSAGE_LIMIT);
+                    this.buildLargeWidget();
                     break;
                 }
                 case BackscreenLauncherConstants.WIDGET_SIZE_MEDIUM: {
-                    this.mDisplayMessagesCount = this.mMessages.updateMessages(1);
-                    if (this.mSpeechRecognizerManager.isListening()) {
-                        this.mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.bs_telegram_medium_widget_voice);
-                    } else {
-                        this.mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.bs_telegram_medium_widget);
-                    }
-
-
+                    this.mDisplayMessagesCount = Math.min(messageCount, MEDIUM_WIDGET_MESSAGE_LIMIT);
+                    this.buildMediumWidget();
                     break;
                 }
             }
+        }
 
-            //            this.mRemoteViews.removeAllViews(R.id.widget_messages_container);
+        private void buildExtraLargeWidget() {
+            if (this.mIsDemo) {
+                this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_1_messge);
+                this.mShowAvatar = true;
+            } else {
+                if (this.mSpeechRecognizerManager.isListening()) {
+                    this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_voice);
+                } else {
+                    if (!this.mIsOnline || this.mDisplayMessagesCount == 0) {
+                        this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_no_message);
+                    } else if (this.mDisplayMessagesCount == 1) {
+                        this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_1_messge);
+                        this.mShowAvatar = true;
+                    } else if (this.mDisplayMessagesCount == 2) {
+                        this.mShowAvatar = true;
+
+                        int linesCount32_0 = BSTelegramWidgetMedium.this.getCountContentLine(32,
+                                this.mMessages.getText(0));
+                        int linesCount32_1 = BSTelegramWidgetMedium.this.getCountContentLine(32,
+                                this.mMessages.getText(1));
+
+                        int linesCount32 = linesCount32_0 + linesCount32_1;
+                        if (linesCount32 <= 2) {
+                            Log.d(LOG_TAG, "2 msg, short single (32sp): " + linesCount32 + " lines");
+                            this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_2_message_short_single_line);
+                        } else {
+                            int linesCount26 = BSTelegramWidgetMedium.this.getCountContentLine(26.66f,
+                                    this.mMessages.getText(0),
+                                    this.mMessages.getText(1));
+                            Log.d(LOG_TAG, "2 msg, short double (26.66sp): " + linesCount26 + " lines");
+                            if (linesCount26 <= 4) {
+                                this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_2_message_short_double_line);
+                            } else {
+                                Log.d(LOG_TAG, "2 msg, long double (26.66sp): " + linesCount26 + " lines");
+
+                                this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_2_message_long);
+
+                                int message2lines = Math.min(linesCount32_1, EXTRA_LARGE_WIDGET_2_MESSAGE_LINE_LIMIT - 1);
+                                int message1lines = EXTRA_LARGE_WIDGET_2_MESSAGE_LINE_LIMIT - message2lines;
+
+                                this.mRemoteViews.setInt(R.id.sms_missed, "setMaxLines", message1lines);
+                                this.mRemoteViews.setInt(R.id.sms_missed_2, "setMaxLines", message2lines);
+                            }
+                        }
+                    } else if (this.mDisplayMessagesCount == 3) {
+                        this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_3_message);
+
+                        int linesCount32_1 = BSTelegramWidgetMedium.this.getCountContentLine(32,
+                                this.mMessages.getText(1));
+                        int linesCount32_2 = BSTelegramWidgetMedium.this.getCountContentLine(32,
+                                this.mMessages.getText(2));
+
+                        int message3lines = Math.min(linesCount32_2, EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT - 2);
+                        int message2lines = Math.min(linesCount32_1, EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT - message3lines - 1);
+                        int message1lines = EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT - message2lines - message3lines;
+
+                        Log.e(LOG_TAG, "Lines: " + message3lines + " " + message2lines + " " + message1lines);
+
+                        this.mRemoteViews.setInt(R.id.sms_missed, "setMaxLines", message1lines);
+                        this.mRemoteViews.setInt(R.id.sms_missed_2, "setMaxLines", message2lines);
+                        this.mRemoteViews.setInt(R.id.sms_missed_3, "setMaxLines", message3lines);
+                    } else if (this.mDisplayMessagesCount == 4) {
+                        this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_4_message);
+                    }
+                }
+            }
+        }
+
+        private void buildLargeWidget() {
+            if (this.mIsDemo) {
+                this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_1_message);
+                this.mShowAvatar = true;
+            } else if (!this.mIsOnline) {
+                this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_no_message);
+            } else {
+                if (this.mSpeechRecognizerManager.isListening()) {
+                    this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_voice);
+                } else {
+                    if (this.mDisplayMessagesCount == 0) {
+                        this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_no_message);
+                    } else if (this.mDisplayMessagesCount == 1) {
+                        this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_1_message);
+                        this.mShowAvatar = true;
+                    } else if (this.mDisplayMessagesCount == 2) {
+                        int linesCount = BSTelegramWidgetMedium.this.getCountContentLine(32,
+                                this.mMessages.getText(0),
+                                this.mMessages.getText(1));
+
+                        if (linesCount <= 2) {
+                            Log.d(LOG_TAG, "2 msg, short: " + linesCount + " lines");
+                            this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_2_message_short);
+                        } else {
+                            Log.d(LOG_TAG, "2 msg, long: " + linesCount + " lines");
+                            this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_2_message_long);
+                        }
+                    } else if (this.mDisplayMessagesCount == 3) {
+                        this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_3_message);
+                    }
+                }
+            }
+        }
+
+        private void buildMediumWidget() {
+            if (this.mIsDemo) {
+                this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_medium_widget);
+            } else if (!this.mIsOnline) {
+                this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_medium_widget_no_message);
+            } else {
+                if (this.mSpeechRecognizerManager.isListening()) {
+                    this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_medium_widget_voice);
+                } else {
+                    if (this.mDisplayMessagesCount == 0) {
+                        this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_medium_widget_no_message);
+                    } else if (this.mDisplayMessagesCount == 1) {
+                        this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_medium_widget);
+                    }
+                }
+            }
         }
 
         public RemoteViews invoke() {
-            RemoteViews remoteViews = null;
             if (!this.mIsDemo) {
                 BSTelegramWidgetMedium.this.onInit(this.mContext);
-                if (UserConfig.isClientActivated()) {
-
+                if (this.mIsOnline) {
                     this.mMessages.loadDialogs();
-                    switch (this.mWidgetSize) {
-                        case BackscreenLauncherConstants.WIDGET_SIZE_LARGE: {
-                            Log.d(LOG_TAG, "Large: count: " + this.mDisplayMessagesCount);
-                            remoteViews = this.buildMessageView();
-                            break;
-                        }
-                        case BackscreenLauncherConstants.WIDGET_SIZE_MEDIUM: {
-                            Log.d(LOG_TAG, "Medium: count: " + this.mDisplayMessagesCount);
-                            remoteViews = this.buildMessageView();
-                            break;
-                        }
+                    if (this.mDisplayMessagesCount == 0) {
+                        this.buildEmptyMessageView();
+                    } else {
+                        this.buildMessageView();
                     }
                 } else {
-                    remoteViews = this.buildOfflineMessageView();
+                    this.buildOfflineMessageView();
                 }
             } else {
-                remoteViews = this.buildDemoMessageView();
+                this.buildDemoMessageView();
             }
 
-            return remoteViews;
+            return this.mRemoteViews;
         }
 
         private String getTimeText(int messageIndex) {
-            String time = this.getFormattedTimeAgoString(this.mContext, this.mMessages.getMessageTime(messageIndex), false);
-            String chatType = this.getChatType(this.mMessages.getCurrentMessage(messageIndex).getDialogId());
-            return LocaleController.formatStringSimple("%s, %s", time, chatType);
+            String time = this.formatDate(this.mMessages.getTime(messageIndex));
+            return LocaleController.formatStringSimple("%s, %s", time, this.mMessages.getChatTypeName(this.mMessages.getChatType(messageIndex)));
         }
 
+        private String formatDate(long date) {
+            Calendar rightNow = Calendar.getInstance(Locale.getDefault());
+            int day = rightNow.get(Calendar.DAY_OF_YEAR);
+            int year = rightNow.get(Calendar.YEAR);
+            rightNow.setTimeInMillis(date * 1000);
+            int dateDay = rightNow.get(Calendar.DAY_OF_YEAR);
+            int dateYear = rightNow.get(Calendar.YEAR);
+            SimpleDateFormat format;
+            String result;
+            Date d = new Date(date * 1000);
 
-        private RemoteViews buildMessageView() {
-            if (this.mDisplayMessagesCount == 0) {
-                return this.buildEmptyMessageView();
-            } else {
-                int buttonSpeakFlag = this.FLAG_MEDIUM_WIDGET;
-
-                this.buildRightButton();
-
-                if (this.mSpeechRecognizerManager.isListening()) {
-                    this.mRemoteViews.setTextViewText(R.id.speak_to, this.mMessages.getMessagesUser(this.mSpeechRecognizerManager.getMessageIndex()));
-
+            if (dateDay == day && year == dateYear) {
+                if (DateFormat.is24HourFormat(ApplicationLoader.applicationContext)) {
+                    format = new SimpleDateFormat("HH:mm", Locale.getDefault());
                 } else {
-                    this.mRemoteViews.setTextViewText(R.id.sms_missed, Html.fromHtml(this.mMessages.getMessageText(0)));
-
-                    this.mRemoteViews.setOnClickPendingIntent(R.id.right_button, getMessagesActivity(this.mContext));
-                    this.mRemoteViews.setOnClickPendingIntent(R.id.sms_missed_container, BSTelegramWidgetMedium.this.getChatActivity(this.mContext, 0));
-
-                    if (this.mWidgetSize == BackscreenLauncherConstants.WIDGET_SIZE_MEDIUM) {
-                        this.mRemoteViews.setViewVisibility(R.id.time_image, View.VISIBLE);
-
-                        this.mRemoteViews.setViewVisibility(R.id.time, View.VISIBLE);
-                        this.mRemoteViews.setTextViewText(R.id.time, this.getTimeText(0));
-                    } else {
-                        if (this.mDisplayMessagesCount == 1) {
-                            buttonSpeakFlag = this.FLAG_LARGE_WIDGET_SINGLE;
-
-                            this.mRemoteViews.setViewVisibility(R.id.time, View.GONE);
-                            this.mRemoteViews.setViewVisibility(R.id.time_image, View.GONE);
-
-                            this.mRemoteViews.setViewVisibility(R.id.extra_time_image, View.VISIBLE);
-
-                            this.mRemoteViews.setViewVisibility(R.id.extra_time, View.VISIBLE);
-                            this.mRemoteViews.setTextViewText(R.id.extra_time, this.getTimeText(0));
-                        } else {
-                            buttonSpeakFlag = this.FLAG_LARGE_WIDGET;
-
-                            this.mRemoteViews.setViewVisibility(R.id.extra_time_image, View.GONE);
-
-                            this.mRemoteViews.setViewVisibility(R.id.time_image, View.VISIBLE);
-
-                            this.mRemoteViews.setViewVisibility(R.id.extra_time, View.VISIBLE);
-                            this.mRemoteViews.setTextViewText(R.id.extra_time, this.mContext.getApplicationContext().getString(R.string.LastFromYotagram));
-
-                            this.mRemoteViews.setViewVisibility(R.id.time, View.VISIBLE);
-                            this.mRemoteViews.setTextViewText(R.id.time, this.getTimeText(0));
-
-                            this.mRemoteViews.setViewVisibility(R.id.sms_missed_2_container, View.VISIBLE);
-                            this.mRemoteViews.setTextViewText(R.id.sms_missed_2, Html.fromHtml(this.mMessages.getMessageText(1)));
-                            this.mRemoteViews.setOnClickPendingIntent(R.id.sms_missed_2, BSTelegramWidgetMedium.this.getChatActivity(this.mContext, 1));
-                            this.mRemoteViews.setTextViewText(R.id.time_2, this.getTimeText(1));
-                        }
-                    }
-                    this.buildSpeakButton(buttonSpeakFlag);
+                    format = new SimpleDateFormat("h:mm a", Locale.US);
                 }
-                return this.mRemoteViews;
+                result = format.format(d);
+            } else if (dateDay + 1 == day && year == dateYear) {
+                result = this.mContext.getString(R.string.WidgetYesterday);
+            } else if (year == dateYear) {
+                if (DateFormat.is24HourFormat(ApplicationLoader.applicationContext)) {
+                    format = new SimpleDateFormat("d MMM HH:mm", Locale.getDefault());
+                } else {
+                    format = new SimpleDateFormat("d MMM hh:mm a", Locale.US);
+                }
+                result = format.format(d);
+            } else {
+                result = this.mContext.getString(R.string.WidgetLastYear);
+            }
+
+            return result;
+        }
+
+        private void buildMessageView() {
+            if (this.mShowAvatar) {
+                this.buildAvatar();
+            }
+
+            this.buildRightButton();
+
+            if (this.mSpeechRecognizerManager.isListening()) {
+                this.mRemoteViews.setTextViewText(R.id.speak_to, this.mMessages.getUserName(this.mSpeechRecognizerManager.getMessageIndex()));
+            } else {
+                if (this.mDisplayMessagesCount == 1) {
+                    this.setOnClickMessage(R.id.widget_root);
+                    this.buildMessage(R.id.sms_missed);
+                    this.buildSpeakButton(R.id.button_speak);
+                    this.buildTime(R.id.time);
+                } else if (this.mDisplayMessagesCount == 2) {
+                    this.setOnClickMessage(R.id.sms_missed_container_2, R.id.sms_missed_container);
+                    this.buildMessage(R.id.sms_missed_2, R.id.sms_missed);
+                    this.buildTime(R.id.time_2, R.id.time);
+                    this.buildSpeakButton(R.id.button_speak_2, R.id.button_speak);
+                } else if (this.mDisplayMessagesCount == 3) {
+                    this.setOnClickMessage(R.id.sms_missed_container_3, R.id.sms_missed_container_2, R.id.sms_missed_container);
+                    this.buildMessage(R.id.sms_missed_3, R.id.sms_missed_2, R.id.sms_missed);
+                    this.buildTime(R.id.time_3, R.id.time_2, R.id.time);
+                    this.buildSpeakButton(R.id.button_speak_3, R.id.button_speak_2, R.id.button_speak);
+                } else if (this.mDisplayMessagesCount == 4) {
+                    this.setOnClickMessage(R.id.sms_missed_container_4, R.id.sms_missed_container_3, R.id.sms_missed_container_2, R.id.sms_missed_container);
+                    this.buildMessage(R.id.sms_missed_4, R.id.sms_missed_3, R.id.sms_missed_2, R.id.sms_missed);
+                    this.buildTime(R.id.time_4, R.id.time_3, R.id.time_2, R.id.time);
+                    this.buildSpeakButton(R.id.button_speak_4, R.id.button_speak_3, R.id.button_speak_2, R.id.button_speak);
+                }
+
+                this.buildError();
             }
         }
 
-        private void buildSpeakButton(int buttonSpeakFlag) {
-            if (SpeechRecognizer.isRecognitionAvailable(this.mContext)) {
-                SpeechRecognizerManager speechRecognizerManager = SpeechRecognizerManager.getInstance(mContext);
+        private void buildAvatar() {
+            this.mRemoteViews.setImageViewBitmap(R.id.user_avatar, this.mMessages.getAvatar(0));
+        }
 
-                //TODO: delete block
-                if (speechRecognizerManager.isListening()) {
-                    if (buttonSpeakFlag == this.FLAG_MEDIUM_WIDGET) {
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak, View.INVISIBLE);
-                    } else if (buttonSpeakFlag == this.FLAG_LARGE_WIDGET_SINGLE) {
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak_hide, View.INVISIBLE);
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak, View.GONE);
-                    } else if (buttonSpeakFlag == this.FLAG_LARGE_WIDGET) {
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak_hide, View.GONE);
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak, View.INVISIBLE);
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak_2, View.INVISIBLE);
+        private void buildMessage(int... resourceIds) {
+            for (int i = 0; i < resourceIds.length; i++) {
+                this.mRemoteViews.setTextViewText(resourceIds[i], Html.fromHtml(this.mMessages.getText(i)));
+            }
+        }
+
+        private void setOnClickMessage(int... resourceIds) {
+            for (int i = 0; i < resourceIds.length; i++) {
+                this.mRemoteViews.setOnClickPendingIntent(resourceIds[i], BSTelegramWidgetMedium.this.getChatActivity(this.mContext, i));
+            }
+        }
+
+        private void buildTime(int... resourceIds) {
+            for (int i = 0; i < resourceIds.length; i++) {
+                this.mRemoteViews.setTextViewText(resourceIds[i], this.getTimeText(i));
+            }
+        }
+
+        private void buildError() {
+            if (!this.mSpeechRecognizerManager.isListening() && this.mSpeechRecognizerManager.isHasError()) {
+                this.mSpeechRecognizerManager.setErrorVisibility(View.VISIBLE);
+                this.mSpeechRecognizerManager.setHasError(false);
+
+                AlarmManager alarmManager = (AlarmManager) this.mContext.getSystemService(Context.ALARM_SERVICE);
+                final PendingIntent pendingIntent = BSTelegramWidgetMedium.this.getPendingSelfIntent(this.mContext, SpeechRecognizerManager.ACTION_CLOSE_RECOGNIZER_ERROR);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SpeechRecognizerManager.SPEECH_RECOGNIZER_ERROR_DISPLAY_TIME, pendingIntent);
+            }
+            this.mRemoteViews.setTextViewText(R.id.recognizer_error, this.getErrorText(this.mSpeechRecognizerManager.getError()));
+            this.mRemoteViews.setViewVisibility(R.id.recognizer_error, this.mSpeechRecognizerManager.getErrorVisibility());
+        }
+
+        private void buildSpeakButton(int... resourceIds) {
+            if (SpeechRecognizer.isRecognitionAvailable(this.mContext)) {
+                if (this.mSpeechRecognizerManager.isListening()) {
+                    for (int i = 0; i < resourceIds.length; i++) {
+                        this.mRemoteViews.setViewVisibility(resourceIds[i], View.INVISIBLE);
                     }
                 } else {
-                    if (buttonSpeakFlag == this.FLAG_MEDIUM_WIDGET) {
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak, View.VISIBLE);
-                        this.mRemoteViews.setOnClickPendingIntent(R.id.button_speak, BSTelegramWidgetMedium.this.getPendingSelfIntent(this.mContext, SpeechRecognizerManager.ACTION_SPEAK, 0));
-                    } else if (buttonSpeakFlag == this.FLAG_LARGE_WIDGET_SINGLE) {
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak, View.GONE);
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak_hide, View.VISIBLE);
-                        this.mRemoteViews.setOnClickPendingIntent(R.id.button_speak_hide, BSTelegramWidgetMedium.this.getPendingSelfIntent(this.mContext, SpeechRecognizerManager.ACTION_SPEAK, 0));
-                    } else if (buttonSpeakFlag == this.FLAG_LARGE_WIDGET) {
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak_hide, View.GONE);
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak, View.VISIBLE);
-                        this.mRemoteViews.setOnClickPendingIntent(R.id.button_speak, BSTelegramWidgetMedium.this.getPendingSelfIntent(this.mContext, SpeechRecognizerManager.ACTION_SPEAK, 0));
-                        this.mRemoteViews.setViewVisibility(R.id.button_speak_2, View.VISIBLE);
-                        this.mRemoteViews.setOnClickPendingIntent(R.id.button_speak_2, BSTelegramWidgetMedium.this.getPendingSelfIntent(this.mContext, SpeechRecognizerManager.ACTION_SPEAK, 1));
-                    }
-
-                    if (speechRecognizerManager.isHasError()) {
-                        speechRecognizerManager.setErrorVisibility(View.VISIBLE);
-                        speechRecognizerManager.setHasError(false);
-
-                        AlarmManager alarmManager = (AlarmManager) this.mContext.getSystemService(Context.ALARM_SERVICE);
-                        final PendingIntent pendingIntent = BSTelegramWidgetMedium.this.getPendingSelfIntent(this.mContext, SpeechRecognizerManager.ACTION_CLOSE_RECOGNIZER_ERROR);
-                        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SpeechRecognizerManager.SPEECH_RECOGNIZER_ERROR_DISPLAY_TIME, pendingIntent);
+                    for (int i = 0; i < resourceIds.length; i++) {
+                        this.mRemoteViews.setViewVisibility(resourceIds[i], View.VISIBLE);
+                        this.mRemoteViews.setOnClickPendingIntent(resourceIds[i], BSTelegramWidgetMedium.this.getPendingSelfIntent(this.mContext, SpeechRecognizerManager.ACTION_SPEAK, i));
                     }
                 }
-                this.mRemoteViews.setTextViewText(R.id.recognizer_error, this.getErrorText(speechRecognizerManager.getError()));
-                this.mRemoteViews.setViewVisibility(R.id.recognizer_error, speechRecognizerManager.getErrorVisibility());
             }
         }
 
         private void buildRightButton() {
             int count = this.mMessages.sumUnreadMessagesCount() + 1 - this.mDisplayMessagesCount;
             if (count > 1) {
-                this.mRemoteViews.setViewVisibility(R.id.right_button_paperplan_image, View.VISIBLE);
-                this.mRemoteViews.setViewVisibility(R.id.right_button_list_image, View.GONE);
-                this.mRemoteViews.setViewVisibility(R.id.right_button_count, View.VISIBLE);
-                this.mRemoteViews.setTextViewText(R.id.right_button_count, String.valueOf(count - 1));
+                this.buildRightButtonCount(count);
             } else {
-                this.mRemoteViews.setViewVisibility(R.id.right_button_paperplan_image, View.VISIBLE);
-                this.mRemoteViews.setViewVisibility(R.id.right_button_list_image, View.VISIBLE);
+                this.buildRightButtonList();
             }
-        }
-
-        private RemoteViews buildEmptyMessageView() {
-            this.mRemoteViews.setViewVisibility(R.id.right_button_paperplan_image, View.VISIBLE);
-            this.mRemoteViews.setViewVisibility(R.id.right_button_list_image, View.VISIBLE);
-
-            this.mRemoteViews.setTextViewText(R.id.sms_missed, this.mContext.getString(R.string.NoItems));
-
             this.mRemoteViews.setOnClickPendingIntent(R.id.right_button, BSTelegramWidgetMedium.this.getMessagesActivity(this.mContext));
-            this.mRemoteViews.setOnClickPendingIntent(R.id.sms_missed_container, BSTelegramWidgetMedium.this.getMessagesActivity(this.mContext));
-
-            if (this.mWidgetSize == BackscreenLauncherConstants.WIDGET_SIZE_MEDIUM) {
-                this.mRemoteViews.setViewVisibility(R.id.time, View.GONE);
-                this.mRemoteViews.setViewVisibility(R.id.time_image, View.GONE);
-            } else {
-                this.mRemoteViews.setViewVisibility(R.id.time, View.GONE);
-                this.mRemoteViews.setViewVisibility(R.id.time_image, View.GONE);
-                this.mRemoteViews.setViewVisibility(R.id.extra_time_image, View.GONE);
-                this.mRemoteViews.setViewVisibility(R.id.extra_time, View.GONE);
-            }
-
-            return this.mRemoteViews;
         }
 
-        private RemoteViews buildOfflineMessageView() {
-            ModernWidgetFooterTemplate builder = new ModernWidgetFooterTemplate();
-
-            this.mRemoteViews.setTextViewText(R.id.sms_missed, this.mContext.getString(R.string.StartMessaging));
-            builder.showTime(false);
-            builder.setText(this.mContext.getString(R.string.StartMessagingWidget));
-            builder.setTime(0);
-            builder.showRightButton(R.drawable.counter_paperplan, R.drawable.counter_list, getStartActivity(this.mContext));
-            builder.setMaxViewActivity(getStartActivity(this.mContext));
-
-
-            builder.setContentView(this.mRemoteViews);
-            return builder.apply(this.mContext);
+        private void buildRightButtonCount(int count) {
+            this.mRemoteViews.setViewVisibility(R.id.right_button_list_image, View.GONE);
+            this.mRemoteViews.setViewVisibility(R.id.right_button_count, View.VISIBLE);
+            this.mRemoteViews.setTextViewText(R.id.right_button_count, String.valueOf(count - 1));
         }
 
-        private RemoteViews buildDemoMessageView() {
-            ModernWidgetFooterTemplate builder = new ModernWidgetFooterTemplate();
-
-            builder.showTime(true);
-            builder.showRightButton(R.drawable.counter_paperplan, R.drawable.counter_list, getMessagesActivity(this.mContext));
-            builder.setMaxViewActivity(getMessagesActivity(this.mContext));
-            builder.setTime(0);
-            this.mRemoteViews.setTextViewText(R.id.sms_missed, this.mContext.getString(R.string.demo_message_from) + ": " + mContext.getString(R.string.demo_message_text));
-
-            builder.setContentView(this.mRemoteViews);
-            return builder.apply(this.mContext);
+        private void buildRightButtonList() {
+            this.mRemoteViews.setViewVisibility(R.id.right_button_list_image, View.VISIBLE);
+            this.mRemoteViews.setViewVisibility(R.id.right_button_count, View.GONE);
         }
 
-        public String getFormattedTimeAgoString(Context context, long eventTime, boolean addToday) {
-            long difference = Math.abs((System.currentTimeMillis() - eventTime));
-            Context appContext = this.mContext.getApplicationContext();
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.set(calendar.get(Calendar.YEAR), Calendar.JANUARY, 1, 0, 0, 0);
-            long timeTillEndOfYear = System.currentTimeMillis() - calendar.getTimeInMillis();
-            if (difference < 24f * 60f * 60f * 1000f) {
-                SimpleDateFormat simpleDateFormat;
-                if (DateFormat.is24HourFormat(context)) {
-                    simpleDateFormat = (SimpleDateFormat) DateFormat.getTimeFormat(context);
-                } else {
-                    simpleDateFormat = (SimpleDateFormat) java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT, Locale.US);
-                }
-                return addToday ?
-                        appContext.getString(R.string.WidgetToday, simpleDateFormat.format(new Date(eventTime))) :
-                        simpleDateFormat.format(new Date(eventTime));
-            } else if (difference < 30f * 24f * 60f * 60f * 1000f) {
-                //TODO:
-                int day = Math.round(difference / 1000f / 60f / 60f / 24f);
-                switch (day) {
-                    case 2:
-                        return appContext.getString(R.string.WidgetYesterday);
-                    default:
-                        return appContext.getString(R.string.WidgetDayAgo, String.valueOf(day));
-                }
-            } else if (difference < timeTillEndOfYear) {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM");
-                return simpleDateFormat.format(new Date(eventTime));
-            } else {
-                return DateFormat.getDateFormat(context).format(new Date(eventTime));
-            }
+        private void buildEmptyMessageView() {
+            this.buildRightButtonList();
+
+            this.mRemoteViews.setTextViewText(R.id.widget_message, this.mContext.getString(R.string.NoItems));
+            this.mRemoteViews.setOnClickPendingIntent(R.id.widget_root, BSTelegramWidgetMedium.this.getMessagesActivity(this.mContext));
+            this.mRemoteViews.setTextViewText(R.id.yotagram_text, this.mContext.getString(R.string.Yotagram));
         }
 
-        private String getChatType(long dialogId) {
-            //TODO
-            Context appContext = this.mContext.getApplicationContext();
-            String chatType = appContext.getString(R.string.ChatTypePersonal);
+        private void buildOfflineMessageView() {
+            this.buildRightButtonList();
 
-            int chatId = 0;
-            int userId = 0;
-            int encId = 0;
+            this.mRemoteViews.setTextViewText(R.id.widget_message, this.mContext.getString(R.string.StartMessagingWidget));
+            this.mRemoteViews.setOnClickPendingIntent(R.id.widget_root, BSTelegramWidgetMedium.this.getStartActivity(this.mContext));
+            this.mRemoteViews.setTextViewText(R.id.yotagram_text, this.mContext.getString(R.string.Authorize));
+        }
 
-            int lower_part = (int) dialogId;
-            int high_id = (int) (dialogId >> 32);
-            if (lower_part != 0) {
-                if (high_id == 1) {
-                    chatId = lower_part;
-                } else {
-                    if (lower_part > 0) {
-                        userId = lower_part;
-                    } else if (lower_part < 0) {
-                        chatId = -lower_part;
-                    }
-                }
-            } else {
-                encId = high_id;
+        private void buildDemoMessageView() {
+            this.buildRightButtonCount(this.mContext.getResources().getInteger(R.integer.demo_messages_count));
+
+            if (this.mShowAvatar) {
+                this.mRemoteViews.setImageViewBitmap(R.id.user_avatar,
+                        this.mMessages.getDemoAvatar(
+                                this.mContext.getString(R.string.demo_message_from_first_name),
+                                this.mContext.getString(R.string.demo_message_from_last_name)));
             }
-            if (chatId != 0) {
-                if (chatId > 0) {
-                    chatType = appContext.getString(R.string.ChatTypeGroup);
-                }
-            } else if (userId != 0) {
 
-            } else if (encId != 0) {
-                chatType = appContext.getString(R.string.ChatTypeSecret);
-            }
-            return chatType;
+            String messageText = LocaleController.formatStringSimple("<b>%s %s:</b> %s",
+                    this.mContext.getString(R.string.demo_message_from_first_name),
+                    this.mContext.getString(R.string.demo_message_from_last_name),
+                    this.mContext.getString(R.string.demo_message_text));
+            this.mRemoteViews.setTextViewText(R.id.sms_missed, Html.fromHtml(messageText));
+            this.mRemoteViews.setTextViewText(R.id.time, this.formatDate(System.currentTimeMillis() / 1000 - 60 * 60 * 23));
         }
 
         private String getErrorText(int errorCode) {
@@ -646,7 +694,7 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
 
         @Override
         public void onBufferReceived(byte[] buffer) {
-            Log.d(SpeechRecognizerListener.LOG_TAG, "onBufferReceived: " + buffer);
+            Log.d(SpeechRecognizerListener.LOG_TAG, "onBufferReceived");
         }
 
         @Override

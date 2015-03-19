@@ -4,49 +4,62 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@android:color/transparent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:id="@+id/sms_missed_container"
+                  android:layout_width="match_parent"
+                  android:layout_height="64dp"
+                  android:layout_gravity="top"
+                  android:orientation="horizontal">
+        <TextView
+            android:id="@+id/sms_missed"
+            style="@style/WidgetMessages"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="1"
+            android:textAlignment="textStart"/>
 
-        <include layout="@layout/widget_medium_sms_missed_container_layout"/>
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical|left"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:id="@+id/time_image"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/counter_paperplan"/>
-
-                    <TextView
-                        android:id="@+id/time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
-
-                <include layout="@layout/widget_right_button_layout"/>
-            </LinearLayout>
-        </FrameLayout>
+        <ImageView
+            android:id="@+id/button_speak"
+            style="@style/ButtonSpeak"
+            android:layout_gravity="bottom|right"
+            android:visibility="gone"/>
     </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingBottom="6dp">
+
+            <ImageView
+                style="@style/widget_clock"
+                android:layout_gravity="center_vertical"/>
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+                style="@style/FooterText"/>
+        </LinearLayout>
+
+        <include
+            layout="@layout/bs_telegram_widget_right_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center_vertical"/>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/recognizer_error"

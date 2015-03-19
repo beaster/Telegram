@@ -1,66 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     android:id="@+id/widget_root"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
-    android:orientation="vertical">
+    android:background="@android:color/transparent">
 
-    <LinearLayout
+    <include
+        layout="@layout/bs_telegram_widget_speak_to"
+        android:layout_width="236.66dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_alignParentStart="true"/>
+
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true">
+
+        <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                     android:alwaysDrawnWithCache="true"
+                     android:animationCache="true"
+                     android:autoStart="true"
+                     android:flipInterval="550"
+                     android:measureAllChildren="true">
+            <!--48dp-->
+            <ImageView
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_gravity="center"
+                android:src="@drawable/voice_background"/>
+            <!--64dp-->
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:src="@drawable/voice_background"/>
+
+            <!--80dp-->
+            <ImageView
+                android:layout_width="74dp"
+                android:layout_height="74dp"
+                android:layout_gravity="center"
+                android:src="@drawable/voice_background"/>
+        </ViewFlipper>
+
+        <!--25-->
+        <ImageView
+            android:layout_width="25.33dp"
+            android:layout_height="25.33dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_mic_voice"/>
+
+    </FrameLayout>
+
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_alignParentBottom="true">
+        <!--10.66dp-->
+        <TextView
+            style="@style/FooterText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:text="@string/LastFromYotagram"/>
 
-        <include
-            layout="@layout/widget_speak_to_layout"
-            android:layout_width="236.66dp"
-            android:layout_height="wrap_content"/>
-
-        <FrameLayout
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center">
-
-            <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
-                         android:layout_width="match_parent"
-                         android:layout_height="match_parent"
-                         android:layout_gravity="center"
-                         android:alwaysDrawnWithCache="true"
-                         android:animationCache="true"
-                         android:autoStart="true"
-                         android:flipInterval="750"
-                         android:measureAllChildren="true">
-                <!--48dp-->
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/voice_background"/>
-                <!--64dp-->
-                <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/voice_background"/>
-
-                <!--80dp-->
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/voice_background"/>
-            </ViewFlipper>
-
-            <!--25-->
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_mic"/>
-
-        </FrameLayout>
-    </LinearLayout>
-
-    <include layout="@layout/widget_text_right_button_layout"/>
-</LinearLayout>
+        <include layout="@layout/bs_telegram_widget_right_button"/>
+    </FrameLayout>
+</RelativeLayout>
