@@ -22,12 +22,12 @@ import org.telegram.messenger.TLRPC;
 /**
  * Created by fanticqq on 20.03.15.
  */
-public class BSChatBaseCell extends BSBaseCell {
+public class BSChatDashCell extends BSBaseCell {
 
     public static interface ChatBaseCellDelegate {
-        public abstract void didPressedUserAvatar(BSChatBaseCell cell, TLRPC.User user);
-        public abstract void didPressedCancelSendButton(BSChatBaseCell cell);
-        public abstract void didLongPressed(BSChatBaseCell cell);
+        public abstract void didPressedUserAvatar(BSChatDashCell cell, TLRPC.User user);
+        public abstract void didPressedCancelSendButton(BSChatDashCell cell);
+        public abstract void didLongPressed(BSChatDashCell cell);
         public abstract boolean canPerformActions();
     }
 
@@ -100,7 +100,7 @@ public class BSChatBaseCell extends BSBaseCell {
     private int last_send_state = 0;
     private int last_delete_date = 0;
 
-    public BSChatBaseCell(Context context) {
+    public BSChatDashCell(Context context) {
         super(context);
         if (backgroundDrawableIn == null) {
             backgroundDrawableIn = getResources().getDrawable(R.drawable.msg_in_bs);
@@ -310,15 +310,13 @@ public class BSChatBaseCell extends BSBaseCell {
             timeLayout = new StaticLayout(currentTimeString, currentTimePaint, timeWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             if (!media) {
                 if (!currentMessageObject.isOut()) {
-//                    timeX = backgroundWidth - dp(9) - timeWidth + (isChat ? dp(52) : 0);
-                    timeX = backgroundWidth - dp(9) - timeWidth;
+                    timeX = backgroundWidth - dp(9) - timeWidth + (isChat ? dp(52) : 0);
                 } else {
                     timeX = layoutWidth - timeWidth - dp(38.5f);
                 }
             } else {
                 if (!currentMessageObject.isOut()) {
-//                    timeX = backgroundWidth - dp(4) - timeWidth + (isChat ? dp(52) : 0);
-                    timeX = backgroundWidth - dp(4) - timeWidth;
+                    timeX = backgroundWidth - dp(4) - timeWidth + (isChat ? dp(52) : 0);
                 } else {
                     timeX = layoutWidth - timeWidth - dp(42.0f);
                 }
@@ -365,7 +363,7 @@ public class BSChatBaseCell extends BSBaseCell {
                     currentBackgroundDrawable = backgroundMediaDrawableOut;
                 }
             }
-            setDrawableBounds(currentBackgroundDrawable, layoutWidth - backgroundWidth - (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2) - namesOffset);
+            setDrawableBounds(currentBackgroundDrawable, layoutWidth - backgroundWidth - (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2));
         } else {
             if (isPressed() && isCheckPressed || !isCheckPressed && isPressed) {
                 if (!media) {
@@ -380,7 +378,11 @@ public class BSChatBaseCell extends BSBaseCell {
                     currentBackgroundDrawable = backgroundMediaDrawableIn;
                 }
             }
-            setDrawableBounds(currentBackgroundDrawable, (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2) - namesOffset);
+            if (isChat) {
+                setDrawableBounds(currentBackgroundDrawable, dp(52 + (!media ? 0 : 9)), dp(1), backgroundWidth, layoutHeight - dp(2));
+            } else {
+                setDrawableBounds(currentBackgroundDrawable, (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2));
+            }
         }
         if (drawBackground) {
             currentBackgroundDrawable.draw(canvas);
@@ -390,7 +392,7 @@ public class BSChatBaseCell extends BSBaseCell {
 
         if (drawName && nameLayout != null) {
             canvas.save();
-            canvas.translate(currentBackgroundDrawable.getBounds().left + dp(19) - nameOffsetX, - dp(10));
+            canvas.translate(currentBackgroundDrawable.getBounds().left + dp(19) - nameOffsetX, dp(10));
             namePaint.setColor(0xff000000);
             nameLayout.draw(canvas);
             canvas.restore();

@@ -172,7 +172,7 @@ public class BSChatMessageCell extends BSChatBaseCell {
             }
 
             backgroundWidth = messageObject.textWidth;
-            totalHeight = messageObject.textHeight + dp(19.5f) + namesOffset;
+            totalHeight = messageObject.textHeight + dp(19.5f) /*+ namesOffset*/;
 
             int maxChildWidth = Math.max(backgroundWidth, nameWidth);
             maxChildWidth = Math.max(maxChildWidth, forwardedNameWidth);
@@ -198,7 +198,7 @@ public class BSChatMessageCell extends BSChatBaseCell {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), totalHeight);
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), totalHeight + namesOffset);
     }
 
     @Override
@@ -207,10 +207,11 @@ public class BSChatMessageCell extends BSChatBaseCell {
 
         if (currentMessageObject.isOut()) {
             textX = layoutWidth - backgroundWidth + dp(10);
-            textY = dp(10) + namesOffset;
+            textY = dp(10) /*+ namesOffset*/;
         } else {
-            textX = dp(19) + (isChat ? dp(52) : 0);
-            textY = dp(10) + namesOffset;
+//            textX = dp(19) + (isChat ? dp(52) : 0);
+            textX = dp(19);
+            textY = dp(10) /*+ namesOffset*/;
         }
     }
 
@@ -223,10 +224,11 @@ public class BSChatMessageCell extends BSChatBaseCell {
 
         if (currentMessageObject.isOut()) {
             textX = layoutWidth - backgroundWidth + dp(10);
-            textY = dp(10) + namesOffset;
+            textY = dp(10) /*+ namesOffset*/;
         } else {
-            textX = dp(19) + (isChat ? dp(52) : 0);
-            textY = dp(10) + namesOffset;
+//            textX = dp(19) + (isChat ? dp(52) : 0);
+            textX = dp(19);
+            textY = dp(10) /*+ namesOffset*/;
         }
 
         for (int a = firstVisibleBlockNum; a <= lastVisibleBlockNum; a++) {
