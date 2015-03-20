@@ -12,6 +12,7 @@
     <string name="demo_message_from_first_name">Johnatan</string>
     <string name="demo_message_from_last_name">Kinsley</string>
     <string name="demo_message_text">I will show you something!</string>
+    <string name="SentMessageDate">Sent: %s</string>
 
     <!--speech recognizer error-->
     <string name="SpeechRecognizerErrorAudio">Audio recording error</string>

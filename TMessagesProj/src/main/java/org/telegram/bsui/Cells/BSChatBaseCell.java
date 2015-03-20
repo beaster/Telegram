@@ -1,9 +1,11 @@
 package org.telegram.bsui.Cells;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.Layout;
@@ -11,6 +13,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 
 import org.telegram.android.ContactsController;
 import org.telegram.android.LocaleController;
@@ -23,6 +26,8 @@ import org.telegram.messenger.TLRPC;
  * Created by fanticqq on 20.03.15.
  */
 public class BSChatBaseCell extends BSBaseCell {
+
+    private boolean forwardNamePressed = false;
 
     public static interface ChatBaseCellDelegate {
         public abstract void didPressedUserAvatar(BSChatBaseCell cell, TLRPC.User user);
@@ -122,23 +127,26 @@ public class BSChatBaseCell extends BSBaseCell {
             broadcastMediaDrawable = getResources().getDrawable(R.drawable.broadcast_bs);
 
             timePaintIn = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaintIn.setTextSize(dp(12));
+            timePaintIn.setTextSize(dp(18));
+            timePaintIn.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
             timePaintIn.setColor(0xff000000);
 
             timePaintOut = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaintOut.setTextSize(dp(12));
+            timePaintOut.setTextSize(dp(18));
+            timePaintOut.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
             timePaintOut.setColor(0xff000000);
 
             timeMediaPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timeMediaPaint.setTextSize(dp(12));
+            timeMediaPaint.setTextSize(dp(18));
             timeMediaPaint.setColor(0xffffffff);
 
             namePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            namePaint.setTextSize(dp(15));
+            namePaint.setTextSize(dp(18));
+            namePaint.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
             namePaint.setColor(0xff000000);
 
             forwardNamePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            forwardNamePaint.setTextSize(dp(14));
+            forwardNamePaint.setTextSize(dp(18));
 
             checkDrawable = getResources().getDrawable(R.drawable.msg_check_bs);
             halfCheckDrawable = getResources().getDrawable(R.drawable.msg_check_bs);
@@ -217,6 +225,7 @@ public class BSChatBaseCell extends BSBaseCell {
         }
 
         currentTimeString = LocaleController.formatterDay.format((long) (currentMessageObject.messageOwner.date) * 1000);
+        currentTimeString = LocaleController.formatStringSimple(getResources().getString(R.string.SentMessageDate), currentTimeString);
         timeWidth = (int)Math.ceil(currentTimePaint.measureText(currentTimeString));
 
         namesOffset = 0;
@@ -229,7 +238,7 @@ public class BSChatBaseCell extends BSBaseCell {
             nameLayout = new StaticLayout(nameStringFinal, namePaint, nameWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             if (nameLayout.getLineCount() > 0) {
                 nameWidth = (int)Math.ceil(nameLayout.getLineWidth(0));
-                namesOffset += dp(18);
+                namesOffset += dp(25);
                 nameOffsetX = nameLayout.getLineLeft(0);
             } else {
                 nameWidth = 0;
@@ -252,7 +261,7 @@ public class BSChatBaseCell extends BSBaseCell {
                 forwardedNameLayout = new StaticLayout(str, forwardNamePaint, forwardedNameWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
                 if (forwardedNameLayout.getLineCount() > 1) {
                     forwardedNameWidth = Math.max((int) Math.ceil(forwardedNameLayout.getLineWidth(0)), (int) Math.ceil(forwardedNameLayout.getLineWidth(1)));
-                    namesOffset += dp(36);
+                    namesOffset += dp(46);
                     forwardNameOffsetX = Math.min(forwardedNameLayout.getLineLeft(0), forwardedNameLayout.getLineLeft(1));
                 } else {
                     forwardedNameWidth = 0;
@@ -282,14 +291,39 @@ public class BSChatBaseCell extends BSBaseCell {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean result = false;
+        float x = event.getX();
+        float y = event.getY();
+
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             if (delegate == null || delegate.canPerformActions()) {
-                result = true;
-                startCheckLongPress();
+                if (drawForwardedName && forwardedNameLayout != null) {
+                    if (x >= forwardNameX && x <= forwardNameX + forwardedNameWidth && y >= forwardNameY && y <= forwardNameY + dp(32)) {
+                        forwardNamePressed = true;
+                        result = true;
+                    }
+                }
+                if (result) {
+                    startCheckLongPress();
+                }
             }
         } else {
             if (event.getAction() != MotionEvent.ACTION_MOVE) {
                 cancelCheckLongPress();
+            }
+            if (forwardNamePressed) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    forwardNamePressed = false;
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                    if (delegate != null) {
+                        delegate.didPressedUserAvatar(this, currentForwardUser);
+                    }
+                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+                    forwardNamePressed = false;
+                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (!(x >= forwardNameX && x <= forwardNameX + forwardedNameWidth && y >= forwardNameY && y <= forwardNameY + dp(32))) {
+                        forwardNamePressed = false;
+                    }
+                }
             }
         }
         return result;
@@ -311,14 +345,14 @@ public class BSChatBaseCell extends BSBaseCell {
             if (!media) {
                 if (!currentMessageObject.isOut()) {
 //                    timeX = backgroundWidth - dp(9) - timeWidth + (isChat ? dp(52) : 0);
-                    timeX = backgroundWidth - dp(9) - timeWidth;
+                    timeX = dp(20);
                 } else {
                     timeX = layoutWidth - timeWidth - dp(38.5f);
                 }
             } else {
                 if (!currentMessageObject.isOut()) {
 //                    timeX = backgroundWidth - dp(4) - timeWidth + (isChat ? dp(52) : 0);
-                    timeX = backgroundWidth - dp(4) - timeWidth;
+                    timeX = dp(20);
                 } else {
                     timeX = layoutWidth - timeWidth - dp(42.0f);
                 }
@@ -390,7 +424,7 @@ public class BSChatBaseCell extends BSBaseCell {
 
         if (drawName && nameLayout != null) {
             canvas.save();
-            canvas.translate(currentBackgroundDrawable.getBounds().left + dp(19) - nameOffsetX, - dp(10));
+            canvas.translate(currentBackgroundDrawable.getBounds().left + dp(19) - nameOffsetX, + dp(10));
             namePaint.setColor(0xff000000);
             nameLayout.draw(canvas);
             canvas.restore();
@@ -418,12 +452,12 @@ public class BSChatBaseCell extends BSBaseCell {
                 mediaBackgroundDrawable.draw(canvas);
 
                 canvas.save();
-                canvas.translate(timeX, layoutHeight - dp(12.0f) - timeLayout.getHeight());
+                canvas.translate(timeX, layoutHeight - timeLayout.getHeight()/*(timeLayout.getHeight() + dp(12))*/);
                 timeLayout.draw(canvas);
                 canvas.restore();
             } else {
                 canvas.save();
-                canvas.translate(timeX, layoutHeight - dp(6.5f) - timeLayout.getHeight());
+                canvas.translate(timeX, layoutHeight - (timeLayout.getHeight() + dp(6.5f)));
                 timeLayout.draw(canvas);
                 canvas.restore();
             }
