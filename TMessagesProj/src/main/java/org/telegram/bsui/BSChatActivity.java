@@ -1328,8 +1328,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             updateBottomOverlay();
 
             chatActivityEnterView.setContainerView(this, fragmentView);
-            chatActivityEnterView.addToAttachLayout(menuItem);
-            menuItem.setVisibility(View.VISIBLE);
+//            chatActivityEnterView.addToAttachLayout(menuItem);
+            menuItem.setVisibility(View.GONE);
 
             if (currentEncryptedChat != null) {
                 emptyView.setVisibility(View.INVISIBLE);
@@ -1482,7 +1482,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             }
         } else {
             if (menuItem != null) {
-                menuItem.setVisibility(View.VISIBLE);
+                menuItem.setVisibility(View.GONE);
             }
            if (timeItem != null) {
                 timeItem.setVisibility(View.VISIBLE);
