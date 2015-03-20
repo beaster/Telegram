@@ -101,6 +101,9 @@ public class LoginActivity extends BaseFragment {
             }
             progressDialog = null;
         }
+        if(getParentActivity() != null) {
+            getParentActivity().finish();
+        }
     }
 
     @Override

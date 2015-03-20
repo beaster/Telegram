@@ -356,14 +356,15 @@ public class DrawerLayoutContainer extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return parentActionBarLayout.checkTransitionAnimation() || onTouchEvent(ev);
+        return false;
+//        return parentActionBarLayout.checkTransitionAnimation() || onTouchEvent(ev);
     }
 
     @Override
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-        if (maybeStartTracking && !startedTracking) {
+        /*if (maybeStartTracking && !startedTracking) {
             onTouchEvent(null);
-        }
+        }*/
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
     }
 

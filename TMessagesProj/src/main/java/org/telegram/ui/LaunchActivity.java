@@ -905,6 +905,7 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
                 }
             }
             if(intent != null && intent.getAction() != null) {
+                actionBarLayout.removeAllFragments();
                 if (intent.getAction().equals(OtherFlipBSActivity.SETTINGS_FLAG)) {
                     actionBarLayout.presentFragment(new SettingsActivity());
                     drawerLayoutContainer.closeDrawer(false);

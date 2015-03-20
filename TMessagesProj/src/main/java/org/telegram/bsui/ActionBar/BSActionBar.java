@@ -14,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -178,7 +179,6 @@ public class BSActionBar extends FrameLayout {
 
         MarginLayoutParams layoutParams1 = (MarginLayoutParams) titleFrameLayout.getLayoutParams();
         layoutParams1.width = x + maxTextWidth + (isSearchFieldVisible ? 0 : AndroidUtilities.bsDp(6));
-        layoutParams1.topMargin = occupyStatusBar ? AndroidUtilities.statusBarHeight : 0;
         titleFrameLayout.setLayoutParams(layoutParams1);
     }
 
@@ -190,7 +190,6 @@ public class BSActionBar extends FrameLayout {
         layoutParams.width = isSearchFieldVisible ? LayoutParams.MATCH_PARENT : LayoutParams.WRAP_CONTENT;
         layoutParams.height = height;
         layoutParams.leftMargin = isSearchFieldVisible ? AndroidUtilities.bsDp(AndroidUtilities.isTablet() ? 74 : 66) : 0;
-        layoutParams.topMargin = occupyStatusBar ? AndroidUtilities.statusBarHeight : 0;
         menu.setLayoutParams(layoutParams);
         menu.measure(width, height);
     }
@@ -277,6 +276,7 @@ public class BSActionBar extends FrameLayout {
         }
         titleTextView = new TextView(getContext());
         titleTextView.setGravity(Gravity.LEFT);
+        titleTextView.setGravity(Gravity.TOP);
         titleTextView.setSingleLine(true);
         titleTextView.setLines(1);
         titleTextView.setMaxLines(1);
@@ -343,7 +343,6 @@ public class BSActionBar extends FrameLayout {
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)view.getLayoutParams();
         layoutParams.width = LayoutParams.FILL_PARENT;
         layoutParams.height = LayoutParams.FILL_PARENT;
-        layoutParams.topMargin = occupyStatusBar ? AndroidUtilities.statusBarHeight : 0;
         view.setLayoutParams(layoutParams);
     }
 
@@ -354,7 +353,6 @@ public class BSActionBar extends FrameLayout {
         actionMode = new BSActionBarMenu(getContext(), this);
         actionMode.setBackgroundResource(R.drawable.editheader);
         addView(actionMode);
-        actionMode.setPadding(0, occupyStatusBar ? AndroidUtilities.statusBarHeight : 0, 0, 0);
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)actionMode.getLayoutParams();
         layoutParams.height = LayoutParams.FILL_PARENT;
         layoutParams.width = LayoutParams.FILL_PARENT;
@@ -367,7 +365,6 @@ public class BSActionBar extends FrameLayout {
             actionModeTop.setBackgroundColor(0x99000000);
             addView(actionModeTop);
             layoutParams = (FrameLayout.LayoutParams)actionModeTop.getLayoutParams();
-            layoutParams.height = AndroidUtilities.statusBarHeight;
             layoutParams.width = LayoutParams.FILL_PARENT;
             layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
             actionModeTop.setLayoutParams(layoutParams);
@@ -437,11 +434,11 @@ public class BSActionBar extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int actionBarHeight = AndroidUtilities.getBSCurrentActionBarHeight();
+        Log.d("bsmessages", "actionBar: bsActionBarHeight#" + actionBarHeight);
         positionBackImage(actionBarHeight);
         positionMenu(MeasureSpec.getSize(widthMeasureSpec), actionBarHeight);
         positionTitle(MeasureSpec.getSize(widthMeasureSpec), actionBarHeight);
-        actionBarHeight += occupyStatusBar ? AndroidUtilities.statusBarHeight : 0;
-        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(actionBarHeight + extraHeight, MeasureSpec.EXACTLY));
+        super.onMeasure(widthMeasureSpec, actionBarHeight);
     }
 
     public void onMenuButtonPressed() {
@@ -485,13 +482,6 @@ public class BSActionBar extends FrameLayout {
 
     public int getExtraHeight() {
         return extraHeight;
-    }
-
-    public void setOccupyStatusBar(boolean value) {
-        occupyStatusBar = value;
-        if (actionMode != null) {
-            actionMode.setPadding(0, occupyStatusBar ? AndroidUtilities.statusBarHeight : 0, 0, 0);
-        }
     }
 
     public boolean getOccupyStatusBar() {

@@ -632,7 +632,6 @@ public class BSPhotoViewer implements NotificationCenter.NotificationCenterDeleg
 
         actionBar = new BSActionBar(context);
         actionBar.setBackgroundColor(0x00000000);
-        actionBar.setOccupyStatusBar(false);
         actionBar.setItemsBackground(R.drawable.bar_selector_white);
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setTitle(LocaleController.formatString("Of", R.string.Of, 1, 1));

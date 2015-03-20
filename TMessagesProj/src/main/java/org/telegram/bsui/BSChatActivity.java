@@ -925,7 +925,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) avatarContainer.getLayoutParams();
             layoutParams2.height = FrameLayout.LayoutParams.WRAP_CONTENT;
             layoutParams2.width = FrameLayout.LayoutParams.WRAP_CONTENT;
-            layoutParams2.topMargin = AndroidUtilities.bsDp(40);
+//            layoutParams2.topMargin = AndroidUtilities.bsDp(40);
             layoutParams2.rightMargin = AndroidUtilities.bsDp(40);
             layoutParams2.leftMargin = AndroidUtilities.bsDp(56);
             layoutParams2.gravity = Gravity.TOP | Gravity.LEFT;
@@ -1964,7 +1964,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                         if (first || scrollToTopOnResume) {
                             chatAdapter.notifyDataSetChanged();
                             if (scrollToMessage != null) {
-                                final int yOffset = scrollToMessageMiddleScreen ? Math.max(0, (AndroidUtilities.displaySize.y - AndroidUtilities.statusBarHeight - scrollToMessage.textHeight - AndroidUtilities.getCurrentActionBarHeight() - AndroidUtilities.bsDp(48)) / 2) : 0;
+                                final int yOffset = scrollToMessageMiddleScreen ? Math.max(0, (AndroidUtilities.bsDisplaySize.y - AndroidUtilities.statusBarHeight - scrollToMessage.textHeight - AndroidUtilities.getBSCurrentActionBarHeight() - AndroidUtilities.bsDp(48)) / 2) : 0;
                                 if (messages.get(messages.size() - 1) == scrollToMessage) {
                                     chatListView.setSelectionFromTop(0, AndroidUtilities.bsDp(-11) + yOffset);
                                 } else {
@@ -2541,7 +2541,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
         if (scrollToTopOnResume) {
             if (scrollToTopUnReadOnResume && scrollToMessage != null) {
                 if (chatListView != null) {
-                    final int yOffset = scrollToMessageMiddleScreen ? Math.max(0, (AndroidUtilities.displaySize.y - AndroidUtilities.statusBarHeight - scrollToMessage.textHeight - AndroidUtilities.getCurrentActionBarHeight() - AndroidUtilities.bsDp(48)) / 2) : 0;
+                    final int yOffset = scrollToMessageMiddleScreen ? Math.max(0, (AndroidUtilities.bsDisplaySize.y - AndroidUtilities.statusBarHeight - scrollToMessage.textHeight - AndroidUtilities.getBSCurrentActionBarHeight() - AndroidUtilities.bsDp(48)) / 2) : 0;
                     chatListView.setSelectionFromTop(messages.size() - messages.indexOf(scrollToMessage), -chatListView.getPaddingTop() - AndroidUtilities.bsDp(7) + yOffset);
                 }
             } else {
