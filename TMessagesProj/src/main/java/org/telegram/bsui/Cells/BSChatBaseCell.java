@@ -101,6 +101,7 @@ public class BSChatBaseCell extends BSBaseCell {
     protected ChatBaseCellDelegate delegate;
 
     protected int namesOffset = 0;
+    protected int timeOffset = 0;
 
     private int last_send_state = 0;
     private int last_delete_date = 0;
@@ -229,6 +230,9 @@ public class BSChatBaseCell extends BSBaseCell {
         timeWidth = (int)Math.ceil(currentTimePaint.measureText(currentTimeString));
 
         namesOffset = 0;
+        if(drawTime) {
+            timeOffset = dp(25);
+        }
 
         if (drawName && isChat && currentUser != null && !currentMessageObject.isOut()) {
             currentNameString = ContactsController.formatName(currentUser.first_name, currentUser.last_name);
@@ -344,14 +348,12 @@ public class BSChatBaseCell extends BSBaseCell {
             timeLayout = new StaticLayout(currentTimeString, currentTimePaint, timeWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             if (!media) {
                 if (!currentMessageObject.isOut()) {
-//                    timeX = backgroundWidth - dp(9) - timeWidth + (isChat ? dp(52) : 0);
                     timeX = dp(20);
                 } else {
                     timeX = layoutWidth - timeWidth - dp(38.5f);
                 }
             } else {
                 if (!currentMessageObject.isOut()) {
-//                    timeX = backgroundWidth - dp(4) - timeWidth + (isChat ? dp(52) : 0);
                     timeX = dp(20);
                 } else {
                     timeX = layoutWidth - timeWidth - dp(42.0f);
@@ -399,7 +401,7 @@ public class BSChatBaseCell extends BSBaseCell {
                     currentBackgroundDrawable = backgroundMediaDrawableOut;
                 }
             }
-            setDrawableBounds(currentBackgroundDrawable, layoutWidth - backgroundWidth - (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2) - namesOffset);
+            setDrawableBounds(currentBackgroundDrawable, layoutWidth - backgroundWidth - (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2) - timeOffset);
         } else {
             if (isPressed() && isCheckPressed || !isCheckPressed && isPressed) {
                 if (!media) {
@@ -414,7 +416,7 @@ public class BSChatBaseCell extends BSBaseCell {
                     currentBackgroundDrawable = backgroundMediaDrawableIn;
                 }
             }
-            setDrawableBounds(currentBackgroundDrawable, (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2) - namesOffset);
+            setDrawableBounds(currentBackgroundDrawable, (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2) - timeOffset);
         }
         if (drawBackground) {
             currentBackgroundDrawable.draw(canvas);

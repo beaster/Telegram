@@ -181,9 +181,8 @@ public class BSChatMessageCell extends BSChatBaseCell {
             if (messageObject.isOut()) {
                 timeMore += dp(20.5f);
             }
-
             if (maxWidth - messageObject.lastLineWidth < timeMore) {
-                totalHeight += dp(14);
+//                totalHeight += dp(14);
                 backgroundWidth = Math.max(maxChildWidth, messageObject.lastLineWidth) + dp(29);
             } else {
                 int diff = maxChildWidth - messageObject.lastLineWidth;
@@ -198,7 +197,7 @@ public class BSChatMessageCell extends BSChatBaseCell {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), totalHeight + namesOffset + (isChat ? 0 : 30));
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), totalHeight + timeOffset);
     }
 
     @Override
