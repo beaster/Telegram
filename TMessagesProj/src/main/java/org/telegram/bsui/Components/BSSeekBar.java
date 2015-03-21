@@ -40,10 +40,10 @@ public class BSSeekBar {
     protected void initThumbs(Context context) {
         if (thumbDrawable == null) {
             thumbDrawable = context.getResources().getDrawable(R.drawable.player_bs);
-            innerPaint1.setColor(0xffb4e396);
-            outerPaint1.setColor(0xff6ac453);
+            innerPaint1.setColor(0xff000000);
+            outerPaint1.setColor(0xff000000);
             innerPaint2.setColor(0xff000000);
-            outerPaint2.setColor(0xff86c5f8);
+            outerPaint2.setColor(0xff000000);
             thumbWidth = thumbDrawable.getIntrinsicWidth();
             thumbHeight = thumbDrawable.getIntrinsicHeight();
         }

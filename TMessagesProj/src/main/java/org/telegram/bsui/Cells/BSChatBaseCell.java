@@ -80,6 +80,7 @@ public class BSChatBaseCell extends BSBaseCell {
     protected boolean drawName = false;
 
     private StaticLayout forwardedNameLayout;
+    private StaticLayout forwardedTitleLayout;
     protected int forwardedNameWidth;
     protected boolean drawForwardedName = false;
     private int forwardNameX;
@@ -102,6 +103,7 @@ public class BSChatBaseCell extends BSBaseCell {
 
     protected int namesOffset = 0;
     protected int timeOffset = 0;
+    protected int forwardedOffset = 0;
 
     private int last_send_state = 0;
     private int last_delete_date = 0;
@@ -128,17 +130,17 @@ public class BSChatBaseCell extends BSBaseCell {
             broadcastMediaDrawable = getResources().getDrawable(R.drawable.broadcast_bs);
 
             timePaintIn = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaintIn.setTextSize(dp(18));
+            timePaintIn.setTextSize(dp(14));
             timePaintIn.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
             timePaintIn.setColor(0xff000000);
 
             timePaintOut = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaintOut.setTextSize(dp(18));
+            timePaintOut.setTextSize(dp(14));
             timePaintOut.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
             timePaintOut.setColor(0xff000000);
 
             timeMediaPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timeMediaPaint.setTextSize(dp(18));
+            timeMediaPaint.setTextSize(dp(14));
             timeMediaPaint.setColor(0xffffffff);
 
             namePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
@@ -534,8 +536,8 @@ public class BSChatBaseCell extends BSBaseCell {
                     }
                     if (drawCheck1) {
                         if (!media) {
-                            setDrawableBounds(checkDrawable, layoutWidth - dp(18) - checkDrawable.getIntrinsicWidth(), layoutHeight - dp(8.5f) - checkDrawable.getIntrinsicHeight());
-                            checkDrawable.draw(canvas);
+                            setDrawableBounds(halfCheckDrawable, layoutWidth - dp(18) - checkDrawable.getIntrinsicWidth(), layoutHeight - dp(8.5f) - checkDrawable.getIntrinsicHeight());
+                            halfCheckDrawable.draw(canvas);
                         } else {
                             setDrawableBounds(halfCheckMediaDrawable, layoutWidth - dp(20.5f) - halfCheckMediaDrawable.getIntrinsicWidth(), layoutHeight - dp(13.0f) - halfCheckMediaDrawable.getIntrinsicHeight());
                             halfCheckMediaDrawable.draw(canvas);
