@@ -296,7 +296,7 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
 
         seekBar.width = backgroundWidth - dp(112);
         seekBar.height = dp(30);
-        progressView.width = backgroundWidth - dp(136) + diff;
+        progressView.width = backgroundWidth - dp(136);
         progressView.height = dp(30);
         seekBarY = dp(10);
         buttonY = dp(6);

@@ -57,12 +57,9 @@ public class BSChatBaseCell extends BSBaseCell {
     private static Drawable halfCheckDrawable;
     private static Drawable clockDrawable;
     private static Drawable broadcastDrawable;
-    private static Drawable checkMediaDrawable;
-    private static Drawable halfCheckMediaDrawable;
     private static Drawable clockMediaDrawable;
     private static Drawable broadcastMediaDrawable;
     private static Drawable errorDrawable;
-    protected static Drawable mediaBackgroundDrawable;
     private static TextPaint timePaintIn;
     private static TextPaint timePaintOut;
     private static TextPaint timeMediaPaint;
@@ -115,17 +112,14 @@ public class BSChatBaseCell extends BSBaseCell {
             backgroundDrawableInSelected = getResources().getDrawable(R.drawable.msg_in_selected_bs);
             backgroundDrawableOut = getResources().getDrawable(R.drawable.msg_out_bs);
             backgroundDrawableOutSelected = getResources().getDrawable(R.drawable.msg_out_selected_bs);
-            backgroundMediaDrawableIn = getResources().getDrawable(R.drawable.msg_in_photo);
-            backgroundMediaDrawableInSelected = getResources().getDrawable(R.drawable.msg_in_photo_selected);
-            backgroundMediaDrawableOut = getResources().getDrawable(R.drawable.msg_out_photo);
-            backgroundMediaDrawableOutSelected = getResources().getDrawable(R.drawable.msg_out_photo_selected);
+            backgroundMediaDrawableIn = getResources().getDrawable(android.R.color.white);
+            backgroundMediaDrawableInSelected = getResources().getDrawable(android.R.color.darker_gray);
+            backgroundMediaDrawableOut = getResources().getDrawable(android.R.color.white);
+            backgroundMediaDrawableOutSelected = getResources().getDrawable(android.R.color.darker_gray);
 
             clockDrawable = getResources().getDrawable(R.drawable.msg_clock_bs);
-            checkMediaDrawable = getResources().getDrawable(R.drawable.msg_check_bs);
-            halfCheckMediaDrawable = getResources().getDrawable(R.drawable.msg_halfchecked_bs);
             clockMediaDrawable = getResources().getDrawable(R.drawable.msg_clock_bs);
             errorDrawable = getResources().getDrawable(R.drawable.alert_bs);
-            mediaBackgroundDrawable = getResources().getDrawable(R.drawable.phototime);
             broadcastDrawable = getResources().getDrawable(R.drawable.broadcast_bs);
             broadcastMediaDrawable = getResources().getDrawable(R.drawable.broadcast_bs);
 
@@ -451,27 +445,17 @@ public class BSChatBaseCell extends BSBaseCell {
         }
 
         if (drawTime) {
-            if (media) {
-                setDrawableBounds(mediaBackgroundDrawable, timeX - dp(3), layoutHeight - dp(27.5f), timeWidth + dp(6 + (currentMessageObject.isOut() ? 20 : 0)), dp(16.5f));
-                mediaBackgroundDrawable.draw(canvas);
-
-                canvas.save();
-                canvas.translate(timeX, layoutHeight - timeLayout.getHeight()/*(timeLayout.getHeight() + dp(12))*/);
-                timeLayout.draw(canvas);
-                canvas.restore();
-            } else {
                 canvas.save();
                 canvas.translate(timeX, layoutHeight - (timeLayout.getHeight() + dp(6.5f)));
                 timeLayout.draw(canvas);
                 canvas.restore();
-            }
 
             if (currentMessageObject.isOut()) {
                 boolean drawCheck1 = false;
                 boolean drawCheck2 = false;
                 boolean drawClock = false;
                 boolean drawError = false;
-                boolean isBroadcast = (int)(currentMessageObject.getDialogId() >> 32) == 1;
+                boolean isBroadcast = (int) (currentMessageObject.getDialogId() >> 32) == 1;
 
                 if (currentMessageObject.isSending()) {
                     drawCheck1 = false;
@@ -516,32 +500,18 @@ public class BSChatBaseCell extends BSBaseCell {
                     }
                 } else {
                     if (drawCheck2) {
-                        if (!media) {
-                            if (drawCheck1) {
-                                final int x = layoutWidth - dp(22.5f) - checkDrawable.getIntrinsicWidth();
-                                final int y = layoutHeight - dp(8.5f) - checkDrawable.getIntrinsicHeight();
-                                setDrawableBounds(checkDrawable, x, y);
-                            } else {
-                                setDrawableBounds(checkDrawable, layoutWidth - dp(18.5f) - checkDrawable.getIntrinsicWidth(), layoutHeight - dp(8.5f) - checkDrawable.getIntrinsicHeight());
-                            }
-                            checkDrawable.draw(canvas);
+                        if (drawCheck1) {
+                            final int x = layoutWidth - dp(22.5f) - checkDrawable.getIntrinsicWidth();
+                            final int y = layoutHeight - dp(8.5f) - checkDrawable.getIntrinsicHeight();
+                            setDrawableBounds(checkDrawable, x, y);
                         } else {
-                            if (drawCheck1) {
-                                setDrawableBounds(checkDrawable, layoutWidth - dp(26.0f) - checkDrawable.getIntrinsicWidth(), layoutHeight - dp(13.0f) - checkDrawable.getIntrinsicHeight());
-                            } else {
-                                setDrawableBounds(checkDrawable, layoutWidth - dp(22.0f) - checkDrawable.getIntrinsicWidth(), layoutHeight - dp(13.0f) - checkDrawable.getIntrinsicHeight());
-                            }
-                            checkDrawable.draw(canvas);
+                            setDrawableBounds(checkDrawable, layoutWidth - dp(18.5f) - checkDrawable.getIntrinsicWidth(), layoutHeight - dp(8.5f) - checkDrawable.getIntrinsicHeight());
                         }
+                        checkDrawable.draw(canvas);
                     }
                     if (drawCheck1) {
-                        if (!media) {
-                            setDrawableBounds(halfCheckDrawable, layoutWidth - dp(18) - checkDrawable.getIntrinsicWidth(), layoutHeight - dp(8.5f) - checkDrawable.getIntrinsicHeight());
-                            halfCheckDrawable.draw(canvas);
-                        } else {
-                            setDrawableBounds(halfCheckMediaDrawable, layoutWidth - dp(20.5f) - halfCheckMediaDrawable.getIntrinsicWidth(), layoutHeight - dp(13.0f) - halfCheckMediaDrawable.getIntrinsicHeight());
-                            halfCheckMediaDrawable.draw(canvas);
-                        }
+                        setDrawableBounds(halfCheckDrawable, layoutWidth - dp(18) - checkDrawable.getIntrinsicWidth(), layoutHeight - dp(8.5f) - checkDrawable.getIntrinsicHeight());
+                        halfCheckDrawable.draw(canvas);
                     }
                 }
                 if (drawError) {

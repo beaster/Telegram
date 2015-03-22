@@ -46,14 +46,11 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
     private static Drawable placeholderDocInDrawable;
     private static Drawable videoIconDrawable;
-    private static Drawable docMenuInDrawable;
-    private static Drawable docMenuOutDrawable;
     private static Drawable[] buttonStatesDrawables = new Drawable[8];
     private static Drawable[][] buttonStatesDrawablesDoc = new Drawable[3][2];
     private static TextPaint infoPaint;
     private static MessageObject lastDownloadedGifMessage = null;
     private static TextPaint namePaint;
-    private static Paint docBackPaint;
     private static Paint deleteProgressPaint;
 
     private GifDrawable gifDrawable = null;
@@ -106,7 +103,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
     protected void initMedia() {
         if (placeholderDocInDrawable == null) {
             placeholderDocInDrawable = getResources().getDrawable(R.drawable.document_icon_bs);
-            buttonStatesDrawables[0] = getResources().getDrawable(R.drawable.photoload);
+            buttonStatesDrawables[0] = getResources().getDrawable(R.drawable.download_video_bs);
             buttonStatesDrawables[1] = getResources().getDrawable(R.drawable.photocancel);
             buttonStatesDrawables[2] = getResources().getDrawable(R.drawable.photogif);
             buttonStatesDrawables[3] = getResources().getDrawable(R.drawable.play_video_bs);
@@ -121,8 +118,6 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             buttonStatesDrawablesDoc[1][1] = getResources().getDrawable(R.drawable.doccancel_g);
             buttonStatesDrawablesDoc[2][1] = getResources().getDrawable(R.drawable.docpause_g);
             videoIconDrawable = getResources().getDrawable(R.drawable.videofile_icon);
-            docMenuInDrawable = getResources().getDrawable(android.R.color.white);
-            docMenuOutDrawable = getResources().getDrawable(android.R.color.white);
 
             infoPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
             infoPaint.setTextSize(dp(12));
@@ -130,8 +125,6 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             namePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
             namePaint.setColor(0xff000000);
             namePaint.setTextSize(dp(16));
-
-            docBackPaint = new Paint();
 
             deleteProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             deleteProgressPaint.setColor(0xff000000);
@@ -408,7 +401,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
     @Override
     public void setMessageObject(MessageObject messageObject) {
-        media = messageObject.type != 9;
+        media = messageObject.type == 1 || messageObject.type == 4;
         boolean dataChanged = currentMessageObject == messageObject && (isUserDataChanged() || photoNotSet);
         if (currentMessageObject != messageObject || isPhotoDataChanged(messageObject) || dataChanged) {
             super.setMessageObject(messageObject);
@@ -649,7 +642,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
                     photoWidth = w;
                     photoHeight = h;
-                    backgroundWidth = w + dp(12);
+                    backgroundWidth = w + dp(27);
 
                     currentPhotoFilter = String.format(Locale.US, "%d_%d", (int) (w / AndroidUtilities.density), (int) (h / AndroidUtilities.density));
                     if (messageObject.photoThumbs.size() > 1 || messageObject.type == 3 || messageObject.type == 8) {
@@ -786,7 +779,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), photoHeight + dp(14));
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), photoHeight + dp(50));
     }
 
     @Override
@@ -798,19 +791,15 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             if (media) {
                 x = layoutWidth - backgroundWidth - dp(3);
             } else {
-                x = layoutWidth - backgroundWidth + dp(6);
+                x = layoutWidth - backgroundWidth + dp(9);
             }
         } else {
-            if (isChat) {
-                x = dp(67);
-            } else {
-                x = dp(15);
-            }
+                x = dp(16.5f);
         }
-        photoImage.setImageCoords(x, dp(7), photoWidth, photoHeight);
+        photoImage.setImageCoords(x, dp(10.5f), photoWidth, photoHeight);
         int size = dp(48);
         buttonX = (int)(x + (photoWidth - size) / 2.0f);
-        buttonY = (int)(dp(7) + (photoHeight - size) / 2.0f);
+        buttonY = (int)(dp(10) + (photoHeight - size) / 2.0f);
 
         radialProgress.setProgressRect(buttonX, buttonY, buttonX + dp(48), buttonY + dp(48));
         deleteProgressRect.set(buttonX + dp(3), buttonY + dp(3), buttonX + dp(45), buttonY + dp(45));
@@ -866,19 +855,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
         radialProgress.setHideCurrentDrawable(false);
 
         if (currentMessageObject.type == 9) {
-            Drawable menuDrawable = null;
-            if (currentMessageObject.isOut()) {
-                infoPaint.setColor(0xff000000);
-                docBackPaint.setColor(0xff000000);
-                menuDrawable = docMenuOutDrawable;
-            } else {
-                infoPaint.setColor(0xff000000);
-                docBackPaint.setColor(0xff000000);
-                menuDrawable = docMenuInDrawable;
-            }
-
-            setDrawableBounds(menuDrawable, photoImage.getImageX() + backgroundWidth - dp(44), dp(10));
-            menuDrawable.draw(canvas);
+            infoPaint.setColor(0xff000000);
 
             if (buttonState >= 0 && buttonState < 4) {
                 if (!imageDrawn) {
@@ -897,7 +874,6 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             }
 
             if (!imageDrawn) {
-                canvas.drawRect(photoImage.getImageX(), photoImage.getImageY(), photoImage.getImageX() + photoImage.getImageWidth(), photoImage.getImageY() + photoImage.getImageHeight(), docBackPaint);
                 if (currentMessageObject.isOut()) {
                     radialProgress.setProgressColor(0xff81bd72);
                 } else {
@@ -953,8 +929,6 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             }
         } else if (infoLayout != null && (buttonState == 1 || buttonState == 0 || buttonState == 3 || currentMessageObject.isSecretPhoto())) {
             infoPaint.setColor(0xffffffff);
-            setDrawableBounds(mediaBackgroundDrawable, photoImage.getImageX() + dp(4), photoImage.getImageY() + dp(4), infoWidth + dp(8) + infoOffset, dp(16.5f));
-            mediaBackgroundDrawable.draw(canvas);
 
             if (currentMessageObject.type == 3) {
                 setDrawableBounds(videoIconDrawable, photoImage.getImageX() + dp(8), photoImage.getImageY() + dp(7.5f));
