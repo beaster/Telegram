@@ -43,7 +43,7 @@ import java.util.Locale;
  */
 public class BSTelegramWidgetMedium extends AppWidgetProvider implements NotificationCenter.NotificationCenterDelegate {
     private static final String LOG_TAG = "BSTelegramWidgetMedium";
-    public static final String WAKELOCK_TAG = "com.yotadevices.yotaphone2.telegram.bsui.widget.WAKELOCK";
+    public static final String WAKELOCK_TAG = "org.telegram.bsui.widget.WAKELOCK";
     private static boolean initialize = false;
     private boolean finished = false;
     private Context mContext;
@@ -73,7 +73,7 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
     private PendingIntent getChatActivity(Context context, int messageIndex) {
         BSTelegramWidgetMessages messages = BSTelegramWidgetMessages.getInstance(context);
 
-        long dialogId = messages.getDialogId(messageIndex);// messages.getCurrentMessage(messageIndex).getDialogId();
+        long dialogId = messages.getDialogId(messageIndex);
         Bundle args = this.getChatActivityArgs(dialogId);
 
         SpeechRecognizerManager speechRecognizerManager = SpeechRecognizerManager.getInstance(context);
@@ -106,7 +106,6 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
     }
 
     private PendingIntent getPendingSelfIntent(Context context, String action, int messageIndex) {
-        Log.d(LOG_TAG, "getPendingSelfIntent messageIndex = " + messageIndex);
         Intent intent = new Intent(context, BSTelegramWidgetMedium.class);
         intent.setAction(action);
 
@@ -129,7 +128,7 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(LOG_TAG, "onReceive: " + intent.getAction() + " (" + intent.getIntExtra("messageIndex", -1) + ")");
+        Log.d(LOG_TAG, "onReceive: " + intent.getAction());
         SpeechRecognizerManager speechRecognizerManager = SpeechRecognizerManager.getInstance(context);
         switch (intent.getAction()) {
             case SpeechRecognizerManager.ACTION_SPEAK: {
@@ -294,6 +293,10 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
             this.mMessages = BSTelegramWidgetMessages.getInstance(this.mContext);
             this.mSpeechRecognizerManager = SpeechRecognizerManager.getInstance(mContext);
 
+            if (this.mIsOnline) {
+                this.mMessages.loadDialogs();
+            }
+
             int messageCount = this.mMessages.updateMessages(MESSAGE_UPDATE_LIMIT);
 
             switch (this.mWidgetSize) {
@@ -313,6 +316,8 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
                     break;
                 }
             }
+
+            Log.d(LOG_TAG, "messageCount: " + this.mDisplayMessagesCount);
         }
 
         private void buildExtraLargeWidget() {
@@ -338,44 +343,38 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
 
                         int linesCount32 = linesCount32_0 + linesCount32_1;
                         if (linesCount32 <= 2) {
-                            Log.d(LOG_TAG, "2 msg, short single (32sp): " + linesCount32 + " lines");
                             this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_2_message_short_single_line);
                         } else {
                             int linesCount26 = BSTelegramWidgetMedium.this.getCountContentLine(26.66f,
                                     this.mMessages.getText(0),
                                     this.mMessages.getText(1));
-                            Log.d(LOG_TAG, "2 msg, short double (26.66sp): " + linesCount26 + " lines");
                             if (linesCount26 <= 4) {
                                 this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_2_message_short_double_line);
                             } else {
-                                Log.d(LOG_TAG, "2 msg, long double (26.66sp): " + linesCount26 + " lines");
-
                                 this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_2_message_long);
 
-                                int message2lines = Math.min(linesCount32_1, EXTRA_LARGE_WIDGET_2_MESSAGE_LINE_LIMIT - 1);
-                                int message1lines = EXTRA_LARGE_WIDGET_2_MESSAGE_LINE_LIMIT - message2lines;
+                                int message0lines = Math.min(linesCount32_0, EXTRA_LARGE_WIDGET_2_MESSAGE_LINE_LIMIT - 1);
+                                int message1lines = EXTRA_LARGE_WIDGET_2_MESSAGE_LINE_LIMIT - message0lines;
 
                                 this.mRemoteViews.setInt(R.id.sms_missed, "setMaxLines", message1lines);
-                                this.mRemoteViews.setInt(R.id.sms_missed_2, "setMaxLines", message2lines);
+                                this.mRemoteViews.setInt(R.id.sms_missed_2, "setMaxLines", message0lines);
                             }
                         }
                     } else if (this.mDisplayMessagesCount == 3) {
                         this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_3_message);
 
+                        int linesCount32_0 = BSTelegramWidgetMedium.this.getCountContentLine(32,
+                                this.mMessages.getText(0));
                         int linesCount32_1 = BSTelegramWidgetMedium.this.getCountContentLine(32,
                                 this.mMessages.getText(1));
-                        int linesCount32_2 = BSTelegramWidgetMedium.this.getCountContentLine(32,
-                                this.mMessages.getText(2));
 
-                        int message3lines = Math.min(linesCount32_2, EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT - 2);
-                        int message2lines = Math.min(linesCount32_1, EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT - message3lines - 1);
-                        int message1lines = EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT - message2lines - message3lines;
+                        int message0lines = Math.min(linesCount32_0, EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT - 2);
+                        int message1lines = Math.min(linesCount32_1, EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT - message0lines - 1);
+                        int message2lines = EXTRA_LARGE_WIDGET_3_MESSAGE_LINE_LIMIT - message1lines - message0lines;
 
-                        Log.e(LOG_TAG, "Lines: " + message3lines + " " + message2lines + " " + message1lines);
-
-                        this.mRemoteViews.setInt(R.id.sms_missed, "setMaxLines", message1lines);
-                        this.mRemoteViews.setInt(R.id.sms_missed_2, "setMaxLines", message2lines);
-                        this.mRemoteViews.setInt(R.id.sms_missed_3, "setMaxLines", message3lines);
+                        this.mRemoteViews.setInt(R.id.sms_missed, "setMaxLines", message2lines);
+                        this.mRemoteViews.setInt(R.id.sms_missed_2, "setMaxLines", message1lines);
+                        this.mRemoteViews.setInt(R.id.sms_missed_3, "setMaxLines", message0lines);
                     } else if (this.mDisplayMessagesCount == 4) {
                         this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_extra_large_widget_4_message);
                     }
@@ -404,10 +403,8 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
                                 this.mMessages.getText(1));
 
                         if (linesCount <= 2) {
-                            Log.d(LOG_TAG, "2 msg, short: " + linesCount + " lines");
                             this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_2_message_short);
                         } else {
-                            Log.d(LOG_TAG, "2 msg, long: " + linesCount + " lines");
                             this.mRemoteViews = new RemoteViews(this.mContext.getPackageName(), R.layout.bs_telegram_large_widget_2_message_long);
                         }
                     } else if (this.mDisplayMessagesCount == 3) {
@@ -439,7 +436,6 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
             if (!this.mIsDemo) {
                 BSTelegramWidgetMedium.this.onInit(this.mContext);
                 if (this.mIsOnline) {
-                    this.mMessages.loadDialogs();
                     if (this.mDisplayMessagesCount == 0) {
                         this.buildEmptyMessageView();
                     } else {
@@ -495,6 +491,7 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
         }
 
         private void buildMessageView() {
+
             if (this.mShowAvatar) {
                 this.buildAvatar();
             }
@@ -568,14 +565,18 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
         private void buildSpeakButton(int... resourceIds) {
             if (SpeechRecognizer.isRecognitionAvailable(this.mContext)) {
                 if (this.mSpeechRecognizerManager.isListening()) {
-                    for (int i = 0; i < resourceIds.length; i++) {
-                        this.mRemoteViews.setViewVisibility(resourceIds[i], View.INVISIBLE);
+                    for (int resourceId : resourceIds) {
+                        this.mRemoteViews.setViewVisibility(resourceId, View.INVISIBLE);
                     }
                 } else {
                     for (int i = 0; i < resourceIds.length; i++) {
                         this.mRemoteViews.setViewVisibility(resourceIds[i], View.VISIBLE);
                         this.mRemoteViews.setOnClickPendingIntent(resourceIds[i], BSTelegramWidgetMedium.this.getPendingSelfIntent(this.mContext, SpeechRecognizerManager.ACTION_SPEAK, i));
                     }
+                }
+            } else {
+                for (int resourceId : resourceIds) {
+                    this.mRemoteViews.setViewVisibility(resourceId, View.INVISIBLE);
                 }
             }
         }
@@ -752,7 +753,7 @@ public class BSTelegramWidgetMedium extends AppWidgetProvider implements Notific
             try {
                 pendingIntent.send();
             } catch (PendingIntent.CanceledException e) {
-                Log.e(LOG_TAG, e.getMessage());
+                Log.e(LOG_TAG, e.getMessage(), e);
             }
         }
 

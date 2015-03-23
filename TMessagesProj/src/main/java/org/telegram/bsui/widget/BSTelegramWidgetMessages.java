@@ -5,13 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.Log;
 
-import java.util.Vector;
-
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.util.Log;
-
 import org.telegram.android.ImageReceiver;
 import org.telegram.android.LocaleController;
 import org.telegram.android.MessageObject;
@@ -32,7 +25,7 @@ public class BSTelegramWidgetMessages {
     public static final int GROUP_CHAT = 2;
     public static final int SECRET_CHAT = 3;
 
-    private static BSTelegramWidgetMessages mInstance;
+    private static volatile BSTelegramWidgetMessages mInstance = null;
     private Context mContext;
 
     private MessageObject[] mCurrentMessages;
@@ -123,13 +116,14 @@ public class BSTelegramWidgetMessages {
             TLRPC.Chat chat = messagesController.getChat(chatId);
 
             photo = chat.photo.photo_big;
-
-            if (photo == null)
+            if (photo == null) {
                 bsAvatarDrawable.setInfo(chat);
+            }
         } else {
             photo = user.photo.photo_big;
-            if (photo == null)
+            if (photo == null) {
                 bsAvatarDrawable.setInfo(user);
+            }
         }
 
         ImageReceiver imageReceiver = new ImageReceiver();
@@ -225,7 +219,6 @@ public class BSTelegramWidgetMessages {
                     allUnreadMessages.add(message);
                     unreadMessagesCount.add(dialog.unread_count);
                     dialogs.add(dialog);
-//                    Collections.reverse(allUnreadMessages);
                 }
             }
         }
