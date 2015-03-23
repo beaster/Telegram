@@ -44,6 +44,16 @@ android {
         }
     }
 
+    productFlavors {
+        flavor1 {
+            applicationId "org.telegram"
+        }
+
+        flavor2 {
+            applicationId "com.yotadevices.yotaphone2.telegram"
+        }
+    }
+
     buildTypes {
         debug {
             debuggable true

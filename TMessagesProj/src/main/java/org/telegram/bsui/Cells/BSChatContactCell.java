@@ -2,7 +2,7 @@ package org.telegram.bsui.Cells;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Point;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -14,15 +14,12 @@ import android.view.SoundEffectConstants;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.android.AndroidUtilities;
 import org.telegram.android.ContactsController;
-import org.telegram.android.ImageReceiver;
 import org.telegram.android.LocaleController;
 import org.telegram.android.MessageObject;
 import org.telegram.android.MessagesController;
-import org.telegram.bsui.BSAvatarDrawable;
 import org.telegram.messenger.R;
 import org.telegram.messenger.TLRPC;
 import org.telegram.messenger.UserConfig;
-import org.telegram.ui.Cells.ChatContactCell;
 import org.telegram.ui.Components.AvatarDrawable;
 
 /**
@@ -40,47 +37,29 @@ public class BSChatContactCell extends BSChatBaseCell {
     private static Drawable addContactDrawableIn;
     private static Drawable addContactDrawableOut;
 
-    private ImageReceiver avatarImage;
-    private BSAvatarDrawable avatarDrawable;
-
     private StaticLayout nameLayout;
     private StaticLayout phoneLayout;
 
     private TLRPC.User contactUser;
-    private TLRPC.FileLocation currentPhoto;
 
-    private boolean avatarPressed = false;
+    private boolean namePressed = false;
     private boolean buttonPressed = false;
     private boolean drawAddButton = false;
     private int namesWidth = 0;
 
     private ChatContactCellDelegate contactDelegate = null;
 
-    protected TextPaint getNamePaint() {
-        return namePaint;
-    }
-    protected TextPaint getPhonePaint() {
-        return phonePaint;
-    }
-    protected Drawable getAddContactDrawableIn() {
-        return addContactDrawableIn;
-    }
-    protected Drawable getAddContactDrawableOut() {
-        return addContactDrawableOut;
-    }
-
     public BSChatContactCell(Context context) {
         super(context);
         initNamePaint();
-        avatarImage = new ImageReceiver(this);
-        avatarImage.setRoundRadius(dp(21));
-        avatarDrawable = new BSAvatarDrawable();
     }
 
     protected void initNamePaint() {
         if (namePaint == null) {
             namePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             namePaint.setTextSize(dp(15));
+            namePaint.setColor(0xff000000);
+            namePaint.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
 
             phonePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             phonePaint.setTextSize(dp(15));
@@ -109,12 +88,7 @@ public class BSChatContactCell extends BSChatBaseCell {
 
         contactUser = MessagesController.getInstance().getUser(currentMessageObject.messageOwner.media.user_id);
 
-        TLRPC.FileLocation newPhoto = null;
-        if (contactUser != null && contactUser.photo != null) {
-            newPhoto = contactUser.photo.photo_small;
-        }
-
-        return currentPhoto == null && newPhoto != null || currentPhoto != null && newPhoto == null || currentPhoto != null && newPhoto != null && (currentPhoto.local_id != newPhoto.local_id || currentPhoto.volume_id != newPhoto.volume_id) || super.isUserDataChanged();
+        return super.isUserDataChanged();
     }
 
     @Override
@@ -123,12 +97,11 @@ public class BSChatContactCell extends BSChatBaseCell {
         float y = event.getY();
 
         boolean result = false;
-        int side = dp(36);
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (x >= avatarImage.getImageX() && x <= avatarImage.getImageX() + namesWidth + dp(42) && y >= avatarImage.getImageY() && y <= avatarImage.getImageY() + avatarImage.getImageHeight()) {
-                avatarPressed = true;
+            if (x >= getLeft() && x <= getLeft() + namesWidth + dp(42) && y >= getTop() && y <= getTop() + getBackground().getIntrinsicHeight()) {
+                namePressed = true;
                 result = true;
-            } else if (x >= avatarImage.getImageX() + namesWidth + dp(52) && y >= dp(13) && x <= avatarImage.getImageX() + namesWidth + dp(92) && y <= dp(52)) {
+            } else if (x >= /*getLeft() */+ namesWidth + dp(52) && y >= dp(13) && x <= /*getLeft()*/ + namesWidth + dp(92) && y <= dp(52)) {
                 buttonPressed = true;
                 result = true;
             }
@@ -139,9 +112,9 @@ public class BSChatContactCell extends BSChatBaseCell {
             if (event.getAction() != MotionEvent.ACTION_MOVE) {
                 cancelCheckLongPress();
             }
-            if (avatarPressed) {
+            if (namePressed) {
                 if (event.getAction() == MotionEvent.ACTION_UP) {
-                    avatarPressed = false;
+                    namePressed = false;
                     playSoundEffect(SoundEffectConstants.CLICK);
                     if (contactUser != null) {
                         if (delegate != null) {
@@ -153,10 +126,10 @@ public class BSChatContactCell extends BSChatBaseCell {
                         }
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    avatarPressed = false;
+                    namePressed = false;
                 } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!(x >= avatarImage.getImageX() && x <= avatarImage.getImageX() + namesWidth + dp(42) && y >= avatarImage.getImageY() && y <= avatarImage.getImageY() + avatarImage.getImageHeight())) {
-                        avatarPressed = false;
+                    if (!(x >= getLeft() && x <= getLeft() + namesWidth + dp(42) && y >= getTop() && y <= getTop() + getBackground().getIntrinsicHeight())) {
+                        namePressed = false;
                     }
                 }
             } else if (buttonPressed) {
@@ -169,7 +142,7 @@ public class BSChatContactCell extends BSChatBaseCell {
                 } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
                     buttonPressed = false;
                 } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!(x >= avatarImage.getImageX() + namesWidth + dp(52) && y >= dp(13) && x <= avatarImage.getImageX() + namesWidth + dp(92) && y <= dp(52))) {
+                    if (!(x >= getLeft() + namesWidth + dp(52) && y >= dp(13) && x <= getLeft() + namesWidth + dp(92) && y <= dp(52))) {
                         buttonPressed = false;
                     }
                 }
@@ -199,24 +172,11 @@ public class BSChatContactCell extends BSChatBaseCell {
             }
             maxWidth -= dp(58 + (drawAddButton ? 42 : 0));
 
-            if (contactUser != null) {
-                if (contactUser.photo != null) {
-                    currentPhoto = contactUser.photo.photo_small;
-                } else {
-                    currentPhoto = null;
-                }
-                avatarDrawable.setInfo(contactUser);
-            } else {
-                currentPhoto = null;
-                avatarDrawable.setInfo(uid, null, null, false);
-            }
-            avatarImage.setImage(currentPhoto, "50_50", avatarDrawable, false);
-
             String currentNameString = ContactsController.formatName(messageObject.messageOwner.media.first_name, messageObject.messageOwner.media.last_name);
-            int nameWidth = Math.min((int) Math.ceil(getNamePaint().measureText(currentNameString)), maxWidth);
+            int nameWidth = Math.min((int) Math.ceil(namePaint.measureText(currentNameString)), maxWidth);
 
-            CharSequence stringFinal = TextUtils.ellipsize(currentNameString.replace("\n", " "), getNamePaint(), nameWidth, TextUtils.TruncateAt.END);
-            nameLayout = new StaticLayout(stringFinal, getNamePaint(), nameWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            CharSequence stringFinal = TextUtils.ellipsize(currentNameString.replace("\n", " "), namePaint, nameWidth, TextUtils.TruncateAt.END);
+            nameLayout = new StaticLayout(stringFinal, namePaint, nameWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             if (nameLayout.getLineCount() > 0) {
                 nameWidth = (int)Math.ceil(nameLayout.getLineWidth(0));
             } else {
@@ -232,9 +192,9 @@ public class BSChatContactCell extends BSChatBaseCell {
             } else {
                 phone = LocaleController.getString("NumberUnknown", R.string.NumberUnknown);
             }
-            int phoneWidth = Math.min((int) Math.ceil(getPhonePaint().measureText(phone)), maxWidth);
-            stringFinal = TextUtils.ellipsize(phone.replace("\n", " "), getPhonePaint(), phoneWidth, TextUtils.TruncateAt.END);
-            phoneLayout = new StaticLayout(stringFinal, getPhonePaint(), phoneWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            int phoneWidth = Math.min((int) Math.ceil(phonePaint.measureText(phone)), maxWidth);
+            stringFinal = TextUtils.ellipsize(phone.replace("\n", " "), phonePaint, phoneWidth, TextUtils.TruncateAt.END);
+            phoneLayout = new StaticLayout(stringFinal, phonePaint, phoneWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             if (phoneLayout.getLineCount() > 0) {
                 phoneWidth = (int)Math.ceil(phoneLayout.getLineWidth(0));
             } else {
@@ -250,7 +210,7 @@ public class BSChatContactCell extends BSChatBaseCell {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), dp(71));
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), dp(91));
     }
 
     @Override
@@ -260,19 +220,6 @@ public class BSChatContactCell extends BSChatBaseCell {
         if (currentMessageObject == null) {
             return;
         }
-
-        int x;
-
-        if (currentMessageObject.isOut()) {
-            x = layoutWidth - backgroundWidth + dp(8);
-        } else {
-            if (isChat) {
-                x = dp(69);
-            } else {
-                x = dp(16);
-            }
-        }
-        avatarImage.setImageCoords(x, dp(9), dp(42), dp(42));
     }
 
     @Override
@@ -283,18 +230,16 @@ public class BSChatContactCell extends BSChatBaseCell {
             return;
         }
 
-        avatarImage.draw(canvas);
 
         if (nameLayout != null) {
             canvas.save();
-            canvas.translate(avatarImage.getImageX() + avatarImage.getImageWidth() + dp(9), dp(10));
-            getNamePaint().setColor(AvatarDrawable.getColorForId(currentMessageObject.messageOwner.media.user_id));
+            canvas.translate(getLeft() + dp(19), dp(10));
             nameLayout.draw(canvas);
             canvas.restore();
         }
         if (phoneLayout != null) {
             canvas.save();
-            canvas.translate(avatarImage.getImageX() + avatarImage.getImageWidth() + dp(9), dp(31));
+            canvas.translate(getLeft() + dp(19), dp(31));
             phoneLayout.draw(canvas);
             canvas.restore();
         }
@@ -302,11 +247,11 @@ public class BSChatContactCell extends BSChatBaseCell {
         if (drawAddButton) {
             Drawable addContactDrawable;
             if (currentMessageObject.isOut()) {
-                addContactDrawable = getAddContactDrawableOut();
+                addContactDrawable = addContactDrawableOut;
             } else {
-                addContactDrawable = getAddContactDrawableIn();
+                addContactDrawable = addContactDrawableIn;
             }
-            setDrawableBounds(addContactDrawable, avatarImage.getImageX() + namesWidth + dp(78), dp(13));
+            setDrawableBounds(addContactDrawable, getLeft() + namesWidth + dp(78), dp(22));
             addContactDrawable.draw(canvas);
         }
     }

@@ -49,7 +49,7 @@ public class BSChatBaseCell extends BSBaseCell {
     private static Drawable backgroundDrawableInSelected;
     private static Drawable backgroundDrawableOut;
     private static Drawable backgroundDrawableOutSelected;
-    private static Drawable backgroundMediaDrawableIn;
+    protected static Drawable backgroundMediaDrawableIn;
     private static Drawable backgroundMediaDrawableInSelected;
     private static Drawable backgroundMediaDrawableOut;
     private static Drawable backgroundMediaDrawableOutSelected;
@@ -59,6 +59,7 @@ public class BSChatBaseCell extends BSBaseCell {
     private static Drawable broadcastDrawable;
     private static Drawable clockMediaDrawable;
     private static Drawable broadcastMediaDrawable;
+    protected static Drawable mediaBackgroundDrawable;
     private static Drawable errorDrawable;
     private static TextPaint timePaintIn;
     private static TextPaint timePaintOut;
@@ -116,6 +117,7 @@ public class BSChatBaseCell extends BSBaseCell {
             backgroundMediaDrawableInSelected = getResources().getDrawable(android.R.color.darker_gray);
             backgroundMediaDrawableOut = getResources().getDrawable(android.R.color.white);
             backgroundMediaDrawableOutSelected = getResources().getDrawable(android.R.color.darker_gray);
+            mediaBackgroundDrawable = getResources().getDrawable(R.drawable.phototime_bs);
 
             clockDrawable = getResources().getDrawable(R.drawable.msg_clock_bs);
             clockMediaDrawable = getResources().getDrawable(R.drawable.msg_clock_bs);

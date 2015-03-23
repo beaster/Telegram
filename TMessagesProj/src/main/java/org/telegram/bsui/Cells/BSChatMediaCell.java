@@ -52,6 +52,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
     private static MessageObject lastDownloadedGifMessage = null;
     private static TextPaint namePaint;
     private static Paint deleteProgressPaint;
+    private static Paint docBackPaint;
 
     private GifDrawable gifDrawable = null;
     private RadialProgress radialProgress;
@@ -111,13 +112,13 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             buttonStatesDrawables[5] = getResources().getDrawable(R.drawable.burn);
             buttonStatesDrawables[6] = getResources().getDrawable(R.drawable.circle);
             buttonStatesDrawables[7] = getResources().getDrawable(R.drawable.photocheck);
-            buttonStatesDrawablesDoc[0][0] = getResources().getDrawable(R.drawable.docload_b);
-            buttonStatesDrawablesDoc[1][0] = getResources().getDrawable(R.drawable.doccancel_b);
-            buttonStatesDrawablesDoc[2][0] = getResources().getDrawable(R.drawable.doccancel_b);
+            buttonStatesDrawablesDoc[0][0] = getResources().getDrawable(R.drawable.doc_download_bs);
+            buttonStatesDrawablesDoc[1][0] = getResources().getDrawable(R.drawable.audiocancel_bs);
+            buttonStatesDrawablesDoc[2][0] = getResources().getDrawable(R.drawable.audiocancel_bs);
             buttonStatesDrawablesDoc[0][1] = getResources().getDrawable(R.drawable.doc_download_bs);
-            buttonStatesDrawablesDoc[1][1] = getResources().getDrawable(R.drawable.doccancel_g);
-            buttonStatesDrawablesDoc[2][1] = getResources().getDrawable(R.drawable.docpause_g);
-            videoIconDrawable = getResources().getDrawable(R.drawable.videofile_icon);
+            buttonStatesDrawablesDoc[1][1] = getResources().getDrawable(R.drawable.audiocancel_bs);
+            buttonStatesDrawablesDoc[2][1] = getResources().getDrawable(R.drawable.pause_bs);
+            videoIconDrawable = getResources().getDrawable(R.drawable.ic_video);
 
             infoPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
             infoPaint.setTextSize(dp(12));
@@ -125,6 +126,12 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             namePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
             namePaint.setColor(0xff000000);
             namePaint.setTextSize(dp(16));
+
+            docBackPaint = new Paint();
+            docBackPaint.setColor(0xff000000);
+            docBackPaint.setStyle(Paint.Style.STROKE);
+            docBackPaint.setStrokeJoin(Paint.Join.ROUND);
+            docBackPaint.setStrokeCap(Paint.Cap.ROUND);
 
             deleteProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             deleteProgressPaint.setColor(0xff000000);
@@ -874,6 +881,11 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             }
 
             if (!imageDrawn) {
+
+                if(media){
+                    canvas.drawRect(photoImage.getImageX(), photoImage.getImageY(), photoImage.getImageX() + photoImage.getImageWidth(), photoImage.getImageY() + photoImage.getImageHeight(), docBackPaint);
+                }
+
                 if (currentMessageObject.isOut()) {
                     radialProgress.setProgressColor(0xff81bd72);
                 } else {
@@ -929,6 +941,8 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             }
         } else if (infoLayout != null && (buttonState == 1 || buttonState == 0 || buttonState == 3 || currentMessageObject.isSecretPhoto())) {
             infoPaint.setColor(0xffffffff);
+            setDrawableBounds(mediaBackgroundDrawable, photoImage.getImageX() + dp(4), photoImage.getImageY() + dp(4), infoWidth + dp(8) + infoOffset, dp(16.5f));
+            mediaBackgroundDrawable.draw(canvas);
 
             if (currentMessageObject.type == 3) {
                 setDrawableBounds(videoIconDrawable, photoImage.getImageX() + dp(8), photoImage.getImageY() + dp(7.5f));
