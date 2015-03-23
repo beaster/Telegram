@@ -240,7 +240,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         return;
                     }
                     if (id == -1) {
-                        finishFragment();
+                        getParentActivity().finish();
                     } else if (id == block_contact) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
                         if (!userBlocked) {
@@ -562,9 +562,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 writeButton = new ImageView(getParentActivity());
                 writeButton.setBackgroundResource(R.drawable.floating_user_states);
                 writeButton.setScaleType(ImageView.ScaleType.CENTER);
-                if (user_id != 0) {
+                if (user_id != 0) {/*
                     writeButton.setImageResource(R.drawable.floating_message);
-                    writeButton.setPadding(0, AndroidUtilities.dp(3), 0, 0);
+                    writeButton.setPadding(0, AndroidUtilities.dp(3), 0, 0);*/
                 } else if (chat_id != 0) {
                     writeButton.setImageResource(R.drawable.floating_camera);
                 }
@@ -594,7 +594,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         if (getParentActivity() == null) {
                             return;
                         }
-                        if (user_id != 0) {
+                        if (user_id != 0) {/*
                             TLRPC.User user = MessagesController.getInstance().getUser(user_id);
                             if (user == null || user instanceof TLRPC.TL_userEmpty) {
                                 return;
@@ -603,7 +603,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             NotificationCenter.getInstance().postNotificationName(NotificationCenter.closeChats);
                             Bundle args = new Bundle();
                             args.putInt("user_id", user_id);
-                            presentFragment(new ChatActivity(args), true);
+                            presentFragment(new ChatActivity(args), true);*/
                         } else if (chat_id != 0) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
                             CharSequence[] items;
@@ -728,6 +728,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (writeButton.getVisibility() == View.GONE) {
                     writeButton.clearAnimation();
                 }
+            }
+            if(user_id != 0){
+                writeButton.setVisibility(View.GONE);
             }
 
             avatarImage.imageReceiver.setRoundRadius(AndroidUtilities.dp(avatarSize / 2));

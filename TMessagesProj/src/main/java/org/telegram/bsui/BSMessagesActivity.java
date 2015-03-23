@@ -3,8 +3,12 @@ package org.telegram.bsui;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,6 +20,7 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -31,17 +36,18 @@ import org.telegram.android.NotificationCenter;
 import org.telegram.bsui.ActionBar.BSActionBar;
 import org.telegram.bsui.ActionBar.BSActionBarMenu;
 import org.telegram.bsui.ActionBar.BSActionBarMenuItem;
+import org.telegram.bsui.ActionBar.BSMenuDrawable;
 import org.telegram.bsui.Adapters.BSDialogsAdapter;
 import org.telegram.bsui.Adapters.BSDialogsSearchAdapter;
+import org.telegram.bsui.Cells.BSDialogCell;
+import org.telegram.bsui.Cells.BSUserCell;
 import org.telegram.bsui.Components.BSAlertDialog;
 import org.telegram.bsui.widget.BSBaseActivity;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.R;
 import org.telegram.messenger.TLRPC;
-import org.telegram.ui.ActionBar.MenuDrawable;
 import org.telegram.ui.AnimationCompat.ObjectAnimatorProxy;
 import org.telegram.ui.AnimationCompat.ViewProxy;
-import org.telegram.ui.Cells.DialogCell;
 import org.telegram.ui.Cells.UserCell;
 
 import java.util.ArrayList;
@@ -128,12 +134,14 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
         floatingButton = (ImageView)findViewById(R.id.btn_new_sms);
         floatingButton.setVisibility(onlySelect ? View.GONE : View.VISIBLE);
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)floatingButton.getLayoutParams();
-        layoutParams.leftMargin = LocaleController.isRTL ? AndroidUtilities.dp(14) : 0;
-        layoutParams.rightMargin = LocaleController.isRTL ? 0 : AndroidUtilities.dp(14);
+        layoutParams.leftMargin = LocaleController.isRTL ? AndroidUtilities.bsDp(14) : 0;
+        layoutParams.rightMargin = LocaleController.isRTL ? 0 : AndroidUtilities.bsDp(14);
         layoutParams.addRule((LocaleController.isRTL ? RelativeLayout.ALIGN_PARENT_LEFT : RelativeLayout.ALIGN_PARENT_RIGHT) | RelativeLayout.ALIGN_BOTTOM);
         floatingButton.setLayoutParams(layoutParams);
         BSActionBarMenu menu = actionBar.createMenu();
-        menu.addItem(0, R.drawable.ic_ab_search)
+        menu.setGravity(Gravity.TOP);
+        menu.setPadding(0, AndroidUtilities.bsDp(5), AndroidUtilities.bsDp(5), 0);
+        menu.addItem(0, R.drawable.zoom)
                 .setIsSearchField(true)
                 .setActionBarMenuItemSearchListener(new BSActionBarMenuItem.ActionBarMenuItemSearchListener() {
                     @Override
@@ -199,7 +207,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
             actionBar.setBackButtonImage(R.drawable.ic_ab_back);
             actionBar.setTitle(LocaleController.getString("SelectChat", R.string.SelectChat));
         } else {
-            actionBar.setBackButtonDrawable(new MenuDrawable());
+            actionBar.setBackButtonDrawable(new BSMenuDrawable());
             actionBar.setTitle(LocaleController.getString("AppName", R.string.AppName));
         }
 //        actionBar.setAllowOverlayTitle(true);
@@ -349,7 +357,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
             return;
         }
         floatingHidden = hide;
-        ObjectAnimatorProxy animator = ObjectAnimatorProxy.ofFloatProxy(floatingButton, "translationY", floatingHidden ? AndroidUtilities.dp(100) : 0).setDuration(300);
+        ObjectAnimatorProxy animator = ObjectAnimatorProxy.ofFloatProxy(floatingButton, "translationY", floatingHidden ? AndroidUtilities.bsDp(100) : 0).setDuration(300);
         animator.setInterpolator(floatingInterpolator);
         floatingButton.setClickable(!hide);
         animator.start();
@@ -368,6 +376,8 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
     @Override
     protected void onBSResume() {
         super.onBSResume();
+        Log.d("bsmessages", "onBSResume");
+        Log.d("bsmessages", "bsActionBarHeight#"+String.valueOf(AndroidUtilities.getBSCurrentActionBarHeight()));
         if (dialogsAdapter != null) {
             dialogsAdapter.notifyDataSetChanged();
         }
@@ -468,7 +478,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
             if (checkBox != null) {
                 ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams)checkBox.getLayoutParams();
                 if (layoutParams != null) {
-                    layoutParams.rightMargin = layoutParams.leftMargin = AndroidUtilities.dp(10);
+                    layoutParams.rightMargin = layoutParams.leftMargin = AndroidUtilities.bsDp(10);
                     checkBox.setLayoutParams(layoutParams);
                 }
             }
@@ -560,13 +570,13 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
         int count = messagesListView.getChildCount();
         for (int a = 0; a < count; a++) {
             View child = messagesListView.getChildAt(a);
-            if (child instanceof DialogCell) {
-                DialogCell cell = (DialogCell) child;
+            if (child instanceof BSDialogCell) {
+                BSDialogCell cell = (BSDialogCell) child;
                 if ((mask & MessagesController.UPDATE_MASK_SELECT_DIALOG) != 0) {
                     cell.update(mask);
                 }
-            } else if (child instanceof UserCell) {
-                ((UserCell) child).update(mask);
+            } else if (child instanceof BSUserCell) {
+                ((BSUserCell) child).update(mask);
             }
         }
     }

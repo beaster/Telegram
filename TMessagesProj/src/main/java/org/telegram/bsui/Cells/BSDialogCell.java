@@ -4,14 +4,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
+import android.view.View;
+import android.view.ViewGroup;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.android.AndroidUtilities;
@@ -31,7 +31,7 @@ import org.telegram.ui.Cells.BaseCell;
 /**
  * Created by Ji on 29.12.2014.
  */
-public class BSDialogCell extends BaseCell {
+public class BSDialogCell extends BSBaseCell {
 
     private static TextPaint namePaint;
     private static TextPaint nameEncryptedPaint;
@@ -50,7 +50,7 @@ public class BSDialogCell extends BaseCell {
     private static Drawable groupDrawable;
     private static Drawable broadcastDrawable;
 
-    private static Paint linePaint;
+    private static Bitmap dottedBitmap;
 
     private long currentDialogId;
     private boolean allowPrintStrings;
@@ -79,31 +79,31 @@ public class BSDialogCell extends BaseCell {
     private int nameLockTop;
 
     private int timeLeft;
-    private int timeTop = AndroidUtilities.bsDp(17);
+    private int timeTop = AndroidUtilities.bsDp(25);
     private StaticLayout timeLayout;
 
     private boolean drawCheck1;
     private boolean drawCheck2;
     private boolean drawClock;
     private int checkDrawLeft;
-    private int checkDrawTop = AndroidUtilities.bsDp(18);
+    private int checkDrawTop = AndroidUtilities.bsDp(27);
     private int halfCheckDrawLeft;
 
-    private int messageTop = AndroidUtilities.bsDp(40);
+    private int messageTop = AndroidUtilities.bsDp(53);
     private int messageLeft;
     private StaticLayout messageLayout;
 
     private boolean drawError;
-    private int errorTop = AndroidUtilities.bsDp(39);
+    private int errorTop = AndroidUtilities.bsDp(48);
     private int errorLeft;
 
     private boolean drawCount;
-    private int countTop = AndroidUtilities.bsDp(39);
+    private int countTop = AndroidUtilities.bsDp(48);
     private int countLeft;
     private int countWidth;
     private StaticLayout countLayout;
 
-    private int avatarTop = AndroidUtilities.bsDp(10);
+    private int avatarTop = AndroidUtilities.bsDp(20);
 
     private void init() {
         if (namePaint == null) {
@@ -124,13 +124,14 @@ public class BSDialogCell extends BaseCell {
 
             messagePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             messagePaint.setTextSize(AndroidUtilities.bsDp(16));
+            messagePaint.setColor(0xFF000000);
 
 
-            linePaint = new Paint();
-
+            dottedBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.dots);
 
             messagePrintingPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             messagePrintingPaint.setTextSize(AndroidUtilities.bsDp(16));
+            messagePrintingPaint.setColor(0xFF000000);
 
 
             timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
@@ -142,16 +143,18 @@ public class BSDialogCell extends BaseCell {
 
             countPaint.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
 
-            lockDrawable = getResources().getDrawable(R.drawable.list_secret);
-            checkDrawable = getResources().getDrawable(R.drawable.dialogs_check);
-            halfCheckDrawable = getResources().getDrawable(R.drawable.dialogs_halfcheck);
-            clockDrawable = getResources().getDrawable(R.drawable.msg_clock);
-            errorDrawable = getResources().getDrawable(R.drawable.dialogs_warning);
-            countDrawable = getResources().getDrawable(R.drawable.dialogs_badge);
+            lockDrawable = getResources().getDrawable(R.drawable.secret_chat_bs);
+            checkDrawable = getResources().getDrawable(R.drawable.msg_check_bs);
+            halfCheckDrawable = getResources().getDrawable(R.drawable.msg_halfchecked_bs);
+            clockDrawable = getResources().getDrawable(R.drawable.msg_clock_bs);
+            errorDrawable = getResources().getDrawable(R.drawable.alert_bs);
+            countDrawable = getResources().getDrawable(R.drawable.msg_counter_bs);
             groupDrawable = getResources().getDrawable(R.drawable.list_group);
-            broadcastDrawable = getResources().getDrawable(R.drawable.list_broadcast);
+            broadcastDrawable = getResources().getDrawable(R.drawable.broadcast_bs);
         }
     }
+
+    Context context;
 
     public BSDialogCell(Context context) {
         super(context);
@@ -159,6 +162,7 @@ public class BSDialogCell extends BaseCell {
         avatarImage = new ImageReceiver(this);
         avatarImage.setRoundRadius(AndroidUtilities.bsDp(26));
         avatarDrawable = new BSAvatarDrawable();
+        this.context = context;
     }
 
     public void setDialog(long dialog_id, MessageObject messageObject, boolean usePrintStrings, int date, int unread) {
@@ -185,7 +189,7 @@ public class BSDialogCell extends BaseCell {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), AndroidUtilities.bsDp(72));
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), AndroidUtilities.bsDp(100));
     }
 
     @Override
@@ -218,36 +222,36 @@ public class BSDialogCell extends BaseCell {
 
         if (encryptedChat != null) {
             drawNameLock = true;
-            nameLockTop = AndroidUtilities.bsDp(16.5f);
+            nameLockTop = AndroidUtilities.bsDp(25.5f);
             if (!LocaleController.isRTL) {
-                nameLockLeft = AndroidUtilities.bsDp(72);
-                nameLeft = AndroidUtilities.bsDp(76) + lockDrawable.getIntrinsicWidth();
+                nameLockLeft = AndroidUtilities.bsDp(84);
+                nameLeft = AndroidUtilities.bsDp(94) + lockDrawable.getIntrinsicWidth();
             } else {
-                nameLockLeft = getMeasuredWidth() - AndroidUtilities.bsDp(72) - lockDrawable.getIntrinsicWidth();
-                nameLeft = AndroidUtilities.bsDp(14);
+                nameLockLeft = getMeasuredWidth() - AndroidUtilities.bsDp(84) - lockDrawable.getIntrinsicWidth();
+                nameLeft = AndroidUtilities.bsDp(22);
             }
         } else {
             if (chat != null) {
                 if (chat.id < 0) {
                     drawNameBroadcast = true;
-                    nameLockTop = AndroidUtilities.bsDp(16.5f);
+                    nameLockTop = AndroidUtilities.bsDp(25.5f);
                 } else {
                     drawNameGroup = true;
-                    nameLockTop = AndroidUtilities.bsDp(17.5f);
+                    nameLockTop = AndroidUtilities.bsDp(26.5f);
                 }
 
                 if (!LocaleController.isRTL) {
-                    nameLockLeft = AndroidUtilities.bsDp(72);
-                    nameLeft = AndroidUtilities.bsDp(76) + (drawNameGroup ? groupDrawable.getIntrinsicWidth() : broadcastDrawable.getIntrinsicWidth());
+                    nameLockLeft = AndroidUtilities.bsDp(84);
+                    nameLeft = AndroidUtilities.bsDp(94) + (drawNameGroup ? groupDrawable.getIntrinsicWidth() : broadcastDrawable.getIntrinsicWidth());
                 } else {
-                    nameLockLeft = getMeasuredWidth() - AndroidUtilities.bsDp(72) - (drawNameGroup ? groupDrawable.getIntrinsicWidth() : broadcastDrawable.getIntrinsicWidth());
-                    nameLeft = AndroidUtilities.bsDp(14);
+                    nameLockLeft = getMeasuredWidth() - AndroidUtilities.bsDp(84) - (drawNameGroup ? groupDrawable.getIntrinsicWidth() : broadcastDrawable.getIntrinsicWidth());
+                    nameLeft = AndroidUtilities.bsDp(22);
                 }
             } else {
                 if (!LocaleController.isRTL) {
-                    nameLeft = AndroidUtilities.bsDp(72);
+                    nameLeft = AndroidUtilities.bsDp(84);
                 } else {
-                    nameLeft = AndroidUtilities.bsDp(14);
+                    nameLeft = AndroidUtilities.bsDp(22);
                 }
             }
         }
@@ -385,9 +389,9 @@ public class BSDialogCell extends BaseCell {
         int timeWidth = (int) Math.ceil(timePaint.measureText(timeString));
         timeLayout = new StaticLayout(timeString, timePaint, timeWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         if (!LocaleController.isRTL) {
-            timeLeft = getMeasuredWidth() - AndroidUtilities.bsDp(15) - timeWidth;
+            timeLeft = getMeasuredWidth() - AndroidUtilities.bsDp(20) - timeWidth;
         } else {
-            timeLeft = AndroidUtilities.bsDp(15);
+            timeLeft = AndroidUtilities.bsDp(20);
         }
 
         if (chat != null) {
@@ -420,7 +424,7 @@ public class BSDialogCell extends BaseCell {
         if (!LocaleController.isRTL) {
             nameWidth = getMeasuredWidth() - nameLeft - AndroidUtilities.bsDp(14) - timeWidth;
         } else {
-            nameWidth = getMeasuredWidth() - nameLeft - AndroidUtilities.bsDp(72) - timeWidth;
+            nameWidth = getMeasuredWidth() - nameLeft - AndroidUtilities.bsDp(84) - timeWidth;
             nameLeft += timeWidth;
         }
         if (drawNameLock) {
@@ -446,17 +450,17 @@ public class BSDialogCell extends BaseCell {
                 nameWidth -= halfCheckDrawable.getIntrinsicWidth() - AndroidUtilities.bsDp(8);
                 if (!LocaleController.isRTL) {
                     halfCheckDrawLeft = timeLeft - w;
-                    checkDrawLeft = halfCheckDrawLeft - AndroidUtilities.bsDp(5.5f);
+                    checkDrawLeft = halfCheckDrawLeft - AndroidUtilities.bsDp(6.5f);
                 } else {
                     checkDrawLeft = timeLeft + timeWidth + AndroidUtilities.bsDp(5);
-                    halfCheckDrawLeft = checkDrawLeft + AndroidUtilities.bsDp(5.5f);
+                    halfCheckDrawLeft = checkDrawLeft + AndroidUtilities.bsDp(6.5f);
                     nameLeft += w + halfCheckDrawable.getIntrinsicWidth() - AndroidUtilities.bsDp(8);
                 }
             } else {
                 if (!LocaleController.isRTL) {
                     checkDrawLeft = timeLeft - w;
                 } else {
-                    checkDrawLeft = timeLeft + timeWidth + AndroidUtilities.bsDp(5);
+                    checkDrawLeft = timeLeft + timeWidth + AndroidUtilities.bsDp(6.5f);
                     nameLeft += w;
                 }
             }
@@ -473,11 +477,11 @@ public class BSDialogCell extends BaseCell {
         int messageWidth = getMeasuredWidth() - AndroidUtilities.bsDp(88);
         int avatarLeft;
         if (!LocaleController.isRTL) {
-            messageLeft = AndroidUtilities.bsDp(72);
-            avatarLeft = AndroidUtilities.bsDp(9);
+            messageLeft = AndroidUtilities.bsDp(84);
+            avatarLeft = AndroidUtilities.bsDp(18);
         } else {
-            messageLeft = AndroidUtilities.bsDp(16);
-            avatarLeft = getMeasuredWidth() - AndroidUtilities.bsDp(61);
+            messageLeft = AndroidUtilities.bsDp(22);
+            avatarLeft = getMeasuredWidth() - AndroidUtilities.bsDp(84);
         }
         avatarImage.setImageCoords(avatarLeft, avatarTop, AndroidUtilities.bsDp(52), AndroidUtilities.bsDp(52));
         if (drawError) {
@@ -495,9 +499,9 @@ public class BSDialogCell extends BaseCell {
             int w = countWidth + AndroidUtilities.bsDp(18);
             messageWidth -= w;
             if (!LocaleController.isRTL) {
-                countLeft = getMeasuredWidth() - countWidth - AndroidUtilities.bsDp(19);
+                countLeft = getMeasuredWidth() - countWidth - AndroidUtilities.bsDp(24);
             } else {
-                countLeft = AndroidUtilities.bsDp(19);
+                countLeft = AndroidUtilities.bsDp(24);
                 messageLeft += w;
             }
             drawCount = true;
@@ -677,7 +681,7 @@ public class BSDialogCell extends BaseCell {
 
         if (nameLayout != null) {
             canvas.save();
-            canvas.translate(nameLeft, AndroidUtilities.bsDp(13));
+            canvas.translate(nameLeft, AndroidUtilities.bsDp(22));
             nameLayout.draw(canvas);
             canvas.restore();
         }
@@ -722,13 +726,17 @@ public class BSDialogCell extends BaseCell {
         }
 
         if (useSeparator) {
-            if (LocaleController.isRTL) {
-                canvas.drawLine(0, getMeasuredHeight() - 1, getMeasuredWidth() - AndroidUtilities.bsDp(72), getMeasuredHeight() - 1, linePaint);
-            } else {
-                canvas.drawLine(AndroidUtilities.bsDp(72), getMeasuredHeight() - 1, getMeasuredWidth(), getMeasuredHeight() - 1, linePaint);
-            }
+            canvas.drawBitmap(dottedBitmap, AndroidUtilities.bsDp(22), 0, null);
         }
 
         avatarImage.draw(canvas);
+    }
+
+    protected void setDrawableBounds(Drawable drawable, int x, int y) {
+        setDrawableBounds(drawable, x, y, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+    }
+
+    protected void setDrawableBounds(Drawable drawable, int x, int y, int w, int h) {
+        drawable.setBounds(x, y, x + w, y + h);
     }
 }

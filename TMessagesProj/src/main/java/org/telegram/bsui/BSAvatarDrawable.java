@@ -205,7 +205,7 @@ public class BSAvatarDrawable extends Drawable {
         if (drawBrodcast && broadcastDrawable != null) {
             int x = (size - broadcastDrawable.getIntrinsicWidth()) / 2;
             int y = (size - broadcastDrawable.getIntrinsicHeight()) / 2;
-            broadcastDrawable.setBounds(x, y, x + broadcastDrawable.getIntrinsicWidth(), y + broadcastDrawable.getIntrinsicHeight());
+            broadcastDrawable.setBounds(x + 20, y + 20, x + broadcastDrawable.getIntrinsicWidth() - 20, y + broadcastDrawable.getIntrinsicHeight() - 20);
             broadcastDrawable.draw(canvas);
         } else {
             if (textLayout != null) {

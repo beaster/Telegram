@@ -906,6 +906,7 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
             }
             if(intent != null && intent.getAction() != null) {
                 if (intent.getAction().equals(OtherFlipBSActivity.SETTINGS_FLAG)) {
+                    actionBarLayout.removeAllFragments();
                     actionBarLayout.presentFragment(new SettingsActivity());
                     drawerLayoutContainer.closeDrawer(false);
                 } else if (intent.getAction().equals(OtherFlipBSActivity.VIEW_PROFILE)) {
@@ -1537,7 +1538,8 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
 
     @Override
     public void onBackPressed() {
-        if (passcodeView.getVisibility() == View.VISIBLE) {
+        super.onBackPressed();
+/*        if (passcodeView.getVisibility() == View.VISIBLE) {
             finish();
             return;
         }
@@ -1560,7 +1562,7 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
             }
         } else {
             actionBarLayout.onBackPressed();
-        }
+        }*/
     }
 
     @Override

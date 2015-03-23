@@ -153,7 +153,7 @@ public class BSChatActivityEnterView implements NotificationCenter.NotificationC
         if (attachButton != null) {
             ViewProxy.setPivotX(attachButton, AndroidUtilities.bsDp(48));
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) messsageEditText.getLayoutParams();
-            layoutParams.rightMargin = AndroidUtilities.bsDp(50);//TODO...
+//            layoutParams.rightMargin = AndroidUtilities.bsDp(50);//TODO...
             messsageEditText.setLayoutParams(layoutParams);
             attachButton.setVisibility(View.VISIBLE);
         }
@@ -489,7 +489,7 @@ public class BSChatActivityEnterView implements NotificationCenter.NotificationC
 
                     if (messsageEditText != null) {
                         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) messsageEditText.getLayoutParams();
-                        layoutParams.rightMargin = AndroidUtilities.bsDp(50);//TODO...
+//                        layoutParams.rightMargin = AndroidUtilities.bsDp(50);//TODO...
                         messsageEditText.setLayoutParams(layoutParams);
                     }
 
@@ -536,7 +536,7 @@ public class BSChatActivityEnterView implements NotificationCenter.NotificationC
                 if (attachButton != null) {
                     attachButton.setVisibility(View.VISIBLE);
                     FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) messsageEditText.getLayoutParams();
-                    layoutParams.rightMargin = AndroidUtilities.bsDp(50);//TODO...
+//                    layoutParams.rightMargin = AndroidUtilities.bsDp(50);//TODO...
                     messsageEditText.setLayoutParams(layoutParams);
                 }
             }

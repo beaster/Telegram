@@ -50,6 +50,7 @@ import org.telegram.bsui.ActionBar.BSActionBarMenuItem;
 import org.telegram.bsui.Cells.BSChatActionCell;
 import org.telegram.bsui.Cells.BSChatActivityEnterView;
 import org.telegram.bsui.Cells.BSChatAudioCell;
+import org.telegram.bsui.Cells.BSChatBaseCell;
 import org.telegram.bsui.Cells.BSChatContactCell;
 import org.telegram.bsui.Cells.BSChatMediaCell;
 import org.telegram.bsui.Cells.BSChatMessageCell;
@@ -70,17 +71,10 @@ import org.telegram.ui.AnimationCompat.AnimatorListenerAdapterProxy;
 import org.telegram.ui.AnimationCompat.AnimatorSetProxy;
 import org.telegram.ui.AnimationCompat.ObjectAnimatorProxy;
 import org.telegram.ui.AnimationCompat.ViewProxy;
-import org.telegram.ui.Cells.ChatActionCell;
-import org.telegram.ui.Cells.ChatAudioCell;
-import org.telegram.ui.Cells.ChatBaseCell;
-import org.telegram.ui.Cells.ChatContactCell;
-import org.telegram.ui.Cells.ChatMediaCell;
-import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.FrameLayoutFixed;
 import org.telegram.ui.Components.LayoutListView;
 import org.telegram.ui.Components.TypingDotsDrawable;
-import org.telegram.ui.ContactAddActivity;
 import org.telegram.ui.SecretPhotoViewer;
 import org.telegram.ui.VideoEditorActivity;
 
@@ -233,10 +227,10 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
 
     private void processRowSelect(View view) {
         MessageObject message = null;
-        if (view instanceof ChatBaseCell) {
-            message = ((ChatBaseCell)view).getMessageObject();
-        } else if (view instanceof ChatActionCell) {
-            message = ((ChatActionCell)view).getMessageObject();
+        if (view instanceof BSChatBaseCell) {
+            message = ((BSChatBaseCell)view).getMessageObject();
+        } else if (view instanceof BSChatActionCell) {
+            message = ((BSChatActionCell)view).getMessageObject();
         }
 
         int type = getMessageType(message);
@@ -255,10 +249,10 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
         }
 
         MessageObject message = null;
-        if (v instanceof ChatBaseCell) {
-            message = ((ChatBaseCell)v).getMessageObject();
-        } else if (v instanceof ChatActionCell) {
-            message = ((ChatActionCell)v).getMessageObject();
+        if (v instanceof BSChatBaseCell) {
+            message = ((BSChatBaseCell)v).getMessageObject();
+        } else if (v instanceof BSChatActionCell) {
+            message = ((BSChatActionCell)v).getMessageObject();
         }
         if (message == null) {
             return;
@@ -926,11 +920,12 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             }
             avatarContainer = new FrameLayoutFixed(getParentActivity());
             avatarContainer.setBackgroundResource(R.drawable.bar_selector);
-            avatarContainer.setPadding(AndroidUtilities.bsDp(8), 0, AndroidUtilities.bsDp(8), 0);
+            avatarContainer.setPadding(AndroidUtilities.bsDp(8), AndroidUtilities.bsDp(5), AndroidUtilities.bsDp(8), 0);
             actionBar.addView(avatarContainer);
             FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) avatarContainer.getLayoutParams();
             layoutParams2.height = FrameLayout.LayoutParams.WRAP_CONTENT;
             layoutParams2.width = FrameLayout.LayoutParams.WRAP_CONTENT;
+//            layoutParams2.topMargin = AndroidUtilities.bsDp(40);
             layoutParams2.rightMargin = AndroidUtilities.bsDp(40);
             layoutParams2.leftMargin = AndroidUtilities.bsDp(56);
             layoutParams2.gravity = Gravity.TOP | Gravity.LEFT;
@@ -1166,10 +1161,10 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                             if (top > y || bottom < y) {
                                 continue;
                             }
-                            if (!(view instanceof ChatMediaCell)) {
+                            if (!(view instanceof BSChatMediaCell)) {
                                 break;
                             }
-                            final ChatMediaCell cell = (ChatMediaCell) view;
+                            final BSChatMediaCell cell = (BSChatMediaCell) view;
                             final MessageObject messageObject = cell.getMessageObject();
                             if (messageObject == null || !messageObject.isSecretPhoto() || !cell.getPhotoImage().isInsideImage(x, y - top)) {
                                 break;
@@ -1293,8 +1288,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                     }
                     for (int a = 0; a < visibleItemCount; a++) {
                         View view = absListView.getChildAt(a);
-                        if (view instanceof ChatMessageCell) {
-                            ChatMessageCell messageCell = (ChatMessageCell)view;
+                        if (view instanceof BSChatMessageCell) {
+                            BSChatMessageCell messageCell = (BSChatMessageCell)view;
                             messageCell.getLocalVisibleRect(scrollRect);
                             messageCell.setVisiblePart(scrollRect.top, scrollRect.bottom - scrollRect.top);
                         }
@@ -1333,8 +1328,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             updateBottomOverlay();
 
             chatActivityEnterView.setContainerView(this, fragmentView);
-            chatActivityEnterView.addToAttachLayout(menuItem);
-            menuItem.setVisibility(View.VISIBLE);
+//            chatActivityEnterView.addToAttachLayout(menuItem);
+            menuItem.setVisibility(View.GONE);
 
             if (currentEncryptedChat != null) {
                 emptyView.setVisibility(View.INVISIBLE);
@@ -1487,7 +1482,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             }
         } else {
             if (menuItem != null) {
-                menuItem.setVisibility(View.VISIBLE);
+                menuItem.setVisibility(View.GONE);
             }
            if (timeItem != null) {
                 timeItem.setVisibility(View.VISIBLE);
@@ -1969,7 +1964,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                         if (first || scrollToTopOnResume) {
                             chatAdapter.notifyDataSetChanged();
                             if (scrollToMessage != null) {
-                                final int yOffset = scrollToMessageMiddleScreen ? Math.max(0, (AndroidUtilities.displaySize.y - AndroidUtilities.statusBarHeight - scrollToMessage.textHeight - AndroidUtilities.getCurrentActionBarHeight() - AndroidUtilities.bsDp(48)) / 2) : 0;
+                                final int yOffset = scrollToMessageMiddleScreen ? Math.max(0, (AndroidUtilities.bsDisplaySize.y - AndroidUtilities.statusBarHeight - scrollToMessage.textHeight - AndroidUtilities.getBSCurrentActionBarHeight() - AndroidUtilities.bsDp(48)) / 2) : 0;
                                 if (messages.get(messages.size() - 1) == scrollToMessage) {
                                     chatListView.setSelectionFromTop(0, AndroidUtilities.bsDp(-11) + yOffset);
                                 } else {
@@ -2404,8 +2399,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                 int count = chatListView.getChildCount();
                 for (int a = 0; a < count; a++) {
                     View view = chatListView.getChildAt(a);
-                    if (view instanceof ChatAudioCell) {
-                        ChatAudioCell cell = (ChatAudioCell) view;
+                    if (view instanceof BSChatAudioCell) {
+                        BSChatAudioCell cell = (BSChatAudioCell) view;
                         if (cell.getMessageObject() != null && cell.getMessageObject().messageOwner.id == mid) {
                             cell.updateButtonState();
                             break;
@@ -2419,8 +2414,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                 int count = chatListView.getChildCount();
                 for (int a = 0; a < count; a++) {
                     View view = chatListView.getChildAt(a);
-                    if (view instanceof ChatAudioCell) {
-                        ChatAudioCell cell = (ChatAudioCell) view;
+                    if (view instanceof BSChatAudioCell) {
+                        BSChatAudioCell cell = (BSChatAudioCell) view;
                         if (cell.getMessageObject() != null && cell.getMessageObject().messageOwner.id == mid) {
                             cell.updateProgress();
                             break;
@@ -2546,7 +2541,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
         if (scrollToTopOnResume) {
             if (scrollToTopUnReadOnResume && scrollToMessage != null) {
                 if (chatListView != null) {
-                    final int yOffset = scrollToMessageMiddleScreen ? Math.max(0, (AndroidUtilities.displaySize.y - AndroidUtilities.statusBarHeight - scrollToMessage.textHeight - AndroidUtilities.getCurrentActionBarHeight() - AndroidUtilities.bsDp(48)) / 2) : 0;
+                    final int yOffset = scrollToMessageMiddleScreen ? Math.max(0, (AndroidUtilities.bsDisplaySize.y - AndroidUtilities.statusBarHeight - scrollToMessage.textHeight - AndroidUtilities.getBSCurrentActionBarHeight() - AndroidUtilities.bsDp(48)) / 2) : 0;
                     chatListView.setSelectionFromTop(messages.size() - messages.indexOf(scrollToMessage), -chatListView.getPaddingTop() - AndroidUtilities.bsDp(7) + yOffset);
                 }
             } else {
@@ -2647,8 +2642,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             for (int a = 0; a < count; a++) {
                 View view = chatListView.getChildAt(a);
                 MessageObject object = null;
-                if (view instanceof ChatBaseCell) {
-                    ChatBaseCell cell = (ChatBaseCell) view;
+                if (view instanceof BSChatBaseCell) {
+                    BSChatBaseCell cell = (BSChatBaseCell) view;
                     object = cell.getMessageObject();
                 }
                 if (object != null && object.messageOwner.id < 0 && object.messageOwner.random_id != 0) {
@@ -2713,8 +2708,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
         int count = chatListView.getChildCount();
         for (int a = 0; a < count; a++) {
             View view = chatListView.getChildAt(a);
-            if (view instanceof ChatBaseCell) {
-                ChatBaseCell cell = (ChatBaseCell)view;
+            if (view instanceof BSChatBaseCell) {
+                BSChatBaseCell cell = (BSChatBaseCell)view;
 
                 boolean disableSelection = false;
                 boolean selected = false;
@@ -2759,8 +2754,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                     messageToOpen = message;
                     imageReceiver = cell.getPhotoImage();
                 }
-            } else if (view instanceof ChatActionCell) {
-                ChatActionCell cell = (ChatActionCell)view;
+            } else if (view instanceof BSChatActionCell) {
+                BSChatActionCell cell = (BSChatActionCell)view;
                 BSMessageObject message = (BSMessageObject) cell.getMessageObject();
                 if (message != null && message.messageOwner.id == messageObject.messageOwner.id) {
                     messageToOpen = message;
@@ -2964,10 +2959,10 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                     view = new BSChatActionCell(mContext);
                 }
 
-                if (view instanceof ChatBaseCell) {
-                    ((ChatBaseCell)view).setDelegate(new ChatBaseCell.ChatBaseCellDelegate() {
+                if (view instanceof BSChatBaseCell) {
+                    ((BSChatBaseCell)view).setDelegate(new BSChatBaseCell.ChatBaseCellDelegate() {
                         @Override
-                        public void didPressedUserAvatar(ChatBaseCell cell, TLRPC.User user) {
+                        public void didPressedUserAvatar(BSChatBaseCell cell, TLRPC.User user) {
                             if (user != null && user.id != UserConfig.getClientUserId()) {
                                     OtherFlipBSActivity.setUserProfileFlag();
                                     OtherFlipBSActivity.Params.put("UId", user.id);
@@ -2976,7 +2971,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                         }
 
                         @Override
-                        public void didPressedCancelSendButton(ChatBaseCell cell) {
+                        public void didPressedCancelSendButton(BSChatBaseCell cell) {
                             MessageObject message = cell.getMessageObject();
                             if (message.messageOwner.send_state != 0) {
                                 SendMessagesHelper.getInstance().cancelSendingMessage(message);
@@ -2984,7 +2979,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                         }
 
                         @Override
-                        public void didLongPressed(ChatBaseCell cell) {
+                        public void didLongPressed(BSChatBaseCell cell) {
                            // createMenu(cell, false);
                         }
 
@@ -2997,7 +2992,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                         ((BSChatMediaCell) view).setAllowedToSetPhoto(openAnimationEnded);
                         ((BSChatMediaCell) view).setMediaDelegate(new BSChatMediaCell.ChatMediaCellDelegate() {
                             @Override
-                            public void didClickedImage(ChatMediaCell cell) {
+                            public void didClickedImage(BSChatMediaCell cell) {
                                 MessageObject message = cell.getMessageObject();
                                 if (message.isSendError()) {
                                     //createMenu(cell, false);
@@ -3038,21 +3033,21 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                                 }
                             }
                             @Override
-                            public void didPressedOther(ChatMediaCell cell) {
+                            public void didPressedOther(BSChatMediaCell cell) {
                                 //createMenu(cell, true);
                             }
                         });
-                    } else if (view instanceof ChatContactCell) {
-                        ((ChatContactCell)view).setContactDelegate(new ChatContactCell.ChatContactCellDelegate() {
+                    } else if (view instanceof BSChatContactCell) {
+                        ((BSChatContactCell)view).setContactDelegate(new BSChatContactCell.ChatContactCellDelegate() {
                             @Override
-                            public void didClickAddButton(ChatContactCell cell, TLRPC.User user) {
+                            public void didClickAddButton(BSChatContactCell cell, TLRPC.User user) {
                                 //TODO
                             }
 
 
 
                             @Override
-                            public void didClickPhone(ChatContactCell cell) {
+                            public void didClickPhone(BSChatContactCell cell) {
                                                                final MessageObject messageObject = cell.getMessageObject();
                                 if (getParentActivity() == null || messageObject.messageOwner.media.phone_number == null || messageObject.messageOwner.media.phone_number.length() == 0) {
                                     return;
@@ -3064,7 +3059,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                 } else if (view instanceof BSChatActionCell) {
                     ((BSChatActionCell)view).setDelegate(new BSChatActionCell.ChatActionCellDelegate() {
                         @Override
-                        public void didClickedImage(ChatActionCell cell) {
+                        public void didClickedImage(BSChatActionCell cell) {
                             BSMessageObject message = (BSMessageObject) cell.getMessageObject();
                             BSPhotoViewer.getInstance().setParentActivity(getContext());
                             BSPhotoViewer.getInstance().openPhoto(message, BSChatActivity.this);
@@ -3072,7 +3067,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                         }
 
                         @Override
-                        public void didLongPressed(ChatActionCell cell)
+                        public void didLongPressed(BSChatActionCell cell)
                         {
                            // createMenu(cell, false);
                         }
@@ -3089,19 +3084,19 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             boolean disableSelection = false;
             view.setBackgroundColor(0);
 
-            if (view instanceof ChatBaseCell) {
-                ChatBaseCell baseCell = (ChatBaseCell)view;
+            if (view instanceof BSChatBaseCell) {
+                BSChatBaseCell baseCell = (BSChatBaseCell)view;
                 baseCell.isChat = currentChat != null;
                 baseCell.setMessageObject(message);
                 baseCell.setCheckPressed(!disableSelection, disableSelection && selected);
-                if (view instanceof ChatAudioCell && MediaController.getInstance().canDownloadMedia(MediaController.AUTODOWNLOAD_MASK_AUDIO)) {
-                    ((ChatAudioCell)view).downloadAudioIfNeed();
+                if (view instanceof BSChatAudioCell && MediaController.getInstance().canDownloadMedia(MediaController.AUTODOWNLOAD_MASK_AUDIO)) {
+                    ((BSChatAudioCell)view).downloadAudioIfNeed();
                 }
                 if (highlightMessageId != Integer.MAX_VALUE && message.messageOwner.id == highlightMessageId) {
                     baseCell.setCheckPressed(false, true);
                 }
-            } else if (view instanceof ChatActionCell) {
-                ChatActionCell actionCell = (ChatActionCell)view;
+            } else if (view instanceof BSChatActionCell) {
+                BSChatActionCell actionCell = (BSChatActionCell)view;
                 actionCell.setMessageObject(message);
                 actionCell.setUseBlackBackground(isCustomTheme);
             }

@@ -26,7 +26,7 @@ import org.telegram.ui.Cells.BaseCell;
 /**
  * Created by E1ektr0 on 09.01.2015.
  */
-public class BSProfileSearchCell  extends BaseCell {
+public class BSProfileSearchCell  extends BSBaseCell {
     private static TextPaint namePaint;
     private static TextPaint nameEncryptedPaint;
     private static TextPaint onlinePaint;

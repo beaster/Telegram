@@ -1,210 +1,247 @@
 package org.telegram.bsui.Cells;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.text.Spannable;
 import android.text.TextPaint;
 import android.text.style.ClickableSpan;
+import android.view.MotionEvent;
 
 import org.telegram.android.AndroidUtilities;
 import org.telegram.android.MessageObject;
 import org.telegram.bsui.BSMessageObject;
 import org.telegram.bsui.ClickSpan;
+import org.telegram.messenger.FileLog;
 import org.telegram.messenger.R;
 import org.telegram.ui.Cells.ChatMessageCell;
 
 /**
  * Created by E1ektr0 on 04.01.2015.
  */
-public class BSChatMessageCell extends ChatMessageCell {
+public class BSChatMessageCell extends BSChatBaseCell {
 
-    private final Context context;
+    private int textX, textY;
+    private int totalHeight = 0;
+    private ClickableSpan pressedLink;
 
-    private static Drawable backgroundDrawableIn;
-    private static Drawable backgroundDrawableOut;
-    private static Drawable backgroundDrawableInSelected;
-    private static TextPaint timePaintIn;
-    private static TextPaint timePaintOut;
-    private static TextPaint timeMediaPaint;
-    private static TextPaint namePaint;
-    private static TextPaint forwardNamePaint;
-    private static Drawable backgroundDrawableOutSelected;
-    private static Drawable checkDrawable;
-    private static Drawable halfCheckDrawable;
-    private static Drawable clockDrawable;
-    private static Drawable broadcastDrawable;
-    private static Drawable checkMediaDrawable;
-    private static Drawable halfCheckMediaDrawable;
-    private static Drawable clockMediaDrawable;
-    private static Drawable broadcastMediaDrawable;
-    private static Drawable errorDrawable;
-    protected static Drawable mediaBackgroundDrawable;
+    private int lastVisibleBlockNum = 0;
+    private int firstVisibleBlockNum = 0;
+    private int totalVisibleBlocksCount = 0;
+    private Context context;
 
     public BSChatMessageCell(Context context) {
         super(context);
+        drawForwardedName = true;
         this.context = context;
     }
 
     @Override
-    protected void initResources() {
-        if(backgroundDrawableIn == null) {
-            backgroundDrawableIn = getResources().getDrawable(R.drawable.msg_in_bs);
-            backgroundDrawableOut = getResources().getDrawable(R.drawable.msg_out_bs);
-            backgroundDrawableInSelected = getResources().getDrawable(R.drawable.msg_in_selected_bs);
-            backgroundDrawableOutSelected = getResources().getDrawable(R.drawable.msg_out_selected_bs);
+    public boolean onTouchEvent(MotionEvent event) {
+        if (currentMessageObject != null && currentMessageObject.textLayoutBlocks != null && !currentMessageObject.textLayoutBlocks.isEmpty() && currentMessageObject.messageText instanceof Spannable && !isPressed) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN || pressedLink != null && event.getAction() == MotionEvent.ACTION_UP) {
+                int x = (int)event.getX();
+                int y = (int)event.getY();
+                if (x >= textX && y >= textY && x <= textX + currentMessageObject.textWidth && y <= textY + currentMessageObject.textHeight) {
+                    y -= textY;
+                    int blockNum = Math.max(0, y / currentMessageObject.blockHeight);
+                    if (blockNum < currentMessageObject.textLayoutBlocks.size()) {
+                        try {
+                            MessageObject.TextLayoutBlock block = currentMessageObject.textLayoutBlocks.get(blockNum);
+                            x -= textX - (int)Math.ceil(block.textXOffset);
+                            y -= block.textYOffset;
+                            final int line = block.textLayout.getLineForVertical(y);
+                            final int off = block.textLayout.getOffsetForHorizontal(line, x) + block.charactersOffset;
 
-            checkDrawable = getResources().getDrawable(R.drawable.msg_check);
-            halfCheckDrawable = getResources().getDrawable(R.drawable.msg_halfcheck);
-            clockDrawable = getResources().getDrawable(R.drawable.msg_clock);
-            checkMediaDrawable = getResources().getDrawable(R.drawable.msg_check_w);
-            halfCheckMediaDrawable = getResources().getDrawable(R.drawable.msg_halfcheck_w);
-            clockMediaDrawable = getResources().getDrawable(R.drawable.msg_clock_photo);
-            errorDrawable = getResources().getDrawable(R.drawable.msg_warning);
-            mediaBackgroundDrawable = getResources().getDrawable(R.drawable.phototime);
-            broadcastDrawable = getResources().getDrawable(R.drawable.broadcast3);
-            broadcastMediaDrawable = getResources().getDrawable(R.drawable.broadcast4);
+                            final float left = block.textLayout.getLineLeft(line);
+                            if (left <= x && left + block.textLayout.getLineWidth(line) >= x) {
+                                Spannable buffer = (Spannable)currentMessageObject.messageText;
+                                ClickableSpan[] link = getSpans(off, buffer);
 
-            timePaintIn = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaintIn.setTextSize(dp(12));
-            timePaintIn.setColor(0xff000000);
+                                if (link.length != 0) {
+                                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                                        pressedLink = link[0];
+                                        return true;
+                                    } else {
+                                        if (link[0] == pressedLink) {
+                                            try {
+                                                pressedLink.onClick(this);
+                                            } catch (Exception e) {
+                                                FileLog.e("tmessages", e);
+                                            }
+                                            return true;
+                                        }
+                                    }
+                                } else {
+                                    pressedLink = null;
+                                }
+                            } else {
+                                pressedLink = null;
+                            }
+                        } catch (Exception e) {
+                            pressedLink = null;
+                            FileLog.e("tmessages", e);
+                        }
+                    } else {
+                        pressedLink = null;
+                    }
+                } else {
+                    pressedLink = null;
+                }
+            }
+        } else {
+            pressedLink = null;
+        }
+        return super.onTouchEvent(event);
+    }
 
-            timePaintOut = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaintOut.setTextSize(dp(12));
-            timePaintOut.setColor(0xff000000);
+    protected ClickableSpan[] getSpans(int off, Spannable buffer) {
+        return buffer.getSpans(off, off, ClickableSpan.class);
+    }
 
-            timeMediaPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timeMediaPaint.setTextSize(dp(12));
-            timeMediaPaint.setColor(0xffffffff);
+    public void setVisiblePart(int position, int height) {
+        if (currentMessageObject == null || currentMessageObject.textLayoutBlocks == null) {
+            return;
+        }
+        int newFirst = -1, newLast = -1, newCount = 0;
 
-            namePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            namePaint.setTextSize(dp(15));
+        for (int a = Math.max(0, (position - textY) / currentMessageObject.blockHeight); a < currentMessageObject.textLayoutBlocks.size(); a++) {
+            MessageObject.TextLayoutBlock block = currentMessageObject.textLayoutBlocks.get(a);
+            float y = textY + block.textYOffset;
+            if (intersect(y, y + currentMessageObject.blockHeight, position, position + height)) {
+                if (newFirst == -1) {
+                    newFirst = a;
+                }
+                newLast = a;
+                newCount++;
+            } else if (y > position) {
+                break;
+            }
+        }
 
-            forwardNamePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            forwardNamePaint.setTextSize(dp(14));
+        if (lastVisibleBlockNum != newLast || firstVisibleBlockNum != newFirst || totalVisibleBlocksCount != newCount) {
+            lastVisibleBlockNum = newLast;
+            firstVisibleBlockNum = newFirst;
+            totalVisibleBlocksCount = newCount;
+            invalidate();
         }
     }
 
-    @Override
-    public Drawable getCheckDrawable() {
-        return checkDrawable;
-    }
-
-    @Override
-    public Drawable getHalfCheckDrawable() {
-        return halfCheckDrawable;
-    }
-
-    @Override
-    public Drawable getClockDrawable() {
-        return clockDrawable;
-    }
-
-    @Override
-    public Drawable getBroadcastDrawable() {
-        return broadcastDrawable;
-    }
-
-    @Override
-    public Drawable getErrorDrawable() {
-        return errorDrawable;
-    }
-
-    @Override
-    public Drawable getBroadcastMediaDrawable() {
-        return broadcastMediaDrawable;
-    }
-
-    @Override
-    public Drawable getClockMediaDrawable() {
-        return clockMediaDrawable;
-    }
-
-    @Override
-    public Drawable getCheckMediaDrawable() {
-        return checkMediaDrawable;
-    }
-
-    @Override
-    public Drawable getHalfCheckMediaDrawable() {
-        return halfCheckMediaDrawable;
-    }
-
-    @Override
-    public TextPaint getTimePaintIn() {
-        return timePaintIn;
-    }
-
-    @Override
-    public TextPaint getTimePaintOut() {
-        return timePaintOut;
-    }
-
-    @Override
-    public TextPaint getTimeMediaPaint() {
-        return timeMediaPaint;
-    }
-
-    @Override
-    public TextPaint getNamePaint() {
-        return namePaint;
-    }
-
-    @Override
-    public TextPaint getForwardNamePaint() {
-        return forwardNamePaint;
-    }
-
-    @Override
-    public Drawable getBackgroundDrawableIn() {
-        return backgroundDrawableIn;
-    }
-
-    @Override
-    public Drawable getBackgroundDrawableInSelected() {
-        return backgroundDrawableInSelected;
-    }
-
-    @Override
-    public Drawable getBackgroundDrawableOutSelected() {
-        return backgroundDrawableOutSelected;
-    }
-
-    @Override
-    public Drawable getBackgroundDrawableOut() {
-        return backgroundDrawableOut;
-    }
-
-    @Override
-    protected int getDisplayY() {
-        return getDisplaySize().y;
-    }
-
-    @Override
-    protected ClickableSpan[] getSpans(int off, Spannable buffer) {
-        return buffer.getSpans(off, off, ClickSpan.class);
+    private boolean intersect(float left1, float right1, float left2, float right2) {
+        if (left1 <= left2) {
+            return right1 >= left2;
+        }
+        return left1 <= right2;
     }
 
     @Override
     public void setMessageObject(MessageObject messageObject) {
-        super.setMessageObject(messageObject);
-        if(messageObject instanceof BSMessageObject)
-        {
-            ((BSMessageObject)messageObject).setContext(context);
+        if (currentMessageObject != messageObject || isUserDataChanged()) {
+            if (currentMessageObject != messageObject) {
+                firstVisibleBlockNum = 0;
+                lastVisibleBlockNum = 0;
+            }
+            pressedLink = null;
+            int maxWidth;
+
+            if (AndroidUtilities.isTablet()) {
+                if (isChat && !messageObject.isOut()) {
+                    maxWidth = AndroidUtilities.getMinTabletSide() - dp(122);
+                    drawName = true;
+                } else {
+                    maxWidth = AndroidUtilities.getMinTabletSide() - dp(80);
+                    drawName = false;
+                }
+            } else {
+                if (isChat && !messageObject.isOut()) {
+                    maxWidth = Math.min(getDisplayX(), getDisplayY()) - dp(122);
+                    drawName = true;
+                } else {
+                    maxWidth = Math.min(getDisplayX(), getDisplayY()) - dp(80);
+                    drawName = false;
+                }
+            }
+
+            backgroundWidth = maxWidth;
+
+            super.setMessageObject(messageObject);
+            if(messageObject instanceof BSMessageObject)
+            {
+                ((BSMessageObject)messageObject).setContext(context);
+            }
+
+            backgroundWidth = messageObject.textWidth;
+            totalHeight = messageObject.textHeight + dp(19.5f) + namesOffset;
+
+            int maxChildWidth = Math.max(backgroundWidth, nameWidth);
+            maxChildWidth = Math.max(maxChildWidth, forwardedNameWidth);
+
+            int timeMore = timeWidth + dp(6);
+            if (messageObject.isOut()) {
+                timeMore += dp(20.5f);
+            }
+
+            if (maxWidth - messageObject.lastLineWidth < timeMore) {
+                totalHeight += dp(14);
+                backgroundWidth = Math.max(maxChildWidth, messageObject.lastLineWidth) + dp(29);
+            } else {
+                int diff = maxChildWidth - messageObject.lastLineWidth;
+                if (diff >= 0 && diff <= timeMore) {
+                    backgroundWidth = maxChildWidth + timeMore - diff + dp(29);
+                } else {
+                    backgroundWidth = Math.max(maxChildWidth, messageObject.lastLineWidth + timeMore) + dp(29);
+                }
+            }
         }
     }
 
     @Override
-    protected int getDisplayX() {
-        return getDisplaySize().x;
-    }
-
-    private Point getDisplaySize() {
-        return AndroidUtilities.bsDisplaySize;
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), totalHeight);
     }
 
     @Override
-    protected int dp(float value) {
-        return AndroidUtilities.bsDp(value);
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        if (currentMessageObject.isOut()) {
+            textX = layoutWidth - backgroundWidth + dp(10);
+            textY = dp(10) + namesOffset;
+        } else {
+            textX = dp(19) + (isChat ? dp(52) : 0);
+            textY = dp(10) + namesOffset;
+        }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (currentMessageObject == null || currentMessageObject.textLayoutBlocks == null || currentMessageObject.textLayoutBlocks.isEmpty() || firstVisibleBlockNum < 0) {
+            return;
+        }
+
+        if (currentMessageObject.isOut()) {
+            textX = layoutWidth - backgroundWidth + dp(10);
+            textY = dp(10) + namesOffset;
+        } else {
+            textX = dp(19) + (isChat ? dp(52) : 0);
+            textY = dp(10) + namesOffset;
+        }
+
+        for (int a = firstVisibleBlockNum; a <= lastVisibleBlockNum; a++) {
+            if (a >= currentMessageObject.textLayoutBlocks.size()) {
+                break;
+            }
+            MessageObject.TextLayoutBlock block = currentMessageObject.textLayoutBlocks.get(a);
+            canvas.save();
+            canvas.translate(textX - (int)Math.ceil(block.textXOffset), textY + block.textYOffset);
+            try {
+                block.textLayout.draw(canvas);
+            } catch (Exception e) {
+                FileLog.e("tmessages", e);
+            }
+            canvas.restore();
+        }
     }
 }

@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
 
 import com.yotadevices.sdk.BSActivity;
 import com.yotadevices.sdk.Constants;
@@ -22,11 +22,9 @@ public class BSBaseActivity extends BSActivity{
     private View rootView;
     protected Bundle arguments;
     protected BSActionBar actionBar;
-    private static Stack<BSActivity> stack = new Stack<>();
 
     @Override
     protected void onBSCreate() {
-        stack.add(this);
         super.onBSCreate();
     }
 
@@ -37,8 +35,6 @@ public class BSBaseActivity extends BSActivity{
     }
 
     public void finishFragment() {
-        stack.remove(this);
-
         finish();
     }
 
@@ -48,7 +44,6 @@ public class BSBaseActivity extends BSActivity{
     }
 
     protected <T extends BSBaseActivity> void presentFragment(Class<T> bsActivityClass, Bundle args, boolean removeFromHistory) {
-        stack.add(this);
         Intent intent = new Intent(getContext(), bsActivityClass);
         intent.putExtras(args);
         present(removeFromHistory, intent);
@@ -69,7 +64,9 @@ public class BSBaseActivity extends BSActivity{
 
     protected View createActionBar(View childView)
     {
-        ((RelativeLayout)rootView.findViewById(R.id.view_container)).addView(childView);
+        FrameLayout container = (FrameLayout) rootView.findViewById(R.id.view_container);
+        container.removeAllViews();
+        container.addView(childView);
         return rootView;
     }
 

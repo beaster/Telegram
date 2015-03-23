@@ -1,194 +1,438 @@
 package org.telegram.bsui.Cells;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.text.Layout;
+import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 
 import org.telegram.android.AndroidUtilities;
+import org.telegram.android.ImageLoader;
+import org.telegram.android.ImageReceiver;
+import org.telegram.android.MediaController;
+import org.telegram.android.MessageObject;
+import org.telegram.android.MessagesController;
 import org.telegram.bsui.Components.BSSeekBar;
+import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.R;
-import org.telegram.ui.Cells.ChatAudioCell;
+import org.telegram.messenger.TLRPC;
+import org.telegram.ui.Cells.ChatBaseCell;
+import org.telegram.ui.Components.AvatarDrawable;
+import org.telegram.ui.Components.ProgressView;
+
+import java.io.File;
 
 /**
  * Created by E1ektr0 on 04.01.2015.
  */
-public class BSChatAudioCell extends ChatAudioCell {
+public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBarDelegate, MediaController.FileDownloadProgressListener {
 
-    private static Drawable backgroundDrawableIn;
-    private static Drawable backgroundDrawableOut;
-    private static Drawable backgroundDrawableInSelected;
-    private static Drawable backgroundDrawableOutSelected;
-    private static TextPaint timePaint;
-    private static TextPaint timePaintIn;
-    private static TextPaint timePaintOut;
-
-    private static Drawable checkDrawable;
-    private static Drawable halfCheckDrawable;
-    private static Drawable clockDrawable;
-    private static Drawable broadcastDrawable;
-    private static Drawable checkMediaDrawable;
-    private static Drawable halfCheckMediaDrawable;
-    private static Drawable clockMediaDrawable;
-    private static Drawable broadcastMediaDrawable;
-    private static Drawable errorDrawable;
-    protected static Drawable mediaBackgroundDrawable;
     private static Drawable[][] statesDrawable = new Drawable[8][2];
+    private static TextPaint timePaint;
+
+    private ImageReceiver avatarImage;
+    private AvatarDrawable avatarDrawable;
+    private boolean needAvatarImage = false;
+    protected BSSeekBar seekBar;
+    private ProgressView progressView;
+    private int seekBarX;
+    private int seekBarY;
+
+    private int buttonState = 0;
+    private int buttonX;
+    private int buttonY;
+    private boolean buttonPressed = false;
+
+    private boolean avatarPressed = false;
+
+    private StaticLayout timeLayout;
+    private int timeX;
+    private String lastTimeString = null;
+
+    private int TAG;
+
+    public TLRPC.User audioUser;
+    private TLRPC.FileLocation currentPhoto;
 
     public BSChatAudioCell(Context context) {
         super(context);
+        TAG = MediaController.getInstance().generateObserverTag();
+
+        avatarImage = new ImageReceiver(this);
+        avatarImage.setRoundRadius(dp(25));
+        progressView = new ProgressView();
+        avatarDrawable = new AvatarDrawable();
         initAudio(context);
     }
 
-    @Override
     protected void initAudio(Context context) {
         seekBar = new BSSeekBar(context);
         seekBar.delegate = this;
 
-        if (timePaint == null || statesDrawable[0][0] == null) {
-            statesDrawable[0][0] = getResources().getDrawable(R.drawable.play1);
-            statesDrawable[0][1] = getResources().getDrawable(R.drawable.play1_pressed);
-            statesDrawable[1][0] = getResources().getDrawable(R.drawable.pause1);
-            statesDrawable[1][1] = getResources().getDrawable(R.drawable.pause1_pressed);
-            statesDrawable[2][0] = getResources().getDrawable(R.drawable.audioload1);
-            statesDrawable[2][1] = getResources().getDrawable(R.drawable.audioload1_pressed);
-            statesDrawable[3][0] = getResources().getDrawable(R.drawable.audiocancel1);
-            statesDrawable[3][1] = getResources().getDrawable(R.drawable.audiocancel1_pressed);
+        if (timePaint == null) {
+            statesDrawable[0][0] = getResources().getDrawable(R.drawable.play_bs);
+            statesDrawable[0][1] = getResources().getDrawable(R.drawable.play_bs);
+            statesDrawable[1][0] = getResources().getDrawable(R.drawable.pause_bs);
+            statesDrawable[1][1] = getResources().getDrawable(R.drawable.pause_bs);
+            statesDrawable[2][0] = getResources().getDrawable(R.drawable.doc_download_bs);
+            statesDrawable[2][1] = getResources().getDrawable(R.drawable.doc_download_bs);
+            statesDrawable[3][0] = getResources().getDrawable(R.drawable.audiocancel_bs);
+            statesDrawable[3][1] = getResources().getDrawable(R.drawable.audiocancel_bs);
 
-            statesDrawable[4][0] = getResources().getDrawable(R.drawable.play2);
-            statesDrawable[4][1] = getResources().getDrawable(R.drawable.play2_pressed);
-            statesDrawable[5][0] = getResources().getDrawable(R.drawable.pause2);
-            statesDrawable[5][1] = getResources().getDrawable(R.drawable.pause2_pressed);
-            statesDrawable[6][0] = getResources().getDrawable(R.drawable.audioload2);
-            statesDrawable[6][1] = getResources().getDrawable(R.drawable.audioload2_pressed);
-            statesDrawable[7][0] = getResources().getDrawable(R.drawable.audiocancel2);
-            statesDrawable[7][1] = getResources().getDrawable(R.drawable.audiocancel2_pressed);
-
-            timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaint.setTextSize(AndroidUtilities.bsDp(12));
-        }
-    }
-
-    @Override
-    protected void initResources() {
-        if(timePaint == null) {
-            backgroundDrawableIn = getResources().getDrawable(R.drawable.msg_in_bs);
-            backgroundDrawableOut = getResources().getDrawable(R.drawable.msg_out_bs);
-            backgroundDrawableOutSelected = getResources().getDrawable(R.drawable.msg_out_selected_bs);
-            backgroundDrawableInSelected = getResources().getDrawable(R.drawable.msg_in_selected_bs);
-
-            checkDrawable = getResources().getDrawable(R.drawable.msg_check);
-            halfCheckDrawable = getResources().getDrawable(R.drawable.msg_halfcheck);
-            clockDrawable = getResources().getDrawable(R.drawable.msg_clock);
-            checkMediaDrawable = getResources().getDrawable(R.drawable.msg_check_w);
-            halfCheckMediaDrawable = getResources().getDrawable(R.drawable.msg_halfcheck_w);
-            clockMediaDrawable = getResources().getDrawable(R.drawable.msg_clock_photo);
-            errorDrawable = getResources().getDrawable(R.drawable.msg_warning);
-            mediaBackgroundDrawable = getResources().getDrawable(R.drawable.phototime);
-            broadcastDrawable = getResources().getDrawable(R.drawable.broadcast3);
-            broadcastMediaDrawable = getResources().getDrawable(R.drawable.broadcast4);
+            statesDrawable[4][0] = getResources().getDrawable(R.drawable.play_bs);
+            statesDrawable[4][1] = getResources().getDrawable(R.drawable.play_bs);
+            statesDrawable[5][0] = getResources().getDrawable(R.drawable.pause_bs);
+            statesDrawable[5][1] = getResources().getDrawable(R.drawable.pause_bs);
+            statesDrawable[6][0] = getResources().getDrawable(R.drawable.doc_download_bs);
+            statesDrawable[6][1] = getResources().getDrawable(R.drawable.doc_download_bs);
+            statesDrawable[7][0] = getResources().getDrawable(R.drawable.audiocancel_bs);
+            statesDrawable[7][1] = getResources().getDrawable(R.drawable.audiocancel_bs);
 
             timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-
-            timePaintIn = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaintIn.setColor(0xffa1aab3);
-
-            timePaintOut = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaintOut.setColor(0xff70b15c);
-
             timePaint.setTextSize(dp(12));
-            timePaintIn.setTextSize(dp(12));
-            timePaintOut.setTextSize(dp(12));
         }
     }
 
     @Override
-    protected Drawable[][] getStatesDrawable() {
-        return statesDrawable;
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (avatarImage != null) {
+            avatarImage.clearImage();
+            currentPhoto = null;
+        }
+        MediaController.getInstance().removeLoadingFileObserver(this);
     }
 
     @Override
-    public TextPaint getTimePaintIn() {
-        return timePaintIn;
+    public boolean onTouchEvent(MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
+        boolean result = seekBar.onTouch(event.getAction(), event.getX() - seekBarX, event.getY() - seekBarY);
+        if (result) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                getParent().requestDisallowInterceptTouchEvent(true);
+            }
+            invalidate();
+        } else {
+            int side = dp(36);
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
+                    buttonPressed = true;
+                    invalidate();
+                    result = true;
+                } else if (needAvatarImage && avatarImage.isInsideImage(x, y)) {
+                    avatarPressed = true;
+                    result = true;
+                }
+            } else if (buttonPressed) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    buttonPressed = false;
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                    didPressedButton();
+                    invalidate();
+                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+                    buttonPressed = false;
+                    invalidate();
+                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (!(x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side)) {
+                        buttonPressed = false;
+                        invalidate();
+                    }
+                }
+            } else if (avatarPressed) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    avatarPressed = false;
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                    if (delegate != null) {
+                        delegate.didPressedUserAvatar(this, audioUser);
+                    }
+                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+                    avatarPressed = false;
+                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (!avatarImage.isInsideImage(x, y)) {
+                        avatarPressed = false;
+                    }
+                }
+            }
+            if (!result) {
+                result = super.onTouchEvent(event);
+            }
+        }
+
+        return result;
+    }
+
+    private void didPressedButton() {
+        if (buttonState == 0) {
+            boolean result = MediaController.getInstance().playAudio(currentMessageObject);
+            if (result) {
+                buttonState = 1;
+                invalidate();
+            }
+        } else if (buttonState == 1) {
+            boolean result = MediaController.getInstance().pauseAudio(currentMessageObject);
+            if (result) {
+                buttonState = 0;
+                invalidate();
+            }
+        } else if (buttonState == 2) {
+            FileLoader.getInstance().loadFile(currentMessageObject.messageOwner.media.audio, true);
+            buttonState = 3;
+            invalidate();
+        } else if (buttonState == 3) {
+            FileLoader.getInstance().cancelLoadFile(currentMessageObject.messageOwner.media.audio);
+            buttonState = 2;
+            invalidate();
+        }
+    }
+
+    public void updateProgress() {
+        if (currentMessageObject == null) {
+            return;
+        }
+
+        if (!seekBar.isDragging()) {
+            seekBar.setProgress(currentMessageObject.audioProgress);
+        }
+
+        int duration = 0;
+        if (!MediaController.getInstance().isPlayingAudio(currentMessageObject)) {
+            duration = currentMessageObject.messageOwner.media.audio.duration;
+        } else {
+            duration = currentMessageObject.audioProgressSec;
+        }
+        String timeString = String.format("%02d:%02d", duration / 60, duration % 60);
+        if (lastTimeString == null || lastTimeString != null && !lastTimeString.equals(timeString)) {
+            int timeWidth = (int)Math.ceil(timePaint.measureText(timeString));
+            timeLayout = new StaticLayout(timeString, timePaint, timeWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        }
+        invalidate();
+    }
+
+    public void downloadAudioIfNeed() {
+        if (buttonState == 2) {
+            FileLoader.getInstance().loadFile(currentMessageObject.messageOwner.media.audio, true);
+            buttonState = 3;
+            invalidate();
+        }
+    }
+
+    public void updateButtonState() {
+        String fileName = currentMessageObject.getFileName();
+        File cacheFile = FileLoader.getPathToMessage(currentMessageObject.messageOwner);
+        if (cacheFile.exists()) {
+            MediaController.getInstance().removeLoadingFileObserver(this);
+            boolean playing = MediaController.getInstance().isPlayingAudio(currentMessageObject);
+            if (!playing || playing && MediaController.getInstance().isAudioPaused()) {
+                buttonState = 0;
+            } else {
+                buttonState = 1;
+            }
+            progressView.setProgress(0);
+        } else {
+            MediaController.getInstance().addLoadingFileObserver(fileName, this);
+            if (!FileLoader.getInstance().isLoadingFile(fileName)) {
+                buttonState = 2;
+                progressView.setProgress(0);
+            } else {
+                buttonState = 3;
+                Float progress = ImageLoader.getInstance().getFileProgress(fileName);
+                if (progress != null) {
+                    progressView.setProgress(progress);
+                } else {
+                    progressView.setProgress(0);
+                }
+            }
+        }
+        updateProgress();
     }
 
     @Override
-    public TextPaint getTimePaintOut() {
-        return timePaintOut;
+    public void onFailedDownload(String fileName) {
+        updateButtonState();
     }
 
     @Override
-    public Drawable getCheckDrawable() {
-        return checkDrawable;
+    public void onSuccessDownload(String fileName) {
+        updateButtonState();
     }
 
     @Override
-    public Drawable getHalfCheckDrawable() {
-        return halfCheckDrawable;
+    public void onProgressDownload(String fileName, float progress) {
+        progressView.setProgress(progress);
+        if (buttonState != 3) {
+            updateButtonState();
+        }
+        invalidate();
     }
 
     @Override
-    public Drawable getClockDrawable() {
-        return clockDrawable;
+    public void onProgressUpload(String fileName, float progress, boolean isEncrypted) {
+
     }
 
     @Override
-    public Drawable getBroadcastDrawable() {
-        return broadcastDrawable;
+    public int getObserverTag() {
+        return TAG;
     }
 
     @Override
-    public Drawable getErrorDrawable() {
-        return errorDrawable;
+    public void onSeekBarDrag(float progress) {
+        if (currentMessageObject == null) {
+            return;
+        }
+        currentMessageObject.audioProgress = progress;
+        MediaController.getInstance().seekToProgress(currentMessageObject, progress);
     }
 
     @Override
-    public Drawable getBroadcastMediaDrawable() {
-        return broadcastMediaDrawable;
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        setMeasuredDimension(width, dp(68));
+        if (isChat) {
+            backgroundWidth = Math.min(width - dp(102), dp(300));
+        } else {
+            backgroundWidth = Math.min(width - dp(50), dp(300));
+        }
     }
 
     @Override
-    public Drawable getClockMediaDrawable() {
-        return clockMediaDrawable;
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        int x;
+
+        if (currentMessageObject.isOut()) {
+            x = layoutWidth - backgroundWidth + dp(8);
+            seekBarX = layoutWidth - backgroundWidth + dp(97);
+            buttonX = layoutWidth - backgroundWidth + dp(67);
+            timeX = layoutWidth - backgroundWidth + dp(71);
+        } else {
+            if (isChat) {
+                x = dp(69);
+                seekBarX = dp(158);
+                buttonX = dp(128);
+                timeX = dp(132);
+            } else {
+                x = dp(16);
+                seekBarX = dp(106);
+                buttonX = dp(76);
+                timeX = dp(80);
+            }
+        }
+        int diff = 0;
+        if (needAvatarImage) {
+            avatarImage.setImageCoords(x, dp(9), dp(50), dp(50));
+        } else {
+            diff = dp(56);
+            seekBarX -= diff;
+            buttonX -= diff;
+            timeX -= diff;
+        }
+
+        seekBar.width = backgroundWidth - dp(112) + diff;
+        seekBar.height = dp(30);
+        progressView.width = backgroundWidth - dp(136) + diff;
+        progressView.height = dp(30);
+        seekBarY = dp(13);
+        buttonY = dp(10);
+
+        updateProgress();
     }
 
     @Override
-    public Drawable getCheckMediaDrawable() {
-        return checkMediaDrawable;
+    protected boolean isUserDataChanged() {
+        TLRPC.User newUser = MessagesController.getInstance().getUser(currentMessageObject.messageOwner.media.audio.user_id);
+        TLRPC.FileLocation newPhoto = null;
+
+        if (avatarImage != null && newUser != null && newUser.photo != null) {
+            newPhoto = newUser.photo.photo_small;
+        }
+
+        return currentPhoto == null && newPhoto != null || currentPhoto != null && newPhoto == null || currentPhoto != null && newPhoto != null && (currentPhoto.local_id != newPhoto.local_id || currentPhoto.volume_id != newPhoto.volume_id) || super.isUserDataChanged();
     }
 
     @Override
-    public Drawable getHalfCheckMediaDrawable() {
-        return halfCheckMediaDrawable;
+    public void setMessageObject(MessageObject messageObject) {
+        if (currentMessageObject != messageObject || isUserDataChanged()) {
+            int uid = messageObject.messageOwner.media.audio.user_id;
+            if (uid == 0) {
+                uid = messageObject.messageOwner.from_id;
+            }
+            needAvatarImage = !(messageObject.messageOwner.to_id != null && messageObject.messageOwner.to_id.chat_id != 0 && !messageObject.isOut() && messageObject.messageOwner.media.audio.user_id == messageObject.messageOwner.from_id);
+            audioUser = MessagesController.getInstance().getUser(uid);
+
+            if (needAvatarImage) {
+                if (audioUser != null) {
+                    if (audioUser.photo != null) {
+                        currentPhoto = audioUser.photo.photo_small;
+                    } else {
+                        currentPhoto = null;
+                    }
+                    avatarDrawable.setInfo(audioUser);
+                } else {
+                    avatarDrawable.setInfo(uid, null, null, false);
+                    currentPhoto = null;
+                }
+                avatarImage.setImage(currentPhoto, "50_50", avatarDrawable, false);
+            }
+
+            if (messageObject.isOut()) {
+                seekBar.type = 0;
+                progressView.setProgressColors(0xffb4e396, 0xff6ac453);
+            } else {
+                seekBar.type = 1;
+                progressView.setProgressColors(0xffd9e2eb, 0xff86c5f8);
+            }
+
+            super.setMessageObject(messageObject);
+        }
+        updateButtonState();
     }
 
     @Override
-    public TextPaint getTimePaint() {
-        return timePaint;
-    }
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
 
-    @Override
-    public Drawable getBackgroundDrawableIn() {
-        return backgroundDrawableIn;
-    }
+        if (currentMessageObject == null) {
+            return;
+        }
 
-    @Override
-    public Drawable getBackgroundDrawableInSelected() {
-        return backgroundDrawableInSelected;
-    }
+        if (needAvatarImage) {
+            avatarImage.draw(canvas);
+        }
 
-    @Override
-    public Drawable getBackgroundDrawableOutSelected() {
-        return backgroundDrawableOutSelected;
-    }
+        canvas.save();
+        if (buttonState == 0 || buttonState == 1) {
+            canvas.translate(seekBarX, seekBarY);
+            seekBar.draw(canvas);
+        } else {
+            canvas.translate(seekBarX + dp(12), seekBarY);
+            progressView.draw(canvas);
+        }
+        canvas.restore();
 
-    @Override
-    public Drawable getBackgroundDrawableOut() {
-        return backgroundDrawableOut;
-    }
+        int state = buttonState;
+        if (!currentMessageObject.isOut()) {
+            state += 4;
+            timePaint.setColor(0xffa1aab3);
+        } else {
+            timePaint.setColor(0xff70b15c);
+        }
+        Drawable buttonDrawable = statesDrawable[state][buttonPressed ? 1 : 0];
+        int side = dp(36);
+        int x = (side - buttonDrawable.getIntrinsicWidth()) / 2;
+        int y = (side - buttonDrawable.getIntrinsicHeight()) / 2;
+        setDrawableBounds(buttonDrawable, x + buttonX, y + buttonY);
+        buttonDrawable.draw(canvas);
 
-    @Override
-    protected int dp(float value) {
-        return AndroidUtilities.bsDp(value);
+        canvas.save();
+        canvas.translate(timeX, dp(45));
+        timeLayout.draw(canvas);
+        canvas.restore();
     }
 }
