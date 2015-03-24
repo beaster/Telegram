@@ -375,8 +375,6 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
     @Override
     protected void onBSResume() {
         super.onBSResume();
-        Log.d("bsmessages", "onBSResume");
-        Log.d("bsmessages", "bsActionBarHeight#"+String.valueOf(AndroidUtilities.getBSCurrentActionBarHeight()));
         if (dialogsAdapter != null) {
             dialogsAdapter.notifyDataSetChanged();
         }
