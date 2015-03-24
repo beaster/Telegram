@@ -193,12 +193,13 @@ public class BSContactsAdapter extends BaseSectionsAdapter {
                 actionCell.setTextAndIcon(LocaleController.getString("InviteFriends", R.string.InviteFriends), R.drawable.menu_invite);
             } else {
                 if (position == 0) {
-                    actionCell.setTextAndIcon(LocaleController.getString("NewGroup", R.string.NewGroup), R.drawable.menu_newgroup);
+                    actionCell.setTextAndIcon(LocaleController.getString("NewGroup", R.string.NewGroup), R.drawable.new_group_bs);
                 } else if (position == 1) {
-                    actionCell.setTextAndIcon(LocaleController.getString("NewSecretChat", R.string.NewSecretChat), R.drawable.menu_secret);
+                    actionCell.setTextAndIcon(LocaleController.getString("NewSecretChat", R.string.NewSecretChat), R.drawable.new_secret_chat_bs);
                 } else if (position == 2) {
-                    actionCell.setTextAndIcon(LocaleController.getString("NewBroadcastList", R.string.NewBroadcastList), R.drawable.menu_broadcast);
+                    actionCell.setTextAndIcon(LocaleController.getString("NewBroadcastList", R.string.NewBroadcastList), R.drawable.new_broadcast_bs);
                 }
+                actionCell.setPadding(0, AndroidUtilities.bsDp(5), 0, 0);
             }
         } else if (type == 1) {
             if (convertView == null) {
@@ -214,8 +215,8 @@ public class BSContactsAdapter extends BaseSectionsAdapter {
             }
         } else if (type == 0) {
             if (convertView == null) {
-                convertView = new BSUserCell(mContext, 58);
-                ((BSUserCell) convertView).setStatusColors(0xffa8a8a8, 0xff3b84c0);
+                convertView = new BSUserCell(mContext, 22);
+                ((BSUserCell) convertView).setStatusColors(0xff000000, 0xff000000);
             }
 
             ArrayList<TLRPC.TL_contact> arr = ContactsController.getInstance().usersSectionsDict.get(ContactsController.getInstance().sortedUsersSectionsArray.get(section - (onlyUsers ? 0 : 1)));

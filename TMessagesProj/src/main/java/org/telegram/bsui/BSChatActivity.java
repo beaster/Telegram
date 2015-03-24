@@ -755,7 +755,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             lastPrintString = null;
             lastStatus = null;
 
-            actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+            actionBar.setBackButtonImage(R.drawable.arrow_white);
             actionBar.setActionBarMenuOnItemClick(new BSActionBar.ActionBarMenuOnItemClick() {
                 @Override
                 public void onItemClick(final int id) {

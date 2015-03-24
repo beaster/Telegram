@@ -98,10 +98,10 @@ public class BSChatContactCell extends BSChatBaseCell {
 
         boolean result = false;
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (x >= getLeft() && x <= getLeft() + namesWidth + dp(42) && y >= getTop() && y <= getTop() + getBackground().getIntrinsicHeight()) {
+            if (x >= getX() && x <= getX() + namesWidth + dp(42) && y >= getY() && y <= getY() + getBackground().getIntrinsicHeight()) {
                 namePressed = true;
                 result = true;
-            } else if (x >= /*getLeft() */+ namesWidth + dp(52) && y >= dp(13) && x <= /*getLeft()*/ + namesWidth + dp(92) && y <= dp(52)) {
+            } else if (x >= getX() + namesWidth + dp(52) && y >= dp(13) && x <= getX() + namesWidth + dp(92) && y <= dp(52)) {
                 buttonPressed = true;
                 result = true;
             }

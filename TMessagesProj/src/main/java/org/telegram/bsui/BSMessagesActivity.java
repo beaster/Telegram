@@ -204,7 +204,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
                     }
                 });
         if (onlySelect){
-            actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+            actionBar.setBackButtonImage(R.drawable.arrow_white);
             actionBar.setTitle(LocaleController.getString("SelectChat", R.string.SelectChat));
         } else {
             actionBar.setBackButtonDrawable(new BSMenuDrawable());
@@ -330,8 +330,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
                 }
             }});
 
-        ImageView newSmsButton = (ImageView)findViewById(R.id.btn_new_sms);
-        newSmsButton.setOnClickListener(new View.OnClickListener() {
+        floatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle args = new Bundle();

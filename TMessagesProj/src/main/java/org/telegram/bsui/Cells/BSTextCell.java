@@ -37,8 +37,8 @@ public class BSTextCell extends FrameLayout {
         LayoutParams layoutParams = (LayoutParams) textView.getLayoutParams();
         layoutParams.width = LayoutParams.MATCH_PARENT;
         layoutParams.height = LayoutParams.MATCH_PARENT;
-        layoutParams.leftMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 16 : 71);
-        layoutParams.rightMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 71 : 16);
+        layoutParams.leftMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 25 : 85);
+        layoutParams.rightMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 85 : 25);
         layoutParams.gravity = LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT;
         textView.setLayoutParams(layoutParams);
 
@@ -64,8 +64,8 @@ public class BSTextCell extends FrameLayout {
         layoutParams = (LayoutParams) imageView.getLayoutParams();
         layoutParams.width = LayoutParams.WRAP_CONTENT;
         layoutParams.height = LayoutParams.WRAP_CONTENT;
-        layoutParams.leftMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 0 : 16);
-        layoutParams.rightMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 16 : 0);
+        layoutParams.leftMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 0 : 22);
+        layoutParams.rightMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 22 : 0);
         layoutParams.gravity = (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL;
         imageView.setLayoutParams(layoutParams);
 
@@ -83,7 +83,7 @@ public class BSTextCell extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.bsDp(48), MeasureSpec.EXACTLY));
+        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.bsDp(60), MeasureSpec.EXACTLY));
     }
 
     public void setTextColor(int color) {

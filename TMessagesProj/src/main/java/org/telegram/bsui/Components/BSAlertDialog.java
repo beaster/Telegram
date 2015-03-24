@@ -1,7 +1,11 @@
 package org.telegram.bsui.Components;
 
+import android.app.ActionBar;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,7 +32,8 @@ public class BSAlertDialog extends FrameLayout {
     public BSAlertDialog(final Context context) {
         super(context);
         this.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        this.setBackgroundColor(android.R.color.transparent);
+        this.setBackgroundColor(0xffffff00);
+        this.getBackground().setAlpha(200);
     }
 
     public static class Builder {
@@ -41,8 +46,14 @@ public class BSAlertDialog extends FrameLayout {
         private Button mCurrentNegative;
         private LinearLayout mYesNo;
         private TextView mTitle;
+        private static Drawable background;
+        private static Drawable dotsVertical;
 
         public Builder(Context context){
+            if(background == null){
+                background = context.getResources().getDrawable(R.drawable.bs_dialog_border);
+                dotsVertical = context.getResources().getDrawable(R.drawable.dots_vertical);
+            }
             mContext = context;
             mDialog = new BSAlertDialog(context);
             mContent = new TableLayout(context);
@@ -55,7 +66,7 @@ public class BSAlertDialog extends FrameLayout {
             params.setMargins(AndroidUtilities.bsDp(20), 0, AndroidUtilities.bsDp(20), 0);
             params.gravity = Gravity.CENTER;
             mContent.setLayoutParams(params);
-            mContent.setBackground(mContext.getResources().getDrawable(R.drawable.bs_dialog_border));
+            mContent.setBackground(background);
             mContent.addView(mYesNo);
             mDialog.addView(mContent);
         }
@@ -69,10 +80,10 @@ public class BSAlertDialog extends FrameLayout {
             TextView tw = new TextView(mContext);
             tw.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             tw.setText(message);
-            tw.setTextSize(AndroidUtilities.bsDp(6));
-            tw.setTextColor(Color.parseColor("#000000"));
+            tw.setTextSize(AndroidUtilities.bsDp(8));
+            tw.setTextColor(0xff000000);
             tw.setGravity(Gravity.CENTER);
-            tw.setBackground(mContext.getResources().getDrawable(R.drawable.bs_dialog_border));
+            tw.setPadding(AndroidUtilities.bsDp(10), AndroidUtilities.bsDp(2) , AndroidUtilities.bsDp(10), AndroidUtilities.bsDp(2));
             if(mTitle != null) {
                 mContent.addView(tw, 1);
             } else {
@@ -88,8 +99,8 @@ public class BSAlertDialog extends FrameLayout {
             mTitle.setText(title);
             mTitle.setPadding(10, 5, 10, 5);
             mTitle.setTextSize(AndroidUtilities.bsDp(10));
-            mTitle.setBackground(mContext.getResources().getDrawable(R.drawable.bs_dialog_border));
-            mTitle.setTextColor(Color.parseColor("#000000"));
+            mTitle.setTextColor(0xff000000);
+            mTitle.setTypeface(Typeface.DEFAULT_BOLD);
             mContent.addView(mTitle, 0);
             return this;
         }
@@ -100,6 +111,7 @@ public class BSAlertDialog extends FrameLayout {
             listView.setPadding(5, 5, 5, 5);
             listView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(mContext, R.layout.bs_dialog_item, items);
+            listView.setDivider(mContext.getResources().getDrawable(R.drawable.dots));
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(listener);
             mContent.addView(listView);
@@ -110,15 +122,22 @@ public class BSAlertDialog extends FrameLayout {
             if(mCurrentPositive != null) mYesNo.removeView(mCurrentPositive);
             mCurrentPositive = new Button(mContext);
             mCurrentPositive.setText(ok);
-            mCurrentPositive.setTextColor(Color.parseColor("#000000"));
+            mCurrentPositive.setTextColor(0xff000000);
+            mCurrentPositive.setBackgroundColor(0xffffffff);
             mCurrentPositive.setPadding(5, 0, 5, 0);
             mCurrentPositive.setTextSize(10);
-            mCurrentPositive.setBackground(mContext.getResources().getDrawable(R.drawable.bs_dialog_border));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.gravity = Gravity.RIGHT;
             lp.weight = 1;
+            lp.setMargins(5, 5, 5, 5);
             mCurrentPositive.setLayoutParams(lp);
             mYesNo.addView(mCurrentPositive);
+            View separator = new View(mContext);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(AndroidUtilities.bsDp(6), AndroidUtilities.bsDp(50));
+            params.gravity = Gravity.CENTER_VERTICAL;
+            separator.setLayoutParams(params);
+            separator.setBackground(dotsVertical);
+            mYesNo.addView(separator);
             if(listener == null){
                 mCurrentPositive.setOnClickListener(new OnClickListener() {
                     @Override
@@ -137,12 +156,13 @@ public class BSAlertDialog extends FrameLayout {
             if(mCurrentNegative != null) mYesNo.removeView(mCurrentNegative);
             mCurrentNegative = new Button(mContext);
             mCurrentNegative.setText(cancel);
-            mCurrentNegative.setTextColor(Color.parseColor("#000000"));
+            mCurrentNegative.setTextColor(0xff000000);
             mCurrentNegative.setPadding(5, 0, 5, 0);
-            mCurrentNegative.setBackground(mContext.getResources().getDrawable(R.drawable.bs_dialog_border));
+            mCurrentNegative.setBackgroundColor(0xffffffff);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.gravity = Gravity.RIGHT;
             lp.weight = 1;
+            lp.setMargins(5, 5, 5, 5);
             mCurrentNegative.setLayoutParams(lp);
             mCurrentNegative.setTextSize(10);
             mYesNo.addView(mCurrentNegative);

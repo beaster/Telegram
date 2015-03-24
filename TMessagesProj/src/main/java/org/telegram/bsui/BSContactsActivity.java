@@ -1,13 +1,9 @@
 package org.telegram.bsui;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -139,7 +135,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             searching = false;
             searchWas = false;
 
-            actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+            actionBar.setBackButtonImage(R.drawable.arrow_white);
 //            actionBar.setAllowOverlayTitle(true);
             if (destroyAfterSelect) {
                 if (returnAsResult) {
@@ -256,7 +252,6 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             listView.setDivider(null);
             listView.setDividerHeight(0);
             listView.setFastScrollEnabled(true);
-            listView.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
             listView.setAdapter(listViewAdapter);
             if (Build.VERSION.SDK_INT >= 11) {
                 listView.setFastScrollAlwaysVisible(true);
@@ -362,30 +357,31 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
                                 if (usePhone == null || getParentActivity() == null) {
                                     return;
                                 }
-                                AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+                                /*final BSAlertDialog.Builder builder = new BSAlertDialog.Builder(getParentActivity());
                                 builder.setMessage(LocaleController.getString("InviteUser", R.string.InviteUser));
                                 builder.setTitle(LocaleController.getString("AppName", R.string.AppName));
                                 final String arg1 = usePhone;
-                                builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), new DialogInterface.OnClickListener() {
+                                builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), new View.OnClickListener() {
                                     @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                    public void onClick(View view) {
                                         try {
                                             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", arg1, null));
                                             intent.putExtra("sms_body", LocaleController.getString("InviteText", R.string.InviteText));
                                             startBSActivity(intent);
+                                            builder.close();
                                         } catch (Exception e) {
                                             FileLog.e("tmessages", e);
                                         }
                                     }
                                 });
-                                builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                                builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);*/
                             }
                         }
                     }
                 }
             });
 
-            listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+/*            listView.setOnScrollListener(new AbsListView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(AbsListView absListView, int i) {
                     if (i == SCROLL_STATE_TOUCH_SCROLL && searching && searchWas) {
@@ -399,7 +395,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
                         AndroidUtilities.clearDrawableAnimation(absListView);
                     }
                 }
-            });
+            });*/
         } else {
             ViewGroup parent = (ViewGroup)fragmentView.getParent();
             if (parent != null) {
