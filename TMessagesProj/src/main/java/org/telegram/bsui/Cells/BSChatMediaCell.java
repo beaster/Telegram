@@ -169,105 +169,107 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float x = event.getX();
-        float y = event.getY();
+        if(!isPressed) {
+            float x = event.getX();
+            float y = event.getY();
 
-        boolean result = false;
-        int side = dp(48);
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (delegate == null || delegate.canPerformActions()) {
-                if (buttonState != -1 && x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
-                    buttonPressed = 1;
-                    invalidate();
-                    result = true;
-                } else {
-                    if (currentMessageObject.type == 9) {
-                        if (x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth - dp(50) && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
-                            imagePressed = true;
-                            result = true;
-                        } else if (x >= photoImage.getImageX() + backgroundWidth - dp(50) && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
-                            otherPressed = true;
-                            result = true;
-                        }
+            boolean result = false;
+            int side = dp(48);
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (delegate == null || delegate.canPerformActions()) {
+                    if (buttonState != -1 && x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
+                        buttonPressed = 1;
+                        invalidate();
+                        result = true;
                     } else {
-                        if (x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
-                            imagePressed = true;
-                            result = true;
+                        if (currentMessageObject.type == 9) {
+                            if (x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth - dp(50) && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
+                                imagePressed = true;
+                                result = true;
+                            } else if (x >= photoImage.getImageX() + backgroundWidth - dp(50) && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
+                                otherPressed = true;
+                                result = true;
+                            }
+                        } else {
+                            if (x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
+                                imagePressed = true;
+                                result = true;
+                            }
                         }
                     }
+                    if (imagePressed && currentMessageObject.isSecretPhoto()) {
+                        imagePressed = false;
+                    } else if (result) {
+                        startCheckLongPress();
+                    }
                 }
-                if (imagePressed && currentMessageObject.isSecretPhoto()) {
-                    imagePressed = false;
-                } else if (result) {
-                    startCheckLongPress();
+            } else {
+                if (event.getAction() != MotionEvent.ACTION_MOVE) {
+                    cancelCheckLongPress();
                 }
-            }
-        } else {
-            if (event.getAction() != MotionEvent.ACTION_MOVE) {
-                cancelCheckLongPress();
-            }
-            if (buttonPressed == 1) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    buttonPressed = 0;
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    didPressedButton(false);
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    buttonPressed = 0;
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!(x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side)) {
+                if (buttonPressed == 1) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        buttonPressed = 0;
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                        didPressedButton(false);
+                        invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
                         buttonPressed = 0;
                         invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (!(x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side)) {
+                            buttonPressed = 0;
+                            invalidate();
+                        }
                     }
-                }
-            } else if (imagePressed) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    imagePressed = false;
-                    if (buttonState == -1 || buttonState == 2 || buttonState == 3) {
+                } else if (imagePressed) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        imagePressed = false;
+                        if (buttonState == -1 || buttonState == 2 || buttonState == 3) {
+                            playSoundEffect(SoundEffectConstants.CLICK);
+                            didClickedImage();
+                        }
+                        invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+                        imagePressed = false;
+                        invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (currentMessageObject.type == 9) {
+                            if (!(x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth - dp(50) && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight())) {
+                                imagePressed = false;
+                                invalidate();
+                            }
+                        } else {
+                            if (!photoImage.isInsideImage(x, y)) {
+                                imagePressed = false;
+                                invalidate();
+                            }
+                        }
+                    }
+                } else if (otherPressed) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        otherPressed = false;
                         playSoundEffect(SoundEffectConstants.CLICK);
-                        didClickedImage();
-                    }
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    imagePressed = false;
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (currentMessageObject.type == 9) {
-                        if (!(x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth - dp(50) && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight())) {
-                            imagePressed = false;
-                            invalidate();
+                        if (mediaDelegate != null) {
+                            mediaDelegate.didPressedOther(this);
                         }
-                    } else {
-                        if (!photoImage.isInsideImage(x, y)) {
-                            imagePressed = false;
-                            invalidate();
-                        }
-                    }
-                }
-            } else if (otherPressed) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    otherPressed = false;
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    if (mediaDelegate != null) {
-                        mediaDelegate.didPressedOther(this);
-                    }
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    otherPressed = false;
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (currentMessageObject.type == 9) {
-                        if (!(x >= photoImage.getImageX() + backgroundWidth - dp(50) && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight())) {
-                            otherPressed = false;
+                    } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+                        otherPressed = false;
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (currentMessageObject.type == 9) {
+                            if (!(x >= photoImage.getImageX() + backgroundWidth - dp(50) && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight())) {
+                                otherPressed = false;
+                            }
                         }
                     }
                 }
             }
-        }
-        if (!result) {
-            result = super.onTouchEvent(event);
-        }
+            if (!result) {
+                result = super.onTouchEvent(event);
+            }
 
-        return result;
+            return result;
+        } return super.onTouchEvent(event);
     }
 
     private void didClickedImage() {

@@ -18,13 +18,13 @@ public class BSLetterSectionCell extends FrameLayout {
 
     public BSLetterSectionCell(Context context) {
         super(context);
-        setLayoutParams(new ViewGroup.LayoutParams(AndroidUtilities.bsDp(54), AndroidUtilities.bsDp(64)));
+        setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtilities.bsDp(64)));
 
         textView = new TextView(getContext());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);//22
         textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
-        textView.setTextColor(0xff808080);
-        textView.setGravity(Gravity.CENTER);
+        textView.setTextColor(0xff000000);
+        textView.setGravity(Gravity.START);
         addView(textView);
         LayoutParams layoutParams = (LayoutParams)textView.getLayoutParams();
         layoutParams.width = LayoutParams.MATCH_PARENT;

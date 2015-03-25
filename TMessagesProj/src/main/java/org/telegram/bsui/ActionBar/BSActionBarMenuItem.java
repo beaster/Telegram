@@ -63,7 +63,6 @@ public class BSActionBarMenuItem extends FrameLayoutFixed {
     private BSActionBarMenu parentMenu;
     private ActionBarPopupWindow popupWindow;
     private EditText searchField;
-    private ImageView clearButton;
     protected ImageView iconView;
     private FrameLayout searchContainer;
     private boolean isSearchField = false;
@@ -376,14 +375,16 @@ public class BSActionBarMenuItem extends FrameLayoutFixed {
             layoutParams.weight = 1;
             layoutParams.width = 0;
             layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
-            layoutParams.leftMargin = AndroidUtilities.bsDp(6);
+//            layoutParams.leftMargin = AndroidUtilities.bsDp(6);
             searchContainer.setLayoutParams(layoutParams);
             searchContainer.setVisibility(GONE);
 
             searchField = new EditText(getContext());
             searchField.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-            searchField.setHintTextColor(0x88ffffff);
+            searchField.setHintTextColor(0xffffffff);
+            searchField.setHint(LocaleController.getString("Search", R.string.Search));
             searchField.setTextColor(0xffffffff);
+//            searchField.setCursorVisible(false);
             searchField.setSingleLine(true);
             searchField.setBackgroundResource(0);
             searchField.setPadding(0, 0, 0, 0);
@@ -435,7 +436,6 @@ public class BSActionBarMenuItem extends FrameLayoutFixed {
                     if (listener != null) {
                         listener.onTextChanged(searchField);
                     }
-                    ViewProxy.setAlpha(clearButton, s == null || s.length() == 0 ? 0.6f : 1.0f);
                 }
 
                 @Override
@@ -444,13 +444,13 @@ public class BSActionBarMenuItem extends FrameLayoutFixed {
                 }
             });
 
-            try {
+/*            try {
                 Field mCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
                 mCursorDrawableRes.setAccessible(true);
                 mCursorDrawableRes.set(searchField, R.drawable.search_carret);
             } catch (Exception e) {
                 //nothing to do
-            }
+            }*/
             if (Build.VERSION.SDK_INT >= 11) {
                 searchField.setImeOptions(EditorInfo.IME_FLAG_NO_FULLSCREEN | EditorInfo.IME_ACTION_SEARCH);
                 searchField.setTextIsSelectable(false);
@@ -464,23 +464,6 @@ public class BSActionBarMenuItem extends FrameLayoutFixed {
             layoutParams2.height = AndroidUtilities.bsDp(36);
             layoutParams2.rightMargin = AndroidUtilities.bsDp(48);
             searchField.setLayoutParams(layoutParams2);
-
-            clearButton = new ImageView(getContext());
-            clearButton.setImageResource(R.drawable.ic_close_white);
-            clearButton.setScaleType(ImageView.ScaleType.CENTER);
-            clearButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    searchField.setText("");
-                    AndroidUtilities.showKeyboard(searchField);
-                }
-            });
-            searchContainer.addView(clearButton);
-            layoutParams2 = (FrameLayout.LayoutParams) clearButton.getLayoutParams();
-            layoutParams2.width = AndroidUtilities.bsDp(48);
-            layoutParams2.gravity = Gravity.CENTER_VERTICAL | Gravity.RIGHT;
-            layoutParams2.height = FrameLayout.LayoutParams.MATCH_PARENT;
-            clearButton.setLayoutParams(layoutParams2);
         }
         isSearchField = value;
         return this;

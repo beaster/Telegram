@@ -91,44 +91,46 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float x = event.getX();
-        float y = event.getY();
-        boolean result = seekBar.onTouch(event.getAction(), event.getX() - seekBarX, event.getY() - seekBarY);
-        if (result) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                getParent().requestDisallowInterceptTouchEvent(true);
-            }
-            invalidate();
-        } else {
-            int side = dp(36);
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
-                    buttonPressed = true;
-                    invalidate();
-                    result = true;
+        if(!isPressed) {
+            float x = event.getX();
+            float y = event.getY();
+            boolean result = seekBar.onTouch(event.getAction(), event.getX() - seekBarX, event.getY() - seekBarY);
+            if (result) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    getParent().requestDisallowInterceptTouchEvent(true);
                 }
-            } else if (buttonPressed) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    buttonPressed = false;
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    didPressedButton();
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    buttonPressed = false;
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!(x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side)) {
+                invalidate();
+            } else {
+                int side = dp(36);
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
+                        buttonPressed = true;
+                        invalidate();
+                        result = true;
+                    }
+                } else if (buttonPressed) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        buttonPressed = false;
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                        didPressedButton();
+                        invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
                         buttonPressed = false;
                         invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (!(x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side)) {
+                            buttonPressed = false;
+                            invalidate();
+                        }
                     }
                 }
+                if (!result) {
+                    result = super.onTouchEvent(event);
+                }
             }
-            if (!result) {
-                result = super.onTouchEvent(event);
-            }
-        }
 
-        return result;
+            return result;
+        } else return super.onTouchEvent(event);
     }
 
     private void didPressedButton() {

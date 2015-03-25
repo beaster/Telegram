@@ -2,7 +2,6 @@ package org.telegram.bsui;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -29,6 +28,7 @@ import org.telegram.bsui.ActionBar.BSActionBarMenu;
 import org.telegram.bsui.ActionBar.BSActionBarMenuItem;
 import org.telegram.bsui.Adapters.BSContactsAdapter;
 import org.telegram.bsui.Adapters.BSContactsSearchAdapter;
+import org.telegram.bsui.Components.BSSectionsListView;
 import org.telegram.bsui.widget.BSBaseActivity;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.R;
@@ -36,7 +36,6 @@ import org.telegram.messenger.TLRPC;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.Adapters.BaseSectionsAdapter;
 import org.telegram.ui.Cells.UserCell;
-import org.telegram.ui.Components.SectionsListView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +47,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
 
     private BaseSectionsAdapter listViewAdapter;
     private TextView emptyTextView;
-    private SectionsListView listView;
+    private BSSectionsListView listView;
     private BSContactsSearchAdapter searchListViewAdapter;
 
     private boolean searchWas;
@@ -171,10 +170,10 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
                     ViewGroup group = (ViewGroup) listView.getParent();
                     listView.setAdapter(listViewAdapter);
                     listViewAdapter.notifyDataSetChanged();
-                    if (Build.VERSION.SDK_INT >= 11) {
+/*                    if (Build.VERSION.SDK_INT >= 11) {
                         listView.setFastScrollAlwaysVisible(true);
                     }
-                    listView.setFastScrollEnabled(true);
+                    listView.setFastScrollEnabled(true);*/
                     listView.setVerticalScrollBarEnabled(false);
                     emptyTextView.setText(LocaleController.getString("NoContacts", R.string.NoContacts));
                 }
@@ -190,10 +189,10 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
                         if (listView != null) {
                             listView.setAdapter(searchListViewAdapter);
                             searchListViewAdapter.notifyDataSetChanged();
-                            if(Build.VERSION.SDK_INT >= 11) {
+/*                            if(Build.VERSION.SDK_INT >= 11) {
                                 listView.setFastScrollAlwaysVisible(false);
                             }
-                            listView.setFastScrollEnabled(false);
+                            listView.setFastScrollEnabled(false);*/
                             listView.setVerticalScrollBarEnabled(true);
                         }
                         if (emptyTextView != null) {
@@ -206,7 +205,6 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
 
             searchListViewAdapter = new BSContactsSearchAdapter(getParentActivity(), ignoreUsers, allowUsernameSearch);
             listViewAdapter = new BSContactsAdapter(getParentActivity(), onlyUsers, needPhonebook, ignoreUsers);
-
             fragmentView = new FrameLayout(getParentActivity());
             fragmentView.setBackgroundColor(Color.parseColor("#FFFFFF"));
             LinearLayout emptyTextLayout = new LinearLayout(getParentActivity());
@@ -216,7 +214,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) emptyTextLayout.getLayoutParams();
             layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT;
             layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT;
-            layoutParams.gravity = Gravity.TOP;
+            layoutParams.gravity = Gravity.CENTER;
             emptyTextLayout.setLayoutParams(layoutParams);
             emptyTextLayout.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -226,7 +224,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             });
 
             emptyTextView = new TextView(getParentActivity());
-            emptyTextView.setTextColor(Color.parseColor("#000000"));
+            emptyTextView.setTextColor(0xff000000);
             emptyTextView.setTextSize(20);
             emptyTextView.setGravity(Gravity.CENTER);
             emptyTextView.setText(LocaleController.getString("NoContacts", R.string.NoContacts));
@@ -246,17 +244,17 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             layoutParams1.weight = 0.5f;
             frameLayout.setLayoutParams(layoutParams1);
 
-            listView = new SectionsListView(getParentActivity());
+            listView = new BSSectionsListView(getParentActivity());
             listView.setEmptyView(emptyTextLayout);
             listView.setVerticalScrollBarEnabled(false);
             listView.setDivider(null);
             listView.setDividerHeight(0);
-            listView.setFastScrollEnabled(true);
+//            listView.setFastScrollEnabled(true);
             listView.setAdapter(listViewAdapter);
-            if (Build.VERSION.SDK_INT >= 11) {
+/*            if (Build.VERSION.SDK_INT >= 11) {
                 listView.setFastScrollAlwaysVisible(true);
                 listView.setVerticalScrollbarPosition(LocaleController.isRTL ? 0 : 0);
-            }
+            }*/
             ((FrameLayout) fragmentView).addView(listView);
             layoutParams = (FrameLayout.LayoutParams) listView.getLayoutParams();
             layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT;
@@ -381,7 +379,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
                 }
             });
 
-/*            listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            listView.setOnScrollListener(new AbsListView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(AbsListView absListView, int i) {
                     if (i == SCROLL_STATE_TOUCH_SCROLL && searching && searchWas) {
@@ -395,7 +393,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
                         AndroidUtilities.clearDrawableAnimation(absListView);
                     }
                 }
-            });*/
+            });
         } else {
             ViewGroup parent = (ViewGroup)fragmentView.getParent();
             if (parent != null) {

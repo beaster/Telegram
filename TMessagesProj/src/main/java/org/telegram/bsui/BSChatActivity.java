@@ -2716,14 +2716,9 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                 boolean selected = false;
                 if (actionBar.isActionModeShowed()) {
                     if (selectedMessagesIds.containsKey(cell.getMessageObject().messageOwner.id)) {
-                        view.setBackgroundColor(Color.LTGRAY);
                         selected = true;
-                    } else {
-                        view.setBackgroundColor(0);
                     }
                     disableSelection = true;
-                } else {
-                    view.setBackgroundColor(0);
                 }
 
                 cell.setMessageObject(cell.getMessageObject());

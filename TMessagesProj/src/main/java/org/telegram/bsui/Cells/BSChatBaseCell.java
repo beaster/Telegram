@@ -1,10 +1,8 @@
 package org.telegram.bsui.Cells;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
@@ -45,14 +43,11 @@ public class BSChatBaseCell extends BSBaseCell {
     protected MessageObject currentMessageObject;
     private boolean wasLayout = false;
 
-    private static Drawable backgroundDrawableIn;
-    private static Drawable backgroundDrawableInSelected;
-    private static Drawable backgroundDrawableOut;
-    private static Drawable backgroundDrawableOutSelected;
+    private static Drawable messageBackgroundDrawable;
+    private static Drawable messageBoldBackgroundDrawableIn;
+    private static Drawable messageBoldBackgroundDrawableOut;
     protected static Drawable backgroundMediaDrawableIn;
-    private static Drawable backgroundMediaDrawableInSelected;
     private static Drawable backgroundMediaDrawableOut;
-    private static Drawable backgroundMediaDrawableOutSelected;
     private static Drawable checkDrawable;
     private static Drawable halfCheckDrawable;
     private static Drawable clockDrawable;
@@ -108,15 +103,12 @@ public class BSChatBaseCell extends BSBaseCell {
 
     public BSChatBaseCell(Context context) {
         super(context);
-        if (backgroundDrawableIn == null) {
-            backgroundDrawableIn = getResources().getDrawable(R.drawable.msg_in_bs);
-            backgroundDrawableInSelected = getResources().getDrawable(R.drawable.msg_in_selected_bs);
-            backgroundDrawableOut = getResources().getDrawable(R.drawable.msg_out_bs);
-            backgroundDrawableOutSelected = getResources().getDrawable(R.drawable.msg_out_selected_bs);
+        if (messageBackgroundDrawable == null) {
+            messageBackgroundDrawable = getResources().getDrawable(R.drawable.dotter_border);
+            messageBoldBackgroundDrawableIn = getResources().getDrawable(R.drawable.bubble_bold_left);
+            messageBoldBackgroundDrawableOut = getResources().getDrawable(R.drawable.bubble_bold_right);
             backgroundMediaDrawableIn = getResources().getDrawable(android.R.color.white);
-            backgroundMediaDrawableInSelected = getResources().getDrawable(android.R.color.darker_gray);
             backgroundMediaDrawableOut = getResources().getDrawable(android.R.color.white);
-            backgroundMediaDrawableOutSelected = getResources().getDrawable(android.R.color.darker_gray);
             mediaBackgroundDrawable = getResources().getDrawable(R.drawable.phototime_bs);
 
             clockDrawable = getResources().getDrawable(R.drawable.msg_clock_bs);
@@ -296,39 +288,41 @@ public class BSChatBaseCell extends BSBaseCell {
         float x = event.getX();
         float y = event.getY();
 
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (delegate == null || delegate.canPerformActions()) {
-                if (drawForwardedName && forwardedNameLayout != null) {
-                    if (x >= forwardNameX && x <= forwardNameX + forwardedNameWidth && y >= forwardNameY && y <= forwardNameY + dp(32)) {
-                        forwardNamePressed = true;
-                        result = true;
+        if(!isPressed) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (delegate == null || delegate.canPerformActions()) {
+                    if (drawForwardedName && forwardedNameLayout != null) {
+                        if (x >= forwardNameX && x <= forwardNameX + forwardedNameWidth && y >= forwardNameY && y <= forwardNameY + dp(32)) {
+                            forwardNamePressed = true;
+                            result = true;
+                        }
+                    }
+                    if (result) {
+                        startCheckLongPress();
                     }
                 }
-                if (result) {
-                    startCheckLongPress();
+            } else {
+                if (event.getAction() != MotionEvent.ACTION_MOVE) {
+                    cancelCheckLongPress();
                 }
-            }
-        } else {
-            if (event.getAction() != MotionEvent.ACTION_MOVE) {
-                cancelCheckLongPress();
-            }
-            if (forwardNamePressed) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    forwardNamePressed = false;
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    if (delegate != null) {
-                        delegate.didPressedUserAvatar(this, currentForwardUser);
-                    }
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    forwardNamePressed = false;
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!(x >= forwardNameX && x <= forwardNameX + forwardedNameWidth && y >= forwardNameY && y <= forwardNameY + dp(32))) {
+                if (forwardNamePressed) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
                         forwardNamePressed = false;
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                        if (delegate != null) {
+                            delegate.didPressedUserAvatar(this, currentForwardUser);
+                        }
+                    } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+                        forwardNamePressed = false;
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (!(x >= forwardNameX && x <= forwardNameX + forwardedNameWidth && y >= forwardNameY && y <= forwardNameY + dp(32))) {
+                            forwardNamePressed = false;
+                        }
                     }
                 }
             }
-        }
-        return result;
+            return result;
+        } else return super.onTouchEvent(event);
     }
 
     @SuppressLint("DrawAllocation")
@@ -386,35 +380,27 @@ public class BSChatBaseCell extends BSBaseCell {
 
         Drawable currentBackgroundDrawable = null;
         if (currentMessageObject.isOut()) {
-            if (isPressed() && isCheckPressed || !isCheckPressed && isPressed) {
-                if (!media) {
-                    currentBackgroundDrawable = backgroundDrawableOutSelected;
-                } else {
-                    currentBackgroundDrawable = backgroundMediaDrawableOutSelected;
-                }
+            if (isPressed) {
+                currentBackgroundDrawable = messageBoldBackgroundDrawableOut;
             } else {
                 if (!media) {
-                    currentBackgroundDrawable = backgroundDrawableOut;
+                    currentBackgroundDrawable = messageBackgroundDrawable;
                 } else {
                     currentBackgroundDrawable = backgroundMediaDrawableOut;
                 }
             }
-            setDrawableBounds(currentBackgroundDrawable, layoutWidth - backgroundWidth - (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2) - timeOffset);
+            setDrawableBounds(currentBackgroundDrawable, layoutWidth - backgroundWidth - dp(9), dp(1), backgroundWidth, layoutHeight - dp(2) - timeOffset);
         } else {
-            if (isPressed() && isCheckPressed || !isCheckPressed && isPressed) {
-                if (!media) {
-                    currentBackgroundDrawable = backgroundDrawableInSelected;
-                } else {
-                    currentBackgroundDrawable = backgroundMediaDrawableInSelected;
-                }
+            if (isPressed) {
+                currentBackgroundDrawable = messageBoldBackgroundDrawableIn;
             } else {
                 if (!media) {
-                    currentBackgroundDrawable = backgroundDrawableIn;
+                    currentBackgroundDrawable = messageBackgroundDrawable;
                 } else {
                     currentBackgroundDrawable = backgroundMediaDrawableIn;
                 }
             }
-            setDrawableBounds(currentBackgroundDrawable, (!media ? 0 : dp(9)), dp(1), backgroundWidth, layoutHeight - dp(2) - timeOffset);
+            setDrawableBounds(currentBackgroundDrawable, dp(9), dp(1), backgroundWidth, layoutHeight - dp(2) - timeOffset);
         }
         if (drawBackground) {
             currentBackgroundDrawable.draw(canvas);
@@ -424,7 +410,7 @@ public class BSChatBaseCell extends BSBaseCell {
 
         if (drawName && nameLayout != null) {
             canvas.save();
-            canvas.translate(currentBackgroundDrawable.getBounds().left + dp(19) - nameOffsetX, + dp(10));
+            canvas.translate(currentBackgroundDrawable.getBounds().left + dp(10) - nameOffsetX, + dp(10));
             namePaint.setColor(0xff000000);
             nameLayout.draw(canvas);
             canvas.restore();
@@ -434,11 +420,11 @@ public class BSChatBaseCell extends BSBaseCell {
             canvas.save();
             if (currentMessageObject.isOut()) {
                 forwardNamePaint.setColor(0xff000000);
-                forwardNameX = currentBackgroundDrawable.getBounds().left + dp(10);
+                forwardNameX = currentBackgroundDrawable.getBounds().left + dp(19);
                 forwardNameY = dp(10 + (drawName ? 18 : 0));
             } else {
                 forwardNamePaint.setColor(0xff000000);
-                forwardNameX = currentBackgroundDrawable.getBounds().left + dp(19);
+                forwardNameX = currentBackgroundDrawable.getBounds().left + dp(10);
                 forwardNameY = dp(10 + (drawName ? 18 : 0));
             }
             canvas.translate(forwardNameX - forwardNameOffsetX, forwardNameY);
