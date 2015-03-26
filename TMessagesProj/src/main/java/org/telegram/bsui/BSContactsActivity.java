@@ -206,14 +206,13 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             searchListViewAdapter = new BSContactsSearchAdapter(getParentActivity(), ignoreUsers, allowUsernameSearch);
             listViewAdapter = new BSContactsAdapter(getParentActivity(), onlyUsers, needPhonebook, ignoreUsers);
             fragmentView = new FrameLayout(getParentActivity());
-            fragmentView.setBackgroundColor(Color.parseColor("#FFFFFF"));
-            LinearLayout emptyTextLayout = new LinearLayout(getParentActivity());
+            fragmentView.setBackgroundColor(0xffffffff);
+            FrameLayout emptyTextLayout = new FrameLayout(getParentActivity());
             emptyTextLayout.setVisibility(View.INVISIBLE);
-            emptyTextLayout.setOrientation(LinearLayout.VERTICAL);
             ((FrameLayout) fragmentView).addView(emptyTextLayout);
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) emptyTextLayout.getLayoutParams();
-            layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT;
-            layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT;
+            layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
+            layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
             layoutParams.gravity = Gravity.CENTER;
             emptyTextLayout.setLayoutParams(layoutParams);
             emptyTextLayout.setOnTouchListener(new View.OnTouchListener() {
@@ -229,19 +228,17 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             emptyTextView.setGravity(Gravity.CENTER);
             emptyTextView.setText(LocaleController.getString("NoContacts", R.string.NoContacts));
             emptyTextLayout.addView(emptyTextView);
-            LinearLayout.LayoutParams layoutParams1 = (LinearLayout.LayoutParams) emptyTextView.getLayoutParams();
-            layoutParams1.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-            layoutParams1.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            FrameLayout.LayoutParams layoutParams1 = (FrameLayout.LayoutParams) emptyTextView.getLayoutParams();
+            layoutParams1.width = FrameLayout.LayoutParams.WRAP_CONTENT;
+            layoutParams1.height = FrameLayout.LayoutParams.WRAP_CONTENT;
             layoutParams1.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
-            layoutParams1.weight = 0.5f;
             emptyTextView.setLayoutParams(layoutParams1);
 
             FrameLayout frameLayout = new FrameLayout(getParentActivity());
             emptyTextLayout.addView(frameLayout);
-            layoutParams1 = (LinearLayout.LayoutParams) frameLayout.getLayoutParams();
-            layoutParams1.width = LinearLayout.LayoutParams.MATCH_PARENT;
-            layoutParams1.height = LinearLayout.LayoutParams.MATCH_PARENT;
-            layoutParams1.weight = 0.5f;
+            layoutParams1 = (FrameLayout.LayoutParams) frameLayout.getLayoutParams();
+            layoutParams1.width = FrameLayout.LayoutParams.MATCH_PARENT;
+            layoutParams1.height = FrameLayout.LayoutParams.MATCH_PARENT;
             frameLayout.setLayoutParams(layoutParams1);
 
             listView = new BSSectionsListView(getParentActivity());
