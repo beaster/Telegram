@@ -88,7 +88,7 @@ public class MessagesController implements NotificationCenter.NotificationCenter
     private String uploadingAvatar = null;
 
     public boolean enableJoined = true;
-    public int fontSize = AndroidUtilities.dp(16);
+    public int fontSize = AndroidUtilities.dp(18);
     public int maxGroupCount = 200;
     public int maxBroadcastCount = 100;
     public int groupBigSize;
@@ -148,7 +148,7 @@ public class MessagesController implements NotificationCenter.NotificationCenter
         maxGroupCount = preferences.getInt("maxGroupCount", 200);
         maxBroadcastCount = preferences.getInt("maxBroadcastCount", 100);
         groupBigSize = preferences.getInt("groupBigSize", 10);
-        fontSize = preferences.getInt("fons_size", AndroidUtilities.isTablet() ? 18 : 16);
+        fontSize = preferences.getInt("fons_size", 18);//preferences.getInt("fons_size", AndroidUtilities.isTablet() ? 18 : 16);
         String disabledFeaturesString = preferences.getString("disabledFeatures", null);
         if (disabledFeaturesString != null && disabledFeaturesString.length() != 0) {
             try {

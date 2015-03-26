@@ -6,13 +6,10 @@ import android.graphics.drawable.Drawable;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 
-import org.telegram.android.AndroidUtilities;
 import org.telegram.android.ImageLoader;
-import org.telegram.android.ImageReceiver;
 import org.telegram.android.MediaController;
 import org.telegram.android.MessageObject;
 import org.telegram.android.MessagesController;
@@ -20,8 +17,6 @@ import org.telegram.bsui.Components.BSSeekBar;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.R;
 import org.telegram.messenger.TLRPC;
-import org.telegram.ui.Cells.ChatBaseCell;
-import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.ProgressView;
 
 import java.io.File;
@@ -34,9 +29,6 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
     private static Drawable[][] statesDrawable = new Drawable[8][2];
     private static TextPaint timePaint;
 
-    private ImageReceiver avatarImage;
-    private AvatarDrawable avatarDrawable;
-    private boolean needAvatarImage = false;
     protected BSSeekBar seekBar;
     private ProgressView progressView;
     private int seekBarX;
@@ -47,8 +39,6 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
     private int buttonY;
     private boolean buttonPressed = false;
 
-    private boolean avatarPressed = false;
-
     private StaticLayout timeLayout;
     private int timeX;
     private String lastTimeString = null;
@@ -56,16 +46,12 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
     private int TAG;
 
     public TLRPC.User audioUser;
-    private TLRPC.FileLocation currentPhoto;
 
     public BSChatAudioCell(Context context) {
         super(context);
         TAG = MediaController.getInstance().generateObserverTag();
 
-        avatarImage = new ImageReceiver(this);
-        avatarImage.setRoundRadius(dp(25));
         progressView = new ProgressView();
-        avatarDrawable = new AvatarDrawable();
         initAudio(context);
     }
 
@@ -100,70 +86,51 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (avatarImage != null) {
-            avatarImage.clearImage();
-            currentPhoto = null;
-        }
         MediaController.getInstance().removeLoadingFileObserver(this);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float x = event.getX();
-        float y = event.getY();
-        boolean result = seekBar.onTouch(event.getAction(), event.getX() - seekBarX, event.getY() - seekBarY);
-        if (result) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                getParent().requestDisallowInterceptTouchEvent(true);
-            }
-            invalidate();
-        } else {
-            int side = dp(36);
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
-                    buttonPressed = true;
-                    invalidate();
-                    result = true;
-                } else if (needAvatarImage && avatarImage.isInsideImage(x, y)) {
-                    avatarPressed = true;
-                    result = true;
+        if(!isPressed) {
+            float x = event.getX();
+            float y = event.getY();
+            boolean result = seekBar.onTouch(event.getAction(), event.getX() - seekBarX, event.getY() - seekBarY);
+            if (result) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    getParent().requestDisallowInterceptTouchEvent(true);
                 }
-            } else if (buttonPressed) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    buttonPressed = false;
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    didPressedButton();
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    buttonPressed = false;
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!(x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side)) {
+                invalidate();
+            } else {
+                int side = dp(36);
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
+                        buttonPressed = true;
+                        invalidate();
+                        result = true;
+                    }
+                } else if (buttonPressed) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        buttonPressed = false;
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                        didPressedButton();
+                        invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
                         buttonPressed = false;
                         invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (!(x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side)) {
+                            buttonPressed = false;
+                            invalidate();
+                        }
                     }
                 }
-            } else if (avatarPressed) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    avatarPressed = false;
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    if (delegate != null) {
-                        delegate.didPressedUserAvatar(this, audioUser);
-                    }
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    avatarPressed = false;
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!avatarImage.isInsideImage(x, y)) {
-                        avatarPressed = false;
-                    }
+                if (!result) {
+                    result = super.onTouchEvent(event);
                 }
             }
-            if (!result) {
-                result = super.onTouchEvent(event);
-            }
-        }
 
-        return result;
+            return result;
+        } else return super.onTouchEvent(event);
     }
 
     private void didPressedButton() {
@@ -292,7 +259,7 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        setMeasuredDimension(width, dp(68));
+        setMeasuredDimension(width, dp(75));
         if (isChat) {
             backgroundWidth = Math.min(width - dp(102), dp(300));
         } else {
@@ -308,52 +275,35 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
 
         if (currentMessageObject.isOut()) {
             x = layoutWidth - backgroundWidth + dp(8);
-            seekBarX = layoutWidth - backgroundWidth + dp(97);
-            buttonX = layoutWidth - backgroundWidth + dp(67);
-            timeX = layoutWidth - backgroundWidth + dp(71);
+            seekBarX = layoutWidth - backgroundWidth + dp(135);
+            buttonX = layoutWidth - backgroundWidth + dp(65);
+            timeX = layoutWidth - backgroundWidth + dp(101);
         } else {
-            if (isChat) {
+            /*if (isChat) {
                 x = dp(69);
                 seekBarX = dp(158);
                 buttonX = dp(128);
                 timeX = dp(132);
-            } else {
+            } else {*/
                 x = dp(16);
-                seekBarX = dp(106);
-                buttonX = dp(76);
-                timeX = dp(80);
-            }
+                seekBarX = dp(145);
+                buttonX = dp(74);
+                timeX = dp(111);
+//            }
         }
-        int diff = 0;
-        if (needAvatarImage) {
-            avatarImage.setImageCoords(x, dp(9), dp(50), dp(50));
-        } else {
-            diff = dp(56);
-            seekBarX -= diff;
-            buttonX -= diff;
-            timeX -= diff;
-        }
+        int diff = dp(56);
+        seekBarX -= diff;
+        buttonX -= diff;
+        timeX -= diff;
 
-        seekBar.width = backgroundWidth - dp(112) + diff;
+        seekBar.width = backgroundWidth - dp(112);
         seekBar.height = dp(30);
-        progressView.width = backgroundWidth - dp(136) + diff;
+        progressView.width = backgroundWidth - dp(136);
         progressView.height = dp(30);
-        seekBarY = dp(13);
-        buttonY = dp(10);
+        seekBarY = dp(10);
+        buttonY = dp(6);
 
         updateProgress();
-    }
-
-    @Override
-    protected boolean isUserDataChanged() {
-        TLRPC.User newUser = MessagesController.getInstance().getUser(currentMessageObject.messageOwner.media.audio.user_id);
-        TLRPC.FileLocation newPhoto = null;
-
-        if (avatarImage != null && newUser != null && newUser.photo != null) {
-            newPhoto = newUser.photo.photo_small;
-        }
-
-        return currentPhoto == null && newPhoto != null || currentPhoto != null && newPhoto == null || currentPhoto != null && newPhoto != null && (currentPhoto.local_id != newPhoto.local_id || currentPhoto.volume_id != newPhoto.volume_id) || super.isUserDataChanged();
     }
 
     @Override
@@ -363,30 +313,14 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
             if (uid == 0) {
                 uid = messageObject.messageOwner.from_id;
             }
-            needAvatarImage = !(messageObject.messageOwner.to_id != null && messageObject.messageOwner.to_id.chat_id != 0 && !messageObject.isOut() && messageObject.messageOwner.media.audio.user_id == messageObject.messageOwner.from_id);
             audioUser = MessagesController.getInstance().getUser(uid);
-
-            if (needAvatarImage) {
-                if (audioUser != null) {
-                    if (audioUser.photo != null) {
-                        currentPhoto = audioUser.photo.photo_small;
-                    } else {
-                        currentPhoto = null;
-                    }
-                    avatarDrawable.setInfo(audioUser);
-                } else {
-                    avatarDrawable.setInfo(uid, null, null, false);
-                    currentPhoto = null;
-                }
-                avatarImage.setImage(currentPhoto, "50_50", avatarDrawable, false);
-            }
 
             if (messageObject.isOut()) {
                 seekBar.type = 0;
-                progressView.setProgressColors(0xffb4e396, 0xff6ac453);
+                progressView.setProgressColors(0xff000000, 0xff000000);
             } else {
                 seekBar.type = 1;
-                progressView.setProgressColors(0xffd9e2eb, 0xff86c5f8);
+                progressView.setProgressColors(0xff000000, 0xff000000);
             }
 
             super.setMessageObject(messageObject);
@@ -402,10 +336,6 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
             return;
         }
 
-        if (needAvatarImage) {
-            avatarImage.draw(canvas);
-        }
-
         canvas.save();
         if (buttonState == 0 || buttonState == 1) {
             canvas.translate(seekBarX, seekBarY);
@@ -419,9 +349,9 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
         int state = buttonState;
         if (!currentMessageObject.isOut()) {
             state += 4;
-            timePaint.setColor(0xffa1aab3);
+            timePaint.setColor(0xff000000);
         } else {
-            timePaint.setColor(0xff70b15c);
+            timePaint.setColor(0xff000000);
         }
         Drawable buttonDrawable = statesDrawable[state][buttonPressed ? 1 : 0];
         int side = dp(36);
@@ -431,7 +361,7 @@ public class BSChatAudioCell extends BSChatBaseCell implements BSSeekBar.SeekBar
         buttonDrawable.draw(canvas);
 
         canvas.save();
-        canvas.translate(timeX, dp(45));
+        canvas.translate(timeX, seekBarY + dp(6.5f));
         timeLayout.draw(canvas);
         canvas.restore();
     }

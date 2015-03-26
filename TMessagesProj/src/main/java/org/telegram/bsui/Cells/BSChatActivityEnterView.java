@@ -146,8 +146,8 @@ public class BSChatActivityEnterView implements NotificationCenter.NotificationC
         emoji_container =  containerView.findViewById(R.id.emoji_container);
 
         messsageEditText = (EditText) containerView.findViewById(R.id.chat_text_edit);
-        messsageEditText.setHint(LocaleController.getString("TypeMessage", R.string.TypeMessage));
-        messsageEditText.setHintTextColor(Color.parseColor("#000000"));
+        messsageEditText.setHint(LocaleController.getString("TypeYourMessage", R.string.TypeYourMessage));
+        messsageEditText.setHintTextColor(0xff000000);
 
         attachButton = (FrameLayout) containerView.findViewById(R.id.chat_attach_button);
         if (attachButton != null) {
@@ -168,9 +168,11 @@ public class BSChatActivityEnterView implements NotificationCenter.NotificationC
         audioSendButton = (ImageButton) containerView.findViewById(R.id.chat_audio_send_button);
         recordPanel = containerView.findViewById(R.id.record_panel);
         recordTimeText = (TextView) containerView.findViewById(R.id.recording_time_text);
+        recordTimeText.setTextColor(0xff000000);
         slideText = containerView.findViewById(R.id.slideText);
         TextView textView = (TextView) containerView.findViewById(R.id.slideToCancelTextView);
         textView.setText(LocaleController.getString("SlideToCancel", R.string.SlideToCancel));
+        textView.setTextColor(0xff000000);
 
         emojiButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -691,7 +693,7 @@ public class BSChatActivityEnterView implements NotificationCenter.NotificationC
             return;
         }
         if (emojiButton != null) {
-            emojiButton.setImageResource(R.drawable.ic_msg_panel_smiles);
+            emojiButton.setImageResource(R.drawable.smiles);
         }
         removeEmojiWindow();
         if (sizeNotifierRelativeLayout != null) {

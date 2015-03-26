@@ -86,8 +86,13 @@
 
         </FrameLayout>
 
-        <LinearLayout
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/black"
+            android:layout_above="@id/chat_compose_panel"/>
 
+        <LinearLayout
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_alignParentBottom="true"
@@ -95,7 +100,7 @@
             android:focusableInTouchMode="true"
             android:id="@+id/chat_compose_panel"
 
-            android:background="#000000"
+            android:background="#ffffff"
             android:orientation="horizontal">
 
             <org.telegram.ui.Components.FrameLayoutFixed
@@ -106,7 +111,7 @@
                 android:layout_weight="1">
 
                 <ImageView
-                    android:src="@drawable/ic_msg_panel_smiles"
+                    android:src="@drawable/smiles"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginTop="2dp"
@@ -136,8 +141,9 @@
                     android:background="#FFFFFF"
                     android:paddingBottom="12dp"
                     android:paddingTop="11dp"
-                    android:textCursorDrawable="@null"
-                    android:textColor="#000000"/>
+                    android:textColor="#000000"
+                    android:cursorVisible="false"
+                    android:textCursorDrawable="@null"/>
 
                 <FrameLayout
                     android:layout_width="48dp"
@@ -168,14 +174,14 @@
                         <ImageView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:src="@drawable/slidearrow"
+                            android:src="@drawable/slidearrow_bs"
                             android:layout_gravity="center_vertical"
                             android:layout_marginTop="1dp"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#999999"
+                            android:textColor="#000000"
                             android:textSize="12dp"
                             android:layout_marginLeft="6dp"
                             android:id="@+id/slideToCancelTextView"
@@ -194,7 +200,7 @@
                         <ImageView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:src="@drawable/rec"
+                            android:src="@drawable/active_tab_dot"
                             android:layout_gravity="center_vertical"
                             android:layout_marginTop="1dp"/>
 
@@ -219,7 +225,7 @@
                 android:layout_height="48dp"
                 android:layout_gravity="bottom"
 
-                android:background="#000000"
+                android:background="#ffffff"
                 android:layout_marginTop="2dp">
 
                 <ImageButton
@@ -228,10 +234,10 @@
                     android:scaleType="centerInside"
                     android:id="@+id/chat_audio_send_button"
                     android:enabled="false"
-                    android:src="@drawable/mic_button_states"
+                    android:src="@drawable/voice_message"
                     android:paddingRight="4dp"
 
-                    android:background="#000000"/>
+                    android:background="#ffffff"/>
 
                 <ImageButton
                     android:layout_width="48dp"
@@ -239,7 +245,7 @@
                     android:scaleType="centerInside"
                     android:id="@+id/chat_send_button"
                     android:enabled="false"
-                    android:src="@drawable/ic_send"
+                    android:src="@drawable/send_bs"
                     android:background="@android:color/transparent"/>
 
             </FrameLayout>
@@ -288,11 +294,11 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/pagedown"
+            android:src="@drawable/page_down_bs"
             android:layout_above="@id/chat_compose_panel"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="4dp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="6dp"
             android:id="@+id/pagedown_button"/>
 
         <LinearLayout android:id="@+id/bottom_layout"

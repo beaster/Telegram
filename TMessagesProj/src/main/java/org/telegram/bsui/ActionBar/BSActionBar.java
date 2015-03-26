@@ -89,6 +89,7 @@ public class BSActionBar extends FrameLayout {
 
     private void positionBackImage(int height) {
         if (backButtonImageView != null) {
+            backButtonImageView.setPadding(AndroidUtilities.bsDp(10), 0, 0, 0);
             LayoutParams layoutParams = (LayoutParams)backButtonImageView.getLayoutParams();
             layoutParams.width = AndroidUtilities.bsDp(54);
             layoutParams.height = height;
@@ -351,7 +352,7 @@ public class BSActionBar extends FrameLayout {
             return actionMode;
         }
         actionMode = new BSActionBarMenu(getContext(), this);
-        actionMode.setBackgroundResource(R.drawable.editheader);
+        actionMode.setBackgroundResource(R.drawable.editheader_bs);
         addView(actionMode);
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)actionMode.getLayoutParams();
         layoutParams.height = LayoutParams.FILL_PARENT;
@@ -359,17 +360,6 @@ public class BSActionBar extends FrameLayout {
         layoutParams.gravity = Gravity.RIGHT;
         actionMode.setLayoutParams(layoutParams);
         actionMode.setVisibility(GONE);
-
-        if (occupyStatusBar) {
-            actionModeTop = new View(getContext());
-            actionModeTop.setBackgroundColor(0x99000000);
-            addView(actionModeTop);
-            layoutParams = (FrameLayout.LayoutParams)actionModeTop.getLayoutParams();
-            layoutParams.width = LayoutParams.FILL_PARENT;
-            layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
-            actionModeTop.setLayoutParams(layoutParams);
-            actionModeTop.setVisibility(GONE);
-        }
 
         return actionMode;
     }
@@ -434,7 +424,6 @@ public class BSActionBar extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int actionBarHeight = AndroidUtilities.getBSCurrentActionBarHeight();
-        Log.d("bsmessages", "actionBar: bsActionBarHeight#" + actionBarHeight);
         positionBackImage(actionBarHeight);
         positionMenu(MeasureSpec.getSize(widthMeasureSpec), actionBarHeight);
         positionTitle(MeasureSpec.getSize(widthMeasureSpec), actionBarHeight);

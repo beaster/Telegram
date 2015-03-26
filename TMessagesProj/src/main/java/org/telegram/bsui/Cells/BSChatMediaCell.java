@@ -46,15 +46,13 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
     private static Drawable placeholderDocInDrawable;
     private static Drawable videoIconDrawable;
-    private static Drawable docMenuInDrawable;
-    private static Drawable docMenuOutDrawable;
     private static Drawable[] buttonStatesDrawables = new Drawable[8];
     private static Drawable[][] buttonStatesDrawablesDoc = new Drawable[3][2];
     private static TextPaint infoPaint;
     private static MessageObject lastDownloadedGifMessage = null;
     private static TextPaint namePaint;
-    private static Paint docBackPaint;
     private static Paint deleteProgressPaint;
+    private static Paint docBackPaint;
 
     private GifDrawable gifDrawable = null;
     private RadialProgress radialProgress;
@@ -106,7 +104,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
     protected void initMedia() {
         if (placeholderDocInDrawable == null) {
             placeholderDocInDrawable = getResources().getDrawable(R.drawable.document_icon_bs);
-            buttonStatesDrawables[0] = getResources().getDrawable(R.drawable.photoload);
+            buttonStatesDrawables[0] = getResources().getDrawable(R.drawable.download_video_bs);
             buttonStatesDrawables[1] = getResources().getDrawable(R.drawable.photocancel);
             buttonStatesDrawables[2] = getResources().getDrawable(R.drawable.photogif);
             buttonStatesDrawables[3] = getResources().getDrawable(R.drawable.play_video_bs);
@@ -114,15 +112,13 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             buttonStatesDrawables[5] = getResources().getDrawable(R.drawable.burn);
             buttonStatesDrawables[6] = getResources().getDrawable(R.drawable.circle);
             buttonStatesDrawables[7] = getResources().getDrawable(R.drawable.photocheck);
-            buttonStatesDrawablesDoc[0][0] = getResources().getDrawable(R.drawable.docload_b);
-            buttonStatesDrawablesDoc[1][0] = getResources().getDrawable(R.drawable.doccancel_b);
-            buttonStatesDrawablesDoc[2][0] = getResources().getDrawable(R.drawable.doccancel_b);
+            buttonStatesDrawablesDoc[0][0] = getResources().getDrawable(R.drawable.doc_download_bs);
+            buttonStatesDrawablesDoc[1][0] = getResources().getDrawable(R.drawable.audiocancel_bs);
+            buttonStatesDrawablesDoc[2][0] = getResources().getDrawable(R.drawable.audiocancel_bs);
             buttonStatesDrawablesDoc[0][1] = getResources().getDrawable(R.drawable.doc_download_bs);
-            buttonStatesDrawablesDoc[1][1] = getResources().getDrawable(R.drawable.doccancel_g);
-            buttonStatesDrawablesDoc[2][1] = getResources().getDrawable(R.drawable.docpause_g);
-            videoIconDrawable = getResources().getDrawable(R.drawable.videofile_icon);
-            docMenuInDrawable = getResources().getDrawable(android.R.color.white);
-            docMenuOutDrawable = getResources().getDrawable(android.R.color.white);
+            buttonStatesDrawablesDoc[1][1] = getResources().getDrawable(R.drawable.audiocancel_bs);
+            buttonStatesDrawablesDoc[2][1] = getResources().getDrawable(R.drawable.pause_bs);
+            videoIconDrawable = getResources().getDrawable(R.drawable.ic_video);
 
             infoPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
             infoPaint.setTextSize(dp(12));
@@ -132,6 +128,10 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             namePaint.setTextSize(dp(16));
 
             docBackPaint = new Paint();
+            docBackPaint.setColor(0xff000000);
+            docBackPaint.setStyle(Paint.Style.STROKE);
+            docBackPaint.setStrokeJoin(Paint.Join.ROUND);
+            docBackPaint.setStrokeCap(Paint.Cap.ROUND);
 
             deleteProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             deleteProgressPaint.setColor(0xff000000);
@@ -169,105 +169,107 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float x = event.getX();
-        float y = event.getY();
+        if(!isPressed) {
+            float x = event.getX();
+            float y = event.getY();
 
-        boolean result = false;
-        int side = dp(48);
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (delegate == null || delegate.canPerformActions()) {
-                if (buttonState != -1 && x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
-                    buttonPressed = 1;
-                    invalidate();
-                    result = true;
-                } else {
-                    if (currentMessageObject.type == 9) {
-                        if (x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth - dp(50) && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
-                            imagePressed = true;
-                            result = true;
-                        } else if (x >= photoImage.getImageX() + backgroundWidth - dp(50) && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
-                            otherPressed = true;
-                            result = true;
-                        }
+            boolean result = false;
+            int side = dp(48);
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (delegate == null || delegate.canPerformActions()) {
+                    if (buttonState != -1 && x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side) {
+                        buttonPressed = 1;
+                        invalidate();
+                        result = true;
                     } else {
-                        if (x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
-                            imagePressed = true;
-                            result = true;
+                        if (currentMessageObject.type == 9) {
+                            if (x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth - dp(50) && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
+                                imagePressed = true;
+                                result = true;
+                            } else if (x >= photoImage.getImageX() + backgroundWidth - dp(50) && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
+                                otherPressed = true;
+                                result = true;
+                            }
+                        } else {
+                            if (x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
+                                imagePressed = true;
+                                result = true;
+                            }
                         }
                     }
+                    if (imagePressed && currentMessageObject.isSecretPhoto()) {
+                        imagePressed = false;
+                    } else if (result) {
+                        startCheckLongPress();
+                    }
                 }
-                if (imagePressed && currentMessageObject.isSecretPhoto()) {
-                    imagePressed = false;
-                } else if (result) {
-                    startCheckLongPress();
+            } else {
+                if (event.getAction() != MotionEvent.ACTION_MOVE) {
+                    cancelCheckLongPress();
                 }
-            }
-        } else {
-            if (event.getAction() != MotionEvent.ACTION_MOVE) {
-                cancelCheckLongPress();
-            }
-            if (buttonPressed == 1) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    buttonPressed = 0;
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    didPressedButton(false);
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    buttonPressed = 0;
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (!(x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side)) {
+                if (buttonPressed == 1) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        buttonPressed = 0;
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                        didPressedButton(false);
+                        invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
                         buttonPressed = 0;
                         invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (!(x >= buttonX && x <= buttonX + side && y >= buttonY && y <= buttonY + side)) {
+                            buttonPressed = 0;
+                            invalidate();
+                        }
                     }
-                }
-            } else if (imagePressed) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    imagePressed = false;
-                    if (buttonState == -1 || buttonState == 2 || buttonState == 3) {
+                } else if (imagePressed) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        imagePressed = false;
+                        if (buttonState == -1 || buttonState == 2 || buttonState == 3) {
+                            playSoundEffect(SoundEffectConstants.CLICK);
+                            didClickedImage();
+                        }
+                        invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+                        imagePressed = false;
+                        invalidate();
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (currentMessageObject.type == 9) {
+                            if (!(x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth - dp(50) && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight())) {
+                                imagePressed = false;
+                                invalidate();
+                            }
+                        } else {
+                            if (!photoImage.isInsideImage(x, y)) {
+                                imagePressed = false;
+                                invalidate();
+                            }
+                        }
+                    }
+                } else if (otherPressed) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        otherPressed = false;
                         playSoundEffect(SoundEffectConstants.CLICK);
-                        didClickedImage();
-                    }
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    imagePressed = false;
-                    invalidate();
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (currentMessageObject.type == 9) {
-                        if (!(x >= photoImage.getImageX() && x <= photoImage.getImageX() + backgroundWidth - dp(50) && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight())) {
-                            imagePressed = false;
-                            invalidate();
+                        if (mediaDelegate != null) {
+                            mediaDelegate.didPressedOther(this);
                         }
-                    } else {
-                        if (!photoImage.isInsideImage(x, y)) {
-                            imagePressed = false;
-                            invalidate();
-                        }
-                    }
-                }
-            } else if (otherPressed) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    otherPressed = false;
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    if (mediaDelegate != null) {
-                        mediaDelegate.didPressedOther(this);
-                    }
-                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    otherPressed = false;
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (currentMessageObject.type == 9) {
-                        if (!(x >= photoImage.getImageX() + backgroundWidth - dp(50) && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight())) {
-                            otherPressed = false;
+                    } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+                        otherPressed = false;
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (currentMessageObject.type == 9) {
+                            if (!(x >= photoImage.getImageX() + backgroundWidth - dp(50) && x <= photoImage.getImageX() + backgroundWidth && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight())) {
+                                otherPressed = false;
+                            }
                         }
                     }
                 }
             }
-        }
-        if (!result) {
-            result = super.onTouchEvent(event);
-        }
+            if (!result) {
+                result = super.onTouchEvent(event);
+            }
 
-        return result;
+            return result;
+        } return super.onTouchEvent(event);
     }
 
     private void didClickedImage() {
@@ -408,7 +410,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
     @Override
     public void setMessageObject(MessageObject messageObject) {
-        media = messageObject.type != 9;
+        media = messageObject.type == 1 || messageObject.type == 4;
         boolean dataChanged = currentMessageObject == messageObject && (isUserDataChanged() || photoNotSet);
         if (currentMessageObject != messageObject || isPhotoDataChanged(messageObject) || dataChanged) {
             super.setMessageObject(messageObject);
@@ -649,7 +651,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
                     photoWidth = w;
                     photoHeight = h;
-                    backgroundWidth = w + dp(12);
+                    backgroundWidth = w + dp(27);
 
                     currentPhotoFilter = String.format(Locale.US, "%d_%d", (int) (w / AndroidUtilities.density), (int) (h / AndroidUtilities.density));
                     if (messageObject.photoThumbs.size() > 1 || messageObject.type == 3 || messageObject.type == 8) {
@@ -786,7 +788,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), photoHeight + dp(14));
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), photoHeight + dp(50));
     }
 
     @Override
@@ -798,19 +800,15 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             if (media) {
                 x = layoutWidth - backgroundWidth - dp(3);
             } else {
-                x = layoutWidth - backgroundWidth + dp(6);
+                x = layoutWidth - backgroundWidth + dp(9);
             }
         } else {
-            if (isChat) {
-                x = dp(67);
-            } else {
-                x = dp(15);
-            }
+                x = dp(16.5f);
         }
-        photoImage.setImageCoords(x, dp(7), photoWidth, photoHeight);
+        photoImage.setImageCoords(x, dp(10.5f), photoWidth, photoHeight);
         int size = dp(48);
         buttonX = (int)(x + (photoWidth - size) / 2.0f);
-        buttonY = (int)(dp(7) + (photoHeight - size) / 2.0f);
+        buttonY = (int)(dp(10) + (photoHeight - size) / 2.0f);
 
         radialProgress.setProgressRect(buttonX, buttonY, buttonX + dp(48), buttonY + dp(48));
         deleteProgressRect.set(buttonX + dp(3), buttonY + dp(3), buttonX + dp(45), buttonY + dp(45));
@@ -866,19 +864,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
         radialProgress.setHideCurrentDrawable(false);
 
         if (currentMessageObject.type == 9) {
-            Drawable menuDrawable = null;
-            if (currentMessageObject.isOut()) {
-                infoPaint.setColor(0xff000000);
-                docBackPaint.setColor(0xff000000);
-                menuDrawable = docMenuOutDrawable;
-            } else {
-                infoPaint.setColor(0xff000000);
-                docBackPaint.setColor(0xff000000);
-                menuDrawable = docMenuInDrawable;
-            }
-
-            setDrawableBounds(menuDrawable, photoImage.getImageX() + backgroundWidth - dp(44), dp(10));
-            menuDrawable.draw(canvas);
+            infoPaint.setColor(0xff000000);
 
             if (buttonState >= 0 && buttonState < 4) {
                 if (!imageDrawn) {
@@ -897,7 +883,11 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             }
 
             if (!imageDrawn) {
-                canvas.drawRect(photoImage.getImageX(), photoImage.getImageY(), photoImage.getImageX() + photoImage.getImageWidth(), photoImage.getImageY() + photoImage.getImageHeight(), docBackPaint);
+
+                if(media){
+                    canvas.drawRect(photoImage.getImageX(), photoImage.getImageY(), photoImage.getImageX() + photoImage.getImageWidth(), photoImage.getImageY() + photoImage.getImageHeight(), docBackPaint);
+                }
+
                 if (currentMessageObject.isOut()) {
                     radialProgress.setProgressColor(0xff81bd72);
                 } else {

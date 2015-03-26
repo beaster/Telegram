@@ -488,9 +488,9 @@ public class BSDialogCell extends BSBaseCell {
             int w = errorDrawable.getIntrinsicWidth() + AndroidUtilities.bsDp(8);
             messageWidth -= w;
             if (!LocaleController.isRTL) {
-                errorLeft = getMeasuredWidth() - errorDrawable.getIntrinsicWidth() - AndroidUtilities.bsDp(11);
+                errorLeft = getMeasuredWidth() - errorDrawable.getIntrinsicWidth() - AndroidUtilities.bsDp(18.5f);
             } else {
-                errorLeft = AndroidUtilities.bsDp(11);
+                errorLeft = AndroidUtilities.bsDp(18.5f);
                 messageLeft += w;
             }
         } else if (countString != null) {

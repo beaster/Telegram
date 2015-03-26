@@ -1,13 +1,8 @@
 package org.telegram.bsui;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,6 +28,7 @@ import org.telegram.bsui.ActionBar.BSActionBarMenu;
 import org.telegram.bsui.ActionBar.BSActionBarMenuItem;
 import org.telegram.bsui.Adapters.BSContactsAdapter;
 import org.telegram.bsui.Adapters.BSContactsSearchAdapter;
+import org.telegram.bsui.Components.BSSectionsListView;
 import org.telegram.bsui.widget.BSBaseActivity;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.R;
@@ -40,7 +36,6 @@ import org.telegram.messenger.TLRPC;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.Adapters.BaseSectionsAdapter;
 import org.telegram.ui.Cells.UserCell;
-import org.telegram.ui.Components.SectionsListView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +47,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
 
     private BaseSectionsAdapter listViewAdapter;
     private TextView emptyTextView;
-    private SectionsListView listView;
+    private BSSectionsListView listView;
     private BSContactsSearchAdapter searchListViewAdapter;
 
     private boolean searchWas;
@@ -139,7 +134,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             searching = false;
             searchWas = false;
 
-            actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+            actionBar.setBackButtonImage(R.drawable.arrow_white);
 //            actionBar.setAllowOverlayTitle(true);
             if (destroyAfterSelect) {
                 if (returnAsResult) {
@@ -175,10 +170,10 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
                     ViewGroup group = (ViewGroup) listView.getParent();
                     listView.setAdapter(listViewAdapter);
                     listViewAdapter.notifyDataSetChanged();
-                    if (Build.VERSION.SDK_INT >= 11) {
+/*                    if (Build.VERSION.SDK_INT >= 11) {
                         listView.setFastScrollAlwaysVisible(true);
                     }
-                    listView.setFastScrollEnabled(true);
+                    listView.setFastScrollEnabled(true);*/
                     listView.setVerticalScrollBarEnabled(false);
                     emptyTextView.setText(LocaleController.getString("NoContacts", R.string.NoContacts));
                 }
@@ -194,10 +189,10 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
                         if (listView != null) {
                             listView.setAdapter(searchListViewAdapter);
                             searchListViewAdapter.notifyDataSetChanged();
-                            if(Build.VERSION.SDK_INT >= 11) {
+/*                            if(Build.VERSION.SDK_INT >= 11) {
                                 listView.setFastScrollAlwaysVisible(false);
                             }
-                            listView.setFastScrollEnabled(false);
+                            listView.setFastScrollEnabled(false);*/
                             listView.setVerticalScrollBarEnabled(true);
                         }
                         if (emptyTextView != null) {
@@ -210,17 +205,15 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
 
             searchListViewAdapter = new BSContactsSearchAdapter(getParentActivity(), ignoreUsers, allowUsernameSearch);
             listViewAdapter = new BSContactsAdapter(getParentActivity(), onlyUsers, needPhonebook, ignoreUsers);
-
             fragmentView = new FrameLayout(getParentActivity());
-            fragmentView.setBackgroundColor(Color.parseColor("#FFFFFF"));
-            LinearLayout emptyTextLayout = new LinearLayout(getParentActivity());
+            fragmentView.setBackgroundColor(0xffffffff);
+            FrameLayout emptyTextLayout = new FrameLayout(getParentActivity());
             emptyTextLayout.setVisibility(View.INVISIBLE);
-            emptyTextLayout.setOrientation(LinearLayout.VERTICAL);
             ((FrameLayout) fragmentView).addView(emptyTextLayout);
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) emptyTextLayout.getLayoutParams();
-            layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT;
-            layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT;
-            layoutParams.gravity = Gravity.TOP;
+            layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
+            layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
+            layoutParams.gravity = Gravity.CENTER;
             emptyTextLayout.setLayoutParams(layoutParams);
             emptyTextLayout.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -230,38 +223,36 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             });
 
             emptyTextView = new TextView(getParentActivity());
-            emptyTextView.setTextColor(Color.parseColor("#000000"));
+            emptyTextView.setTextColor(0xff000000);
             emptyTextView.setTextSize(20);
             emptyTextView.setGravity(Gravity.CENTER);
             emptyTextView.setText(LocaleController.getString("NoContacts", R.string.NoContacts));
             emptyTextLayout.addView(emptyTextView);
-            LinearLayout.LayoutParams layoutParams1 = (LinearLayout.LayoutParams) emptyTextView.getLayoutParams();
-            layoutParams1.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-            layoutParams1.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            FrameLayout.LayoutParams layoutParams1 = (FrameLayout.LayoutParams) emptyTextView.getLayoutParams();
+            layoutParams1.width = FrameLayout.LayoutParams.WRAP_CONTENT;
+            layoutParams1.height = FrameLayout.LayoutParams.WRAP_CONTENT;
             layoutParams1.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
-            layoutParams1.weight = 0.5f;
             emptyTextView.setLayoutParams(layoutParams1);
 
             FrameLayout frameLayout = new FrameLayout(getParentActivity());
             emptyTextLayout.addView(frameLayout);
-            layoutParams1 = (LinearLayout.LayoutParams) frameLayout.getLayoutParams();
-            layoutParams1.width = LinearLayout.LayoutParams.MATCH_PARENT;
-            layoutParams1.height = LinearLayout.LayoutParams.MATCH_PARENT;
-            layoutParams1.weight = 0.5f;
+            layoutParams1 = (FrameLayout.LayoutParams) frameLayout.getLayoutParams();
+            layoutParams1.width = FrameLayout.LayoutParams.MATCH_PARENT;
+            layoutParams1.height = FrameLayout.LayoutParams.MATCH_PARENT;
             frameLayout.setLayoutParams(layoutParams1);
 
-            listView = new SectionsListView(getParentActivity());
+            listView = new BSSectionsListView(getParentActivity());
             listView.setEmptyView(emptyTextLayout);
             listView.setVerticalScrollBarEnabled(false);
             listView.setDivider(null);
+            listView.setPadding(0, AndroidUtilities.bsDp(10), 0, 0);
             listView.setDividerHeight(0);
-            listView.setFastScrollEnabled(true);
-            listView.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
+//            listView.setFastScrollEnabled(true);
             listView.setAdapter(listViewAdapter);
-            if (Build.VERSION.SDK_INT >= 11) {
+/*            if (Build.VERSION.SDK_INT >= 11) {
                 listView.setFastScrollAlwaysVisible(true);
                 listView.setVerticalScrollbarPosition(LocaleController.isRTL ? 0 : 0);
-            }
+            }*/
             ((FrameLayout) fragmentView).addView(listView);
             layoutParams = (FrameLayout.LayoutParams) listView.getLayoutParams();
             layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT;
@@ -362,23 +353,24 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
                                 if (usePhone == null || getParentActivity() == null) {
                                     return;
                                 }
-                                AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+                                /*final BSAlertDialog.Builder builder = new BSAlertDialog.Builder(getParentActivity());
                                 builder.setMessage(LocaleController.getString("InviteUser", R.string.InviteUser));
                                 builder.setTitle(LocaleController.getString("AppName", R.string.AppName));
                                 final String arg1 = usePhone;
-                                builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), new DialogInterface.OnClickListener() {
+                                builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), new View.OnClickListener() {
                                     @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                    public void onClick(View view) {
                                         try {
                                             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", arg1, null));
                                             intent.putExtra("sms_body", LocaleController.getString("InviteText", R.string.InviteText));
                                             startBSActivity(intent);
+                                            builder.close();
                                         } catch (Exception e) {
                                             FileLog.e("tmessages", e);
                                         }
                                     }
                                 });
-                                builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                                builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);*/
                             }
                         }
                     }

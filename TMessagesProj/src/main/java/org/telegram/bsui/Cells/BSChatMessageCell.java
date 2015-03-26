@@ -2,20 +2,14 @@ package org.telegram.bsui.Cells;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.text.Spannable;
-import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.view.MotionEvent;
 
 import org.telegram.android.AndroidUtilities;
 import org.telegram.android.MessageObject;
 import org.telegram.bsui.BSMessageObject;
-import org.telegram.bsui.ClickSpan;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.R;
-import org.telegram.ui.Cells.ChatMessageCell;
 
 /**
  * Created by E1ektr0 on 04.01.2015.
@@ -172,18 +166,15 @@ public class BSChatMessageCell extends BSChatBaseCell {
             }
 
             backgroundWidth = messageObject.textWidth;
-            totalHeight = messageObject.textHeight + dp(19.5f) + namesOffset;
+            totalHeight = messageObject.textHeight + dp(19.5f) + namesOffset + timeOffset;
 
             int maxChildWidth = Math.max(backgroundWidth, nameWidth);
             maxChildWidth = Math.max(maxChildWidth, forwardedNameWidth);
 
             int timeMore = timeWidth + dp(6);
-            if (messageObject.isOut()) {
-                timeMore += dp(20.5f);
-            }
 
             if (maxWidth - messageObject.lastLineWidth < timeMore) {
-                totalHeight += dp(14);
+
                 backgroundWidth = Math.max(maxChildWidth, messageObject.lastLineWidth) + dp(29);
             } else {
                 int diff = maxChildWidth - messageObject.lastLineWidth;
@@ -209,7 +200,8 @@ public class BSChatMessageCell extends BSChatBaseCell {
             textX = layoutWidth - backgroundWidth + dp(10);
             textY = dp(10) + namesOffset;
         } else {
-            textX = dp(19) + (isChat ? dp(52) : 0);
+//            textX = dp(19) + (isChat ? dp(52) : 0);
+            textX = dp(19);
             textY = dp(10) + namesOffset;
         }
     }
@@ -225,7 +217,8 @@ public class BSChatMessageCell extends BSChatBaseCell {
             textX = layoutWidth - backgroundWidth + dp(10);
             textY = dp(10) + namesOffset;
         } else {
-            textX = dp(19) + (isChat ? dp(52) : 0);
+//            textX = dp(19) + (isChat ? dp(52) : 0);
+            textX = dp(19);
             textY = dp(10) + namesOffset;
         }
 

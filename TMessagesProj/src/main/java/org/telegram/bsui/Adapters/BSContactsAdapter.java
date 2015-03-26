@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 
 import org.telegram.android.AndroidUtilities;
 import org.telegram.android.ContactsController;
@@ -177,7 +179,7 @@ public class BSContactsAdapter extends BaseSectionsAdapter {
         if (type == 4) {
             if (convertView == null) {
                 convertView = new BSDividerCell(mContext);
-                convertView.setPadding(AndroidUtilities.bsDp(LocaleController.isRTL ? 28 : 72), 0, AndroidUtilities.bsDp(LocaleController.isRTL ? 72 : 28), 0);
+                convertView.setPadding(AndroidUtilities.dp(LocaleController.isRTL ? 28 : 72), 0, AndroidUtilities.dp(LocaleController.isRTL ? 72 : 28), 0);
             }
         } else if (type == 3) {
             if (convertView == null) {
@@ -193,11 +195,11 @@ public class BSContactsAdapter extends BaseSectionsAdapter {
                 actionCell.setTextAndIcon(LocaleController.getString("InviteFriends", R.string.InviteFriends), R.drawable.menu_invite);
             } else {
                 if (position == 0) {
-                    actionCell.setTextAndIcon(LocaleController.getString("NewGroup", R.string.NewGroup), R.drawable.menu_newgroup);
+                    actionCell.setTextAndIcon(LocaleController.getString("NewGroup", R.string.NewGroup), R.drawable.new_group_bs);
                 } else if (position == 1) {
-                    actionCell.setTextAndIcon(LocaleController.getString("NewSecretChat", R.string.NewSecretChat), R.drawable.menu_secret);
+                    actionCell.setTextAndIcon(LocaleController.getString("NewSecretChat", R.string.NewSecretChat), R.drawable.new_secret_chat_bs);
                 } else if (position == 2) {
-                    actionCell.setTextAndIcon(LocaleController.getString("NewBroadcastList", R.string.NewBroadcastList), R.drawable.menu_broadcast);
+                    actionCell.setTextAndIcon(LocaleController.getString("NewBroadcastList", R.string.NewBroadcastList), R.drawable.new_broadcast_bs);
                 }
             }
         } else if (type == 1) {
@@ -215,7 +217,7 @@ public class BSContactsAdapter extends BaseSectionsAdapter {
         } else if (type == 0) {
             if (convertView == null) {
                 convertView = new BSUserCell(mContext, 58);
-                ((BSUserCell) convertView).setStatusColors(0xffa8a8a8, 0xff3b84c0);
+                ((BSUserCell) convertView).setStatusColors(0xff000000, 0xff000000);
             }
 
             ArrayList<TLRPC.TL_contact> arr = ContactsController.getInstance().usersSectionsDict.get(ContactsController.getInstance().sortedUsersSectionsArray.get(section - (onlyUsers ? 0 : 1)));

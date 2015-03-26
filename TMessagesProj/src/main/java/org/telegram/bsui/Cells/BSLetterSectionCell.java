@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import org.telegram.android.AndroidUtilities;
+import org.telegram.android.LocaleController;
 
 /**
  * Created by E1ektr0 on 09.01.2015.
@@ -18,17 +19,20 @@ public class BSLetterSectionCell extends FrameLayout {
 
     public BSLetterSectionCell(Context context) {
         super(context);
-        setLayoutParams(new ViewGroup.LayoutParams(AndroidUtilities.bsDp(54), AndroidUtilities.bsDp(64)));
+        setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtilities.bsDp(64)));
 
         textView = new TextView(getContext());
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);//22
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);//22
         textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
-        textView.setTextColor(0xff808080);
-        textView.setGravity(Gravity.CENTER);
+        textView.setTextColor(0xff000000);
+        textView.setGravity(Gravity.START);
         addView(textView);
         LayoutParams layoutParams = (LayoutParams)textView.getLayoutParams();
         layoutParams.width = LayoutParams.MATCH_PARENT;
         layoutParams.height = LayoutParams.MATCH_PARENT;
+        layoutParams.gravity = LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT;
+        layoutParams.leftMargin = LocaleController.isRTL ? 0 : AndroidUtilities.bsDp(25);
+        layoutParams.rightMargin = LocaleController.isRTL ? AndroidUtilities.bsDp(25) : 0;
         textView.setLayoutParams(layoutParams);
     }
 

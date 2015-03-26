@@ -180,6 +180,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
     private float startY = 0;
 
     private FrameLayoutFixed avatarContainer;
+    private FrameLayoutFixed actionAvatarContainer;
     private BackupImageView avatarImageView;
     private BSActionBarMenuItem headerItem;
     private BSActionBarMenuItem menuItem;
@@ -755,7 +756,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             lastPrintString = null;
             lastStatus = null;
 
-            actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+            actionBar.setBackButtonImage(R.drawable.arrow_white);
             actionBar.setActionBarMenuOnItemClick(new BSActionBar.ActionBarMenuOnItemClick() {
                 @Override
                 public void onItemClick(final int id) {
@@ -919,7 +920,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                 timeItem.setImageDrawable(timerDrawable);
             }
             avatarContainer = new FrameLayoutFixed(getParentActivity());
-            avatarContainer.setBackgroundResource(R.drawable.bar_selector);
+            avatarContainer.setBackgroundColor(0xff000000);
             avatarContainer.setPadding(AndroidUtilities.bsDp(8), AndroidUtilities.bsDp(5), AndroidUtilities.bsDp(8), 0);
             actionBar.addView(avatarContainer);
             FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) avatarContainer.getLayoutParams();
@@ -1074,7 +1075,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             actionModeViews.clear();
 
             final BSActionBarMenu actionMode = actionBar.createActionMode();
-            actionModeViews.add(actionMode.addItem(-2, R.drawable.ic_ab_back_grey, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
+            actionModeViews.add(actionMode.addItem(-2, R.drawable.arrow_black_bs, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
             selectedMessagesCountTextView = new TextView(actionMode.getContext());
             selectedMessagesCountTextView.setTextSize(16);
             selectedMessagesCountTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
@@ -1098,12 +1099,12 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
             selectedMessagesCountTextView.setLayoutParams(layoutParams);
 
             if (currentEncryptedChat == null) {
-                actionModeViews.add(actionMode.addItem(copy, R.drawable.ic_ab_fwd_copy, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
-                actionModeViews.add(actionMode.addItem(forward, R.drawable.ic_ab_fwd_forward, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
-                actionModeViews.add(actionMode.addItem(delete, R.drawable.ic_ab_fwd_delete, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
+                actionModeViews.add(actionMode.addItem(copy, R.drawable.copy_bs, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
+                actionModeViews.add(actionMode.addItem(forward, R.drawable.forward_bs, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
+                actionModeViews.add(actionMode.addItem(delete, R.drawable.trash_bs, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
             } else {
-                actionModeViews.add(actionMode.addItem(copy, R.drawable.ic_ab_fwd_copy, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
-                actionModeViews.add(actionMode.addItem(delete, R.drawable.ic_ab_fwd_delete, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
+                actionModeViews.add(actionMode.addItem(copy, R.drawable.copy_bs, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
+                actionModeViews.add(actionMode.addItem(delete, R.drawable.trash_bs, R.drawable.bar_selector_mode, null, AndroidUtilities.bsDp(54)));
             }
             View contentView = fragmentView.findViewById(R.id.chat_layout_bs);
             TextView emptyView = (TextView) fragmentView.findViewById(R.id.searchEmptyView);
@@ -1116,8 +1117,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                 }
             });
             emptyView.setText(LocaleController.getString("NoMessages", R.string.NoMessages));
-            emptyView.setTextColor(Color.parseColor("#000000"));
-            emptyViewContainer.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            emptyView.setTextColor(0xff000000);
+            emptyViewContainer.setBackgroundColor(0xffffffff);
             chatListView = (LayoutListView)fragmentView.findViewById(R.id.chat_list_view);
             chatListView.setAdapter(chatAdapter = new ChatAdapter(getBSDrawer().getBSContext()));
             bottomOverlay = fragmentView.findViewById(R.id.bottom_overlay);
@@ -1131,8 +1132,8 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
 
             updateContactStatus();
 
-            contentView.setBackgroundColor(Color.parseColor("#FFFFFF"));
-            chatListView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            contentView.setBackgroundColor(0xffffffff);
+            chatListView.setBackgroundColor(0xffffffff);
 
             emptyView.setPadding(AndroidUtilities.bsDp(7), AndroidUtilities.bsDp(1), AndroidUtilities.bsDp(7), AndroidUtilities.bsDp(1));
 
@@ -1336,7 +1337,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                 View secretChatPlaceholder = contentView.findViewById(R.id.secret_placeholder);
                 secretChatPlaceholder.setVisibility(View.VISIBLE);
                 secretViewStatusTextView = (TextView) contentView.findViewById(R.id.invite_text);
-                secretViewStatusTextView.setTextColor(Color.parseColor("#000000"));
+                secretViewStatusTextView.setTextColor(0xff000000);
                 secretChatPlaceholder.setPadding(AndroidUtilities.bsDp(16), AndroidUtilities.bsDp(12), AndroidUtilities.bsDp(16), AndroidUtilities.bsDp(12));
 
                 View v = contentView.findViewById(R.id.secret_placeholder);
@@ -2715,14 +2716,9 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
                 boolean selected = false;
                 if (actionBar.isActionModeShowed()) {
                     if (selectedMessagesIds.containsKey(cell.getMessageObject().messageOwner.id)) {
-                        view.setBackgroundColor(Color.LTGRAY);
                         selected = true;
-                    } else {
-                        view.setBackgroundColor(0);
                     }
                     disableSelection = true;
-                } else {
-                    view.setBackgroundColor(0);
                 }
 
                 cell.setMessageObject(cell.getMessageObject());
@@ -2916,7 +2912,6 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
-            Log.d("debug","bschatadapter");
             int offset = 1;
             if ((!endReached || !forward_end_reached) && messages.size() != 0) {
                 if (!endReached) {
