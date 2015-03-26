@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -13,15 +14,21 @@ import org.telegram.android.LocaleController;
 import org.telegram.messenger.FileLog;
 import org.telegram.ui.Adapters.BaseSectionsAdapter;
 
+import java.util.ArrayList;
+
 /**
  * Created by fanticqq on 25.03.15.
  */
 public class BSSectionsListView extends ListView implements AbsListView.OnScrollListener {
 
-    private View pinnedHeader;
+    private ArrayList<View> headers = new ArrayList<>();
+    private ArrayList<View> headersCache = new ArrayList<>();
     private OnScrollListener mOnScrollListener;
     private BaseSectionsAdapter mAdapter;
-    private int currentStartSection = -1;
+    private int currentFirst = -1;
+    private int currentVisible = -1;
+    private int startSection;
+    private int sectionsCount;
 
     public BSSectionsListView(Context context) {
         super(context);
@@ -43,7 +50,8 @@ public class BSSectionsListView extends ListView implements AbsListView.OnScroll
         if (mAdapter == adapter) {
             return;
         }
-        pinnedHeader = null;
+        headers.clear();
+        headersCache.clear();
         if (adapter instanceof BaseSectionsAdapter) {
             mAdapter = (BaseSectionsAdapter) adapter;
         } else {
@@ -61,38 +69,69 @@ public class BSSectionsListView extends ListView implements AbsListView.OnScroll
             return;
         }
 
+        headersCache.addAll(headers);
+        headers.clear();
+
         if (mAdapter.getCount() == 0) {
             return;
         }
 
-        int startSection = mAdapter.getSectionForPosition(firstVisibleItem);
-        if (currentStartSection != startSection || pinnedHeader == null) {
-            pinnedHeader = getSectionHeaderView(startSection, pinnedHeader);
-            currentStartSection = startSection;
+        if (currentFirst != firstVisibleItem || currentVisible != visibleItemCount) {
+            currentFirst = firstVisibleItem;
+            currentVisible = visibleItemCount;
+
+            sectionsCount = 1;
+            startSection = mAdapter.getSectionForPosition(firstVisibleItem);
+            int itemNum = firstVisibleItem + mAdapter.getCountForSection(startSection) - mAdapter.getPositionInSectionForPosition(firstVisibleItem);
+            while (true) {
+                if (itemNum >= firstVisibleItem + visibleItemCount) {
+                    break;
+                }
+                itemNum += mAdapter.getCountForSection(startSection + sectionsCount);
+                sectionsCount++;
+            }
         }
 
-        int count = mAdapter.getCountForSection(startSection);
-
-        int pos = mAdapter.getPositionInSectionForPosition(firstVisibleItem);
-        if (pos == count - 1) {
-            View child = getChildAt(0);
-            int headerHeight = pinnedHeader.getHeight();
-            int headerTop = 0;
-            if (child != null) {
-                int available = child.getTop() + child.getHeight();
-                if (available < headerHeight) {
-                    headerTop = available - headerHeight;
+        int itemNum = firstVisibleItem;
+        for (int a = startSection; a < startSection + sectionsCount; a++) {
+            View header = null;
+            if (!headersCache.isEmpty()) {
+                header = headersCache.get(0);
+                headersCache.remove(0);
+            }
+            header = getSectionHeaderView(a, header);
+            headers.add(header);
+            int count = mAdapter.getCountForSection(a);
+            if (a == startSection) {
+                int pos = mAdapter.getPositionInSectionForPosition(itemNum);
+                if (pos == count - 1) {
+                    header.setTag(-header.getHeight());
+                } else if (pos == count - 2) {
+                    View child = getChildAt(itemNum - firstVisibleItem);
+                    int headerTop = 0;
+                    if (child != null) {
+                        headerTop = child.getTop();
+                    } else {
+                        headerTop = -AndroidUtilities.dp(100);
+                    }
+                    if (headerTop < 0) {
+                        header.setTag(headerTop);
+                    } else {
+                        header.setTag(0);
+                    }
+                } else {
+                    header.setTag(0);
                 }
+                itemNum += count - mAdapter.getPositionInSectionForPosition(firstVisibleItem);
             } else {
-                headerTop = -AndroidUtilities.bsDp(100);
+                View child = getChildAt(itemNum - firstVisibleItem);
+                if (child != null) {
+                    header.setTag(child.getTop());
+                } else {
+                    header.setTag(-AndroidUtilities.dp(100));
+                }
+                itemNum += count;
             }
-            if (headerTop < 0) {
-                pinnedHeader.setTag(headerTop);
-            } else {
-                pinnedHeader.setTag(0);
-            }
-        } else {
-            pinnedHeader.setTag(0);
         }
 
         invalidate();
@@ -109,7 +148,7 @@ public class BSSectionsListView extends ListView implements AbsListView.OnScroll
         boolean shouldLayout = oldView == null;
         View view = mAdapter.getSectionHeaderView(section, oldView, this);
         if (shouldLayout) {
-            ensurePinnedHeaderLayout(view);
+            ensurePinnedHeaderLayout(view, false);
         }
         return view;
     }
@@ -117,35 +156,45 @@ public class BSSectionsListView extends ListView implements AbsListView.OnScroll
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        if (mAdapter == null || pinnedHeader == null) {
+        if (mAdapter == null || headers.isEmpty()) {
             return;
         }
-        ensurePinnedHeaderLayout(pinnedHeader);
+        for (View header : headers) {
+            ensurePinnedHeaderLayout(header, true);
+        }
     }
 
-    private void ensurePinnedHeaderLayout(View header) {
-        int widthSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY);
-        int heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-        try {
-            header.measure(widthSpec, heightSpec);
-        } catch (Exception e) {
-            FileLog.e("tmessages", e);
+    private void ensurePinnedHeaderLayout(View header, boolean forceLayout) {
+        if (header.isLayoutRequested() || forceLayout) {
+            ViewGroup.LayoutParams layoutParams = header.getLayoutParams();
+            int heightSpec = MeasureSpec.makeMeasureSpec(layoutParams.height, MeasureSpec.EXACTLY);
+            int widthSpec = MeasureSpec.makeMeasureSpec(layoutParams.width, MeasureSpec.EXACTLY);
+            try {
+                header.measure(widthSpec, heightSpec);
+            } catch (Exception e) {
+                FileLog.e("bsmessages", e);
+            }
+            header.layout(0, 0, header.getMeasuredWidth(), header.getMeasuredHeight());
         }
-        header.layout(0, 0, header.getMeasuredWidth(), header.getMeasuredHeight());
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        if (mAdapter == null || pinnedHeader == null) {
+        if (mAdapter == null || headers.isEmpty()) {
             return;
         }
-        int saveCount = canvas.save();
-        int top = (Integer) pinnedHeader.getTag();
-        canvas.translate(LocaleController.isRTL ? getWidth() - pinnedHeader.getWidth() : 0, top);
-        canvas.clipRect(0, 0, getWidth(), pinnedHeader.getMeasuredHeight());
-        pinnedHeader.draw(canvas);
-        canvas.restoreToCount(saveCount);
+        for (View header : headers) {
+            int saveCount = canvas.save();
+            int top = (Integer)header.getTag();
+            canvas.translate(LocaleController.isRTL ? getWidth() - header.getWidth() : 0, top);
+            canvas.clipRect(0, 0, getWidth(), header.getMeasuredHeight());
+            if (top < 0) {
+                canvas.saveLayerAlpha(0, top, header.getWidth(), top + canvas.getHeight(), (int)(255 * (1.0f + (float)top / (float)header.getMeasuredHeight())), Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
+            }
+            header.draw(canvas);
+            canvas.restoreToCount(saveCount);
+        }
     }
 
     @Override
@@ -153,7 +202,7 @@ public class BSSectionsListView extends ListView implements AbsListView.OnScroll
         mOnScrollListener = l;
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(BSSectionsListView.OnItemClickListener listener) {
         super.setOnItemClickListener(listener);
     }
 }

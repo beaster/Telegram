@@ -245,6 +245,7 @@ public class BSContactsActivity extends BSBaseActivity implements NotificationCe
             listView.setEmptyView(emptyTextLayout);
             listView.setVerticalScrollBarEnabled(false);
             listView.setDivider(null);
+            listView.setPadding(0, AndroidUtilities.bsDp(10), 0, 0);
             listView.setDividerHeight(0);
 //            listView.setFastScrollEnabled(true);
             listView.setAdapter(listViewAdapter);

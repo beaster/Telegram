@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 
 import org.telegram.android.AndroidUtilities;
 import org.telegram.android.ContactsController;
@@ -177,7 +179,7 @@ public class BSContactsAdapter extends BaseSectionsAdapter {
         if (type == 4) {
             if (convertView == null) {
                 convertView = new BSDividerCell(mContext);
-                convertView.setPadding(AndroidUtilities.bsDp(LocaleController.isRTL ? 28 : 72), 0, AndroidUtilities.bsDp(LocaleController.isRTL ? 72 : 28), 0);
+                convertView.setPadding(AndroidUtilities.dp(LocaleController.isRTL ? 28 : 72), 0, AndroidUtilities.dp(LocaleController.isRTL ? 72 : 28), 0);
             }
         } else if (type == 3) {
             if (convertView == null) {
@@ -199,7 +201,6 @@ public class BSContactsAdapter extends BaseSectionsAdapter {
                 } else if (position == 2) {
                     actionCell.setTextAndIcon(LocaleController.getString("NewBroadcastList", R.string.NewBroadcastList), R.drawable.new_broadcast_bs);
                 }
-                actionCell.setPadding(0, AndroidUtilities.bsDp(5), 0, 0);
             }
         } else if (type == 1) {
             if (convertView == null) {
@@ -215,7 +216,7 @@ public class BSContactsAdapter extends BaseSectionsAdapter {
             }
         } else if (type == 0) {
             if (convertView == null) {
-                convertView = new BSUserCell(mContext, 22);
+                convertView = new BSUserCell(mContext, 58);
                 ((BSUserCell) convertView).setStatusColors(0xff000000, 0xff000000);
             }
 

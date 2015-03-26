@@ -26,7 +26,7 @@ public class BSTextCell extends FrameLayout {
         super(context);
 
         textView = new TextView(context);
-        textView.setTextColor(0xff212121);
+        textView.setTextColor(0xff000000);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 9);//16
         textView.setLines(1);
         textView.setMaxLines(1);
@@ -37,8 +37,8 @@ public class BSTextCell extends FrameLayout {
         LayoutParams layoutParams = (LayoutParams) textView.getLayoutParams();
         layoutParams.width = LayoutParams.MATCH_PARENT;
         layoutParams.height = LayoutParams.MATCH_PARENT;
-        layoutParams.leftMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 25 : 85);
-        layoutParams.rightMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 85 : 25);
+        layoutParams.leftMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 22 : 85);
+        layoutParams.rightMargin = AndroidUtilities.bsDp(LocaleController.isRTL ? 85 : 22);
         layoutParams.gravity = LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT;
         textView.setLayoutParams(layoutParams);
 

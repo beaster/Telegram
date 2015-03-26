@@ -89,6 +89,7 @@ public class BSActionBar extends FrameLayout {
 
     private void positionBackImage(int height) {
         if (backButtonImageView != null) {
+            backButtonImageView.setPadding(AndroidUtilities.bsDp(10), 0, 0, 0);
             LayoutParams layoutParams = (LayoutParams)backButtonImageView.getLayoutParams();
             layoutParams.width = AndroidUtilities.bsDp(54);
             layoutParams.height = height;

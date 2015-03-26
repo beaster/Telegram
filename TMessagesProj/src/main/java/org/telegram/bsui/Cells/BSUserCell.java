@@ -55,8 +55,8 @@ public class BSUserCell extends FrameLayout {
         layoutParams.width = AndroidUtilities.bsDp(48);
         layoutParams.height = AndroidUtilities.bsDp(48);
         layoutParams.gravity = LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT;
-        layoutParams.leftMargin = LocaleController.isRTL ? 0 : AndroidUtilities.bsDp(7 + padding);
-        layoutParams.rightMargin = LocaleController.isRTL ? AndroidUtilities.bsDp(7 + padding) : 0;
+        layoutParams.leftMargin = LocaleController.isRTL ? 0 : AndroidUtilities.bsDp(15 + padding);
+        layoutParams.rightMargin = LocaleController.isRTL ? AndroidUtilities.bsDp(15 + padding) : 0;
         layoutParams.topMargin = AndroidUtilities.bsDp(8);
         avatarImageView.setLayoutParams(layoutParams);
         avatarDrawable = new BSAvatarDrawable();
