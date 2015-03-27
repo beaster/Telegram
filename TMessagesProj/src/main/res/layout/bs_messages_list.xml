@@ -19,6 +19,7 @@
         android:layout_height="match_parent"
         android:id="@+id/bs_search_empty_view"
         android:orientation="vertical"
+        android:layout_centerInParent="true"
         android:gravity="center"
         android:visibility="gone">
 
@@ -27,6 +28,7 @@
             android:layout_height="0dp"
             android:textColor="#000000"
             android:gravity="center"
+            android:textStyle="bold"
             android:textSize="20dp"
             android:id="@+id/search_empty_text"
             android:layout_weight="1"/>
@@ -43,6 +45,7 @@
         android:layout_height="match_parent"
         android:id="@+id/nomessages_layout"
         android:orientation="vertical"
+        android:layout_centerInParent="true"
         android:gravity="center"
         android:visibility="gone">
 
@@ -50,19 +53,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#000000"
+            android:textStyle="bold"
             android:gravity="center"
             android:textSize="20dp"
             android:id="@+id/list_empty_view_text1"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#000000"
-            android:gravity="center"
-            android:textSize="20dp"
-            android:paddingTop="6dp"
-            android:lineSpacingExtra="2dp"
-            android:id="@+id/list_empty_view_text2"/>
 
     </LinearLayout>
 

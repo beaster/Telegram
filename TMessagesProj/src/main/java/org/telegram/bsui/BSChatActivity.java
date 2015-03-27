@@ -2692,7 +2692,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
     @Override
     protected boolean onBackPressed() {
         if(getIntent().getExtras() != null && getIntent().hasExtra("fromWidget")){
-            backPressed = counter > 10;
+            backPressed = counter > 15;
         }
         return super.onBackPressed();
     }

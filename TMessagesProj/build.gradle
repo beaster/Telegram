@@ -37,10 +37,10 @@ android {
         }
 
         release {
-            storeFile file("config/release.keystore")
-            storePassword RELEASE_STORE_PASSWORD
-            keyAlias RELEASE_KEY_ALIAS
-            keyPassword RELEASE_KEY_PASSWORD
+            storeFile file("../../../yapps_yotacommons/Build/titanium_yotadevices_keys/yotadevices.keystore")
+            storePassword "yotadevices"
+            keyPassword "yotadevices"
+            keyAlias "yotadevices"
         }
     }
 
