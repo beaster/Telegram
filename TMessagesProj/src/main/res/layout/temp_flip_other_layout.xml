@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/main_layout"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/notification_linear_layout"
+        android:layout_width="match_parent"
+    	android:paddingTop="55px"
+    	android:layout_height="330px"
+        android:layout_marginLeft="32dp"
+        android:gravity="center_vertical"
+    	android:background="@android:color/transparent"
+        android:layout_marginRight="32dp"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/flip_popup_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="Roboto Medium Yota"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:maxLines="2"
+            android:textColor="@android:color/black"
+            android:textSize="56px" />
+
+        <TextView
+            android:id="@+id/flip_popup_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/flip_popup_title"
+            android:layout_marginLeft="21dp"
+            android:layout_marginRight="21dp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:layout_marginTop="30px"
+            android:ellipsize="end"
+            android:fontFamily="Roboto Yota"
+            android:maxLines="3"
+            android:textColor="@android:color/black"
+            android:textSize="24px" />
+    </LinearLayout>
+
+</LinearLayout>

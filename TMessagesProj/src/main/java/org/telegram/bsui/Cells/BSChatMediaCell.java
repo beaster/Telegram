@@ -410,7 +410,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
 
     @Override
     public void setMessageObject(MessageObject messageObject) {
-        media = messageObject.type == 1 || messageObject.type == 4;
+        media = messageObject.type == 1;
         boolean dataChanged = currentMessageObject == messageObject && (isUserDataChanged() || photoNotSet);
         if (currentMessageObject != messageObject || isPhotoDataChanged(messageObject) || dataChanged) {
             super.setMessageObject(messageObject);
@@ -800,7 +800,7 @@ public class BSChatMediaCell extends BSChatBaseCell implements MediaController.F
             if (media) {
                 x = layoutWidth - backgroundWidth - dp(3);
             } else {
-                x = layoutWidth - backgroundWidth + dp(9);
+                x = layoutWidth - backgroundWidth + dp(2);
             }
         } else {
                 x = dp(16.5f);
