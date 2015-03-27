@@ -8,5 +8,3 @@ local.properties
 gradle.properties
 
 TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java
-
-TMessagesProj/libs/com.yotadevices.yotaphone2.sdk.v2.jar
