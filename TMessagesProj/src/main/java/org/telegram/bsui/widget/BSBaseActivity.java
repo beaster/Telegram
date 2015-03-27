@@ -22,7 +22,7 @@ public class BSBaseActivity extends BSActivity{
     private View rootView;
     protected Bundle arguments;
     protected BSActionBar actionBar;
-    protected int counter = 0;
+    protected static int counter = 0;
 
     @Override
     protected void onBSCreate() {
