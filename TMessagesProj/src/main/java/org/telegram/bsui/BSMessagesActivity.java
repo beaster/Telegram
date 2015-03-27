@@ -96,7 +96,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
     public void finishFragment() {
         removeObservers();
         super.finishFragment();
-        if(backPressed)
+        if(backPressed && counter > 10)
         {
             System.exit(0);
         }

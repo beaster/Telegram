@@ -200,6 +200,7 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
     private final static int delete_chat = 12;
     private final static int share_contact = 13;
     private final static int mute = 14;
+    private boolean backPressed = false;
 
     public BSChatActivity(){
         super();
@@ -743,6 +744,9 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
 
         MediaController.getInstance().stopAudio();
         super.finishFragment();
+        if(backPressed){
+            System.exit(0);
+        }
     }
 
     @Override
@@ -2687,18 +2691,9 @@ public class BSChatActivity extends BSBaseActivity implements NotificationCenter
 
     @Override
     protected boolean onBackPressed() {
-        /*View v = BSPhotoViewer.getInstance().getWindowView();
-        if(BSPhotoViewer.getInstance().isVisible()){
-            getBSDrawer().removeViewFromBS(v);
-            getBSDrawer().findViewById(R.id.chat_list_view).setEnabled(true);
-            return true;
-        } else if (chatActivityEnterView.isEmojiPopupShowing()) {
-            chatActivityEnterView.hideEmojiPopup();
-            return true;
-        } else {
-            presentFragment(BSMessagesActivity.class, true);
-            return false;
-        }*/
+        if(getIntent().getExtras() != null && getIntent().hasExtra("fromWidget")){
+            backPressed = counter > 10;
+        }
         return super.onBackPressed();
     }
 
