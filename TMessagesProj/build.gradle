@@ -6,11 +6,12 @@ buildscript {
         classpath 'com.android.tools.build:gradle:1.1.0'
     }
 }
-apply plugin: 'com.android.application'
 
 repositories {
     mavenCentral()
 }
+
+apply plugin: 'com.android.application'
 
 dependencies {
     compile 'com.android.support:support-v4:21.0.+'
@@ -24,23 +25,27 @@ dependencies {
 
 android {
     compileSdkVersion 21
-    buildToolsVersion '21.1.2'
+    buildToolsVersion "21.1.2"
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+    defaultConfig {
+        applicationId "com.yotadevices.yotaphone2.telegram.messenger"
+        minSdkVersion 19
+        targetSdkVersion 19
+
+        project.archivesBaseName = "YD_Telegramm";
+        versionCode 1
+        versionName "1.0"
     }
 
     signingConfigs {
-        debug {
-            storeFile file("config/debug.keystore")
-        }
-
         release {
             storeFile file("../../../yapps_yotacommons/Build/titanium_yotadevices_keys/yotadevices.keystore")
             storePassword "yotadevices"
             keyPassword "yotadevices"
             keyAlias "yotadevices"
+        }
+        debug {
+            storeFile file("config/debug.keystore")
         }
     }
 
@@ -65,36 +70,32 @@ android {
             debuggable false
             jniDebuggable false
             signingConfig signingConfigs.release
+            //   cleanBuildType()
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
 
-        foss {
-            debuggable false
-            jniDebuggable false
-            signingConfig signingConfigs.release
-        }
+    packagingOptions {
+        exclude 'LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    dexOptions {
+        preDexLibraries = false
     }
 
     sourceSets.main {
         jniLibs.srcDir 'libs'
         jni.srcDirs = [] //disable automatic ndk-build call
     }
-
-    sourceSets.debug {
-        manifest.srcFile 'config/debug/AndroidManifest.xml'
-    }
-
-    sourceSets.release {
-        manifest.srcFile 'config/release/AndroidManifest.xml'
-    }
-
-    sourceSets.foss {
-        manifest.srcFile 'config/foss/AndroidManifest.xml'
-    }
-
-    defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 21
-        versionCode 458
-        versionName "2.5.2"
-    }
 }
+
