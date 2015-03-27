@@ -149,7 +149,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
                     public void onSearchExpand() {
                         searching = true;
                         if (messagesListView != null) {
-//                            messagesListView.setEmptyView(searchEmptyView);
+                            messagesListView.setEmptyView(searchEmptyView);
                             emptyView.setVisibility(View.GONE);
                             if (!onlySelect) {
                                 floatingButton.setVisibility(View.GONE);
@@ -166,7 +166,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
                                 searchEmptyView.setVisibility(View.GONE);
                                 emptyView.setVisibility(View.GONE);
                             } else {
-//                                messagesListView.setEmptyView(emptyView);
+                                messagesListView.setEmptyView(emptyView);
                                 searchEmptyView.setVisibility(View.GONE);
                             }
                             if (!onlySelect) {
@@ -195,7 +195,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
                                 dialogsSearchAdapter.notifyDataSetChanged();
                             }
                             if (searchEmptyView != null && messagesListView.getEmptyView() == emptyView) {
-//                                messagesListView.setEmptyView(searchEmptyView);
+                                messagesListView.setEmptyView(searchEmptyView);
                                 emptyView.setVisibility(View.GONE);
                             }
                         }
@@ -243,7 +243,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
         dialogsAdapter = new BSDialogsAdapter(getBSDrawer().getBSContext(), serverOnly);
         emptyView = findViewById(R.id.nomessages_layout);
         messagesListView.setAdapter(dialogsAdapter);
-//        messagesListView.setEmptyView(emptyView);
+        messagesListView.setEmptyView(emptyView);
         searchEmptyView = findViewById(R.id.bs_search_empty_view);
         searchEmptyView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -257,12 +257,14 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
             searchEmptyView.setVisibility(View.GONE);
             emptyView.setVisibility(View.GONE);
         } else {
-//            messagesListView.setEmptyView(emptyView);
+            messagesListView.setEmptyView(emptyView);
             searchEmptyView.setVisibility(View.GONE);
         }
 
         TextView textView = (TextView)findViewById(R.id.list_empty_view_text1);
         textView.setText(LocaleController.getString("NoChats", R.string.NoChats));
+        textView = (TextView)findViewById(R.id.list_empty_view_text2);
+        textView.setText(LocaleController.getString("NoChatsHelp", R.string.NoChatsHelp));
         textView = (TextView)findViewById(R.id.search_empty_text);
         textView.setText(LocaleController.getString("NoResult", R.string.NoResult));
 
@@ -526,7 +528,7 @@ public class BSMessagesActivity extends BSBaseActivity implements NotificationCe
                     if (MessagesController.getInstance().loadingDialogs && MessagesController.getInstance().dialogs.isEmpty()) {
                         emptyView.setVisibility(View.GONE);
                     } else {
-//                        messagesListView.setEmptyView(emptyView);
+                        messagesListView.setEmptyView(emptyView);
                     }
                 } catch (Exception e) {
                     FileLog.e("bsmessages", e);
